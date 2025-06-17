@@ -37,7 +37,7 @@ const Button: React.FC<ButtonProps> = ({
       {...props}
     >
       {startIcon && <span>{startIcon}</span>}
-      {children}
+      {children} 
       {endIcon && <span>{endIcon}</span>}
     </button>
   );
