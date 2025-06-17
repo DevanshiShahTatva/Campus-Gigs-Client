@@ -153,8 +153,8 @@ const ResetPasswordPage = () => {
                   />
                   <Button
                     type="submit"
+                    variant="black"
                     disabled={isSubmitting}
-                    variant="primary"
                     className="w-full py-3 transition-colors disabled:opacity-50"
                   >
                     {isSubmitting
@@ -166,7 +166,7 @@ const ResetPasswordPage = () => {
                     Remembered your password?{" "}
                     <Link
                       href={"login"}
-                      className="text-[#4F46E5] font-medium hover:underline"
+                      className="text-black font-medium hover:underline"
                     >
                       Go back to login.
                     </Link>
@@ -184,7 +184,7 @@ const ResetPasswordPage = () => {
             fill
             alt="reset password illustration"
             className="object-contain p-8"
-            src="https://img.freepik.com/free-vector/privacy-policy-concept-illustration_114360-7853.jpg?semt=ais_hybrid&w=740"
+            src="https://rsssc.org/assest/img/Login.jpg"
           />
         </div>
       </div>
