@@ -153,7 +153,7 @@ const ResetPasswordPage = () => {
                   />
                   <Button
                     type="submit"
-                    variant="black"
+                    variant="primary"
                     disabled={isSubmitting}
                     className="w-full py-3 transition-colors disabled:opacity-50"
                   >
@@ -166,7 +166,7 @@ const ResetPasswordPage = () => {
                     Remembered your password?{" "}
                     <Link
                       href={"login"}
-                      className="text-black font-medium hover:underline"
+                      className="text-[#4F46E5] font-medium hover:underline"
                     >
                       Go back to login.
                     </Link>

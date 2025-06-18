@@ -3,7 +3,7 @@
 import React from "react";
 import clsx from "clsx";
 
-type variant = "primary" | "secondary" | "delete" | "outlined" | "disabled" | "success" | "warning" | "black";
+type variant = "primary" | "secondary" | "delete" | "outlined" | "disabled" | "success" | "warning" | "black" | "green";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: variant;
@@ -29,7 +29,8 @@ const Button: React.FC<ButtonProps> = ({
     delete: "bg-red-500 hover:bg-red-600 rounded-[8px] text-white cursor-pointer",
     outlined: "border border-gray-500 text-gray-700 hover:bg-gray-100 cursor-pointer rounded-[8px]",
     black: "bg-black hover:bg-gray-900 text-white cursor-pointer rounded-[8px]",
-    disabled: "bg-gray-100 text-gray-400 cursor-not-allowed rounded-[8px]"
+    disabled: "bg-gray-100 text-gray-400 cursor-not-allowed rounded-[8px]",
+    green: "bg-[var(--base)] text-white hover:bg-[var(--base-hover)] cursor-pointer rounded-[8px] transition-colors",
   };
 
   return (
