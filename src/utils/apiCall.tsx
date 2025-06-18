@@ -5,7 +5,7 @@ export interface IRequestParams {
   endPoint: string;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
-  body?: any;
+  body?: {};
   withToken?: boolean;
   isFormData?: boolean;
 }
