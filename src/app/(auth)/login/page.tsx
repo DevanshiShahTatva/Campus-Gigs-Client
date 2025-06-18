@@ -41,7 +41,7 @@ const LogInPage = () => {
     const response = await apiCall({
       endPoint: "/login",
       method: "POST",
-      body: values,
+      body: {},
     });
 
     actions.setSubmitting(false);
@@ -114,7 +114,7 @@ const LogInPage = () => {
                     {isSubmitting ? "Logging In..." : "Log In"}
                   </Button>
                   <p className="text-center text-sm text-gray-500 mt-4">
-                    Don't have an account?{" "}
+                    {"Don't have an account? "}
                     <Link href="/sign-up" className="text-[#4F46E5] font-medium hover:underline">
                       Register Now.
                     </Link>

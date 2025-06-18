@@ -50,7 +50,7 @@ const SignUpPage = () => {
     const response = await apiCall({
       endPoint: "/sign-up",
       method: "POST",
-      body: values,
+      body: {},
     });
 
     actions.setSubmitting(false);
