@@ -153,8 +153,8 @@ const ResetPasswordPage = () => {
                   />
                   <Button
                     type="submit"
-                    disabled={isSubmitting}
                     variant="primary"
+                    disabled={isSubmitting}
                     className="w-full py-3 transition-colors disabled:opacity-50"
                   >
                     {isSubmitting
@@ -184,7 +184,7 @@ const ResetPasswordPage = () => {
             fill
             alt="reset password illustration"
             className="object-contain p-8"
-            src="https://img.freepik.com/free-vector/privacy-policy-concept-illustration_114360-7853.jpg?semt=ais_hybrid&w=740"
+            src="https://rsssc.org/assest/img/Login.jpg"
           />
         </div>
       </div>

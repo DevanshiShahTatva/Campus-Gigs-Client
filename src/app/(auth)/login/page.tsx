@@ -110,7 +110,7 @@ const LogInPage = () => {
                     type="submit"
                     variant="primary"
                     disabled={isSubmitting}
-                    className="w-full py-3 transition-colors disabled:opacity-50">
+                    className="w-full py-3 transition-colors disabled:opacity-50 bg-[#218189]">
                     {isSubmitting ? "Logging In..." : "Log In"}
                   </Button>
                   <p className="text-center text-sm text-gray-500 mt-4">
@@ -132,7 +132,7 @@ const LogInPage = () => {
             fill
             alt="dashboard preview"
             className="object-contain p-8"
-            src="https://img.freepik.com/free-vector/privacy-policy-concept-illustration_114360-7853.jpg?semt=ais_hybrid&w=740"
+            src="https://rsssc.org/assest/img/Login.jpg"
           />
         </div>
       </div>

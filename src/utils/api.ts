@@ -2,7 +2,7 @@ import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 
 import { toast } from "react-toastify";
 import { getAuthToken, logout } from './helper';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+const API_BASE_URL = process.env.BE_BASE_URL ?? "";
 
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
