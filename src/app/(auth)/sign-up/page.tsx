@@ -9,7 +9,7 @@ import TagsInput from "react-tagsinput";
 import { toast } from "react-toastify";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { Formik, Form, FormikHelpers } from "formik";
-import { ChevronLeft, ChevronRight, User, Camera, FileText, Check, Tag, Info, BookOpen } from "lucide-react";
+import { ChevronLeft, ChevronRight, User, Camera, FileText, Check, Tag, Info, BookOpen, ExternalLink } from "lucide-react";
 
 import Button from "@/components/common/Button";
 import FormikTextField from "@/components/common/FormikTextField";
@@ -49,21 +49,32 @@ const SignUpPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [acceptedTerms, setAcceptedTerms] = useState<boolean>(false);
+  const [emailErr, setEmailErr] = useState("");
 
   const handleSignupSubmit = async (values: ISignupFormValues, actions: FormikHelpers<ISignupFormValues>) => {
+    if (!acceptedTerms) {
+      toast.error("Please accept the Terms and Conditions to continue.");
+      return;
+    }
+
     actions.setSubmitting(true);
 
     const formData = new FormData();
     formData.append("name", values.name);
     formData.append("email", values.email);
     formData.append("password", values.password);
-    formData.append("file", values.profilePicture || "");
-    formData.append("professional_interests", values.professionalInterests || "");
-    formData.append("extracurriculars", values.extracurriculars || "");
-    formData.append("certifications", values.certifications || "");
-    formData.append("education", values.educationLevel || "");
-    formData.append("customEducation", values.customEducation || "");
-    formData.append("skills", JSON.stringify(values.skills || []));
+    values.profilePicture && formData.append("file", values.profilePicture);
+    values.professionalInterests && formData.append("professional_interests", values.professionalInterests);
+    values.extracurriculars && formData.append("extracurriculars", values.extracurriculars);
+    values.certifications && formData.append("certifications", values.certifications);
+    values.educationLevel && formData.append("education", values.educationLevel === "Other" ? values.customEducation : values.educationLevel);
+    if (values.skills.length > 0) {
+      values.skills.forEach((skill: string) => {
+        formData.append("skills[]", skill);
+      });
+    }
+    formData.append("isAgreed", acceptedTerms ? "true" : "false");
 
     try {
       const response: ApiResponse = await apiCall({
@@ -78,6 +89,9 @@ const SignUpPage: React.FC = () => {
       if (response.success) {
         router.push("/login");
         toast.success(response.message ?? "Account created successfully!");
+      } else if (response.message === "Email already registered") {
+        setEmailErr(response.message);
+        setCurrentStep(0);
       } else {
         toast.error(response.message ?? "Signup failed. Please try again.");
       }
@@ -181,12 +195,19 @@ const SignUpPage: React.FC = () => {
           placeholder="Enter your full name"
           type="text"
         />
-        <FormikTextField
-          name="email"
-          label="Email Address"
-          placeholder="Enter your email address"
-          type="email"
-        />
+        <div>
+          <FormikTextField
+            name="email"
+            label="Email Address"
+            placeholder="Enter your email address"
+            type="email"
+          />
+          {emailErr && (
+            <div className="text-red-500 text-sm mt-1">
+              {emailErr}
+            </div>
+          )}
+        </div>
         <FormikTextField
           name="password"
           label="Password"
@@ -427,6 +448,53 @@ const SignUpPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        <div className="mt-8">
+          <div>
+            <div className="flex items-start space-x-3">
+              <div className="flex-1">
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-3 rounded-lg transition-all duration-200">
+                    <div className="flex items-center mt-0.5">
+                      <input
+                        type="checkbox"
+                        checked={acceptedTerms}
+                        onChange={(e) => setAcceptedTerms(e.target.checked)}
+                        className="appearance-none w-6 h-6 border-[1.5px] border-gray-300 rounded-sm
+                        bg-white checked:bg-purple-500 checked:border-purple-500 cursor-pointer
+                          relative transition-colors duration-200  checked:after:content-['✓']
+                          checked:after:font-bold checked:after:left-[5px] checked:after:absolute 
+                        checked:after:text-white checked:after:text-sm checked:after:top-[0px]"
+                      />
+                    </div>
+                    <label htmlFor="acceptTerms" className="flex-1">
+                      <div className="mt-[4px] text-sm text-gray-700">
+                        I agree to the{" "}
+                        <Link
+                          href="/terms"
+                          target="_blank"
+                          className="text-blue-600 hover:text-blue-800 font-medium underline inline-flex items-center"
+                        >
+                          Terms of Service
+                          <ExternalLink className="w-3 h-3 ml-1" />
+                        </Link>
+                        {" "}and{" "}
+                        <Link
+                          href="/privacy"
+                          target="_blank"
+                          className="text-blue-600 hover:text-blue-800 font-medium underline inline-flex items-center"
+                        >
+                          Privacy Policy
+                          <ExternalLink className="w-3 h-3 ml-1" />
+                        </Link>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -489,12 +557,12 @@ const SignUpPage: React.FC = () => {
                 {({ values, errors, isSubmitting, setFieldValue }) => (
                   <Form className="space-y-6">
                     {renderStepContent(values, setFieldValue)}
-                    <div className="flex justify-between items-center pt-6">
+                    <div className="flex justify-between items-center pt-2">
                       <button
                         type="button"
                         onClick={prevStep}
                         disabled={currentStep === 0}
-                        className={`flex items-center space-x-2 text-[13px] px-3 lg:px-8 py-3 rounded-lg lg:font-medium transition-all duration-200 ${currentStep === 0
+                        className={`flex items-center space-x-2 text-[13px] lg:text-[15px] px-3 lg:px-8 py-3 rounded-lg lg:font-medium transition-all duration-200 ${currentStep === 0
                           ? 'text-gray-400 cursor-not-allowed'
                           : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 cursor-pointer'
                           }`}
@@ -506,8 +574,8 @@ const SignUpPage: React.FC = () => {
                         <Button
                           type="submit"
                           variant="green"
-                          disabled={isSubmitting ?? !isStepValid(currentStep, values, errors)}
-                          className="flex items-center space-x-2 text-[13px] lg:font-medium px-3 lg:px-8 py-3 rounded-lg transition-all duration-200 disabled:opacity-50"
+                          disabled={isSubmitting || !isStepValid(currentStep, values, errors) || !acceptedTerms}
+                          className="flex items-center space-x-2 text-[13px] lg:text-[15px] lg:font-medium px-3 lg:px-8 py-3 rounded-lg transition-all duration-200 disabled:opacity-50"
                         >
                           {isSubmitting ? "Creating Account..." : "Create Account"}
                           <Check className="w-4 h-4 ml-2" />

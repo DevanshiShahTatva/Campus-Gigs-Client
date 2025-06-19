@@ -39,22 +39,24 @@ const LogInPage = () => {
     actions.setSubmitting(true);
 
     const response = await apiCall({
-      endPoint: "/login",
+      endPoint: "/auth/login",
       method: "POST",
-      body: {},
+      body: {
+        email: values.email,
+        password: values.password,
+      },
     });
 
     actions.setSubmitting(false);
 
     if (response.success) {
+      toast.success(response.message);
       const { role } = response.data;
       if (role === 'admin') {
         router.push("/admin/dashboard");
       } else {
         router.push("/");
       }
-
-      toast.success(response.message);
     } else {
       toast.error(response.message ?? "Login failed. Please try again.");
     }
@@ -102,20 +104,20 @@ const LogInPage = () => {
                     }
                   />
                   <div className="flex items-center justify-end text-sm text-gray-600">
-                    <Link href="/reset-password" className="text-[#4F46E5] hover:underline font-medium">
+                    <Link href="/forgot-password" className="text-[var(--base)] hover:underline font-medium">
                       Forgot Password?
                     </Link>
                   </div>
                   <Button
                     type="submit"
-                    variant="primary"
+                    variant="green"
                     disabled={isSubmitting}
                     className="w-full py-3 transition-colors disabled:opacity-50 bg-[#218189]">
                     {isSubmitting ? "Logging In..." : "Log In"}
                   </Button>
                   <p className="text-center text-sm text-gray-500 mt-4">
                     {"Don't have an account? "}
-                    <Link href="/sign-up" className="text-[#4F46E5] font-medium hover:underline">
+                    <Link href="/sign-up" className="text-[var(--base)] font-medium hover:underline">
                       Register Now.
                     </Link>
                   </p>

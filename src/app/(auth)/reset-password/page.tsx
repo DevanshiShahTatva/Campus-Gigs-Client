@@ -63,9 +63,9 @@ const ResetPasswordPage = () => {
       endPoint: "/reset-password",
       method: "POST",
       body: {
+        otp: values.otp.toString(),
         password: values.confirmPassword,
         email: localStorage.getItem("resetPassEmail"),
-        otp: values.otp.toString()
       },
     });
 
@@ -153,7 +153,7 @@ const ResetPasswordPage = () => {
                   />
                   <Button
                     type="submit"
-                    variant="primary"
+                    variant="green"
                     disabled={isSubmitting}
                     className="w-full py-3 transition-colors disabled:opacity-50"
                   >
@@ -166,7 +166,7 @@ const ResetPasswordPage = () => {
                     Remembered your password?{" "}
                     <Link
                       href={"login"}
-                      className="text-[#4F46E5] font-medium hover:underline"
+                      className="text-[var(--base)] font-medium hover:underline"
                     >
                       Go back to login.
                     </Link>
