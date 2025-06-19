@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { ToastContainer } from "react-toastify";
 import { DM_Sans } from "next/font/google";;
 import "./globals.css";
+import "react-toastify/dist/ReactToastify.css";
 
 const dmSans = DM_Sans({
   display: "swap",
@@ -21,6 +23,7 @@ export default function RootLayout({
       <body
         className={`${dmSans.className} antialiased`}
       >
+        <ToastContainer />
         {children}
       </body>
     </html>
