@@ -23,6 +23,7 @@ export const SignupFormSchema = yup.object().shape({
   professionalInterests: yup.string(),
   extracurriculars: yup.string(),
   certifications: yup.string(),
+  skills: yup.array(),
   educationLevel: yup.string(),
 });
 
