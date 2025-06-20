@@ -19,8 +19,7 @@ export interface DynamicTableProps<T extends { id: number | string }> {
   currentPage: number;
 
   // Optional search/sort handlers
-  onSearch?: (search: string) => void;
-  onSortChange?: (sortKey: keyof T, sortOrder: SortOrder) => void;
+  onSearchSort?: (search: string, sortKey: keyof T, sortOrder: SortOrder, page: number) => void;
 
   // Optional overrides
   defaultSortKey?: keyof T;
@@ -28,8 +27,9 @@ export interface DynamicTableProps<T extends { id: number | string }> {
   searchPlaceholder?: string;
   children?: React.ReactNode;
   title: string;
+  onClickCreateButton: () => void;
 }
-export interface SubscriptionPlan {
+export interface ISubscriptionPlan {
   id: number;
   name: string;
   description: string;
@@ -42,6 +42,8 @@ export interface SubscriptionPlan {
   maxGigsPerMonth: number;
   maxBidsPerMonth: number;
   features: string[];
+  createdAt: string;
+  canGetBadges: boolean;
 }
 
 export interface Data {

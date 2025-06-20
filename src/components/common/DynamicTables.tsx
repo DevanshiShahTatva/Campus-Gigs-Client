@@ -24,29 +24,28 @@ export function DynamicTable<T extends { id: number | string }>({
   totalPages,
   handlePageChange,
   currentPage,
-  onSearch,
-  onSortChange,
-  defaultSortKey,
+  onSearchSort,
   defaultSortOrder = "asc",
   searchPlaceholder = "Search",
   children,
   title,
+  onClickCreateButton,
 }: DynamicTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
 
-  const [sortKey, setSortKey] = useState<keyof T>(defaultSortKey ?? columns[0].key);
+  const [sortKey, setSortKey] = useState<keyof T | string>("");
   const [sortOrder, setSortOrder] = useState<SortOrder>(defaultSortOrder);
 
   useEffect(() => {
-    onSearch?.(debouncedSearch);
+    onSearchSort?.(debouncedSearch, sortKey as keyof T, sortOrder, 0);
   }, [debouncedSearch]);
 
   const handleSort = (key: keyof T) => {
     const newOrder = sortKey === key && sortOrder === "asc" ? "desc" : "asc";
     setSortKey(key);
     setSortOrder(newOrder);
-    onSortChange?.(key, newOrder);
+    onSearchSort?.(searchTerm, key, newOrder, currentPage);
   };
 
   const visiblePages = useMemo((): (number | "...")[] => {
@@ -81,7 +80,7 @@ export function DynamicTable<T extends { id: number | string }>({
           <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>
         {children}
-        <Button variant="green" className="flex items-center h-[46px]" onClick={() => {}}>
+        <Button variant="green" className="flex items-center h-[46px]" onClick={onClickCreateButton}>
           <Plus size={20} />
         </Button>
       </div>
@@ -102,7 +101,7 @@ export function DynamicTable<T extends { id: number | string }>({
                   </span>
                 </TableHead>
               ))}
-              {actions && <TableHead textAlign="right">Actions</TableHead>}
+              {actions && <TableHead textAlign="center">Actions</TableHead>}
             </TableRow>
           </TableHeader>
 
