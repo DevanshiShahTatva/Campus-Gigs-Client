@@ -28,6 +28,7 @@ export interface DynamicTableProps<T extends { id: number | string }> {
   searchPlaceholder?: string;
   children?: React.ReactNode;
   title: string;
+  onClickPlus?: () => void
 }
 export interface SubscriptionPlan {
   id: number;

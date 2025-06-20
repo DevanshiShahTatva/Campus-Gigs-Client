@@ -26,6 +26,7 @@ export function DynamicTable<T extends { id: number | string }>({
   currentPage,
   onSearch,
   onSortChange,
+  onClickPlus,
   defaultSortKey,
   defaultSortOrder = "asc",
   searchPlaceholder = "Search",
@@ -66,7 +67,7 @@ export function DynamicTable<T extends { id: number | string }>({
   return (
     <main className="isolate mx-auto w-full max-w-screen-2xl overflow-hidden p-4 md:p-6 2xl:p-10">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-[26px] font-semibold leading-[30px] text-[var(--base)] whitespace-nowrap">{title}</h2>
+        <h2 className="text-[26px] mb-4 font-semibold leading-[30px] text-[var(--base)] whitespace-nowrap">{title}</h2>
       </div>
 
       <div className="flex w-full items-center gap-2 mb-4">
@@ -81,7 +82,7 @@ export function DynamicTable<T extends { id: number | string }>({
           <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>
         {children}
-        <Button variant="green" className="flex items-center h-[46px]" onClick={() => {}}>
+        <Button variant="green" className="flex items-center h-[46px]" onClick={onClickPlus}>
           <Plus size={20} />
         </Button>
       </div>
