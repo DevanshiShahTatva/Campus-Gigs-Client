@@ -1,7 +1,8 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Plus, SearchIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { ArrowDown, ArrowUp, Plus, SearchIcon } from "lucide-react";
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/common/ui/Table";
 import {
   Pagination,
@@ -12,39 +13,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/common/ui/Pagination";
-import { SortOrder } from "@/utils/interface";
+import { DynamicTableProps, SortOrder } from "@/utils/interface";
 import Button from "./Button";
 import useDebounce from "@/hooks/useDebounce";
-
-interface ColumnConfig<T> {
-  key: keyof T;
-  label: string;
-  sortable?: boolean;
-  render?: (value: T[keyof T], row: T, index: number) => React.ReactNode;
-  textAlign?: "left" | "center" | "right";
-}
-
-interface DynamicTableProps<T extends { id: number | string }> {
-  data: T[];
-  columns: ColumnConfig<T>[];
-  actions?: (row: T) => React.ReactNode;
-
-  // Pagination
-  totalPages: number;
-  handlePageChange: (page: number) => void;
-  currentPage: number;
-
-  // Optional search/sort handlers
-  onSearch?: (search: string) => void;
-  onSortChange?: (sortKey: keyof T, sortOrder: SortOrder) => void;
-
-  // Optional overrides
-  defaultSortKey?: keyof T;
-  defaultSortOrder?: SortOrder;
-  searchPlaceholder?: string;
-  children?: React.ReactNode;
-  title: string;
-}
 
 export function DynamicTable<T extends { id: number | string }>({
   data,
