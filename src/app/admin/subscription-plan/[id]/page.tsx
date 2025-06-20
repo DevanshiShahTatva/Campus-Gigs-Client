@@ -10,6 +10,7 @@ import FormikTextField from "@/components/common/FormikTextField";
 import CheckboxCard from "@/components/common/CheckboxCard";
 import RadioCard from "@/components/common/RadioCard";
 import { useRouter } from "next/navigation";
+import { apiCall } from "@/utils/apiCall";
 
 type SubscriptionPlanFormValues = {
   name: string;
@@ -44,7 +45,7 @@ type FeatureFieldProps = {
 // Constants
 const ROLE_OPTIONS: RoleOption[] = [
   { value: ROLE.USER, label: "User" },
-  { value: ROLE.ADMIN, label: "Provider" },
+  { value: ROLE.PROVIDER, label: "Provider" },
 ];
 
 const MAX_FEATURES = 10;
@@ -161,30 +162,48 @@ const CreateEditSubscriptionPlan = () => {
   };
 
   const handleSubmit = async (values: SubscriptionPlanFormValues, { resetForm }: FormikHelpers<SubscriptionPlanFormValues>) => {
+    setIsSubmitting(true);
+
+    // Prepare the submission data
+    const submissionData = {
+      name: values.name,
+      description: values.description,
+      features: values.features.filter((f) => f.trim() !== ""), // Remove empty features
+      price: Number(values.price),
+      isPro: values.isPro,
+      canGetBadges: values.canGetBadges,
+      mostPopular: values.mostPopular,
+      icon: values.icon,
+      buttonText: values.buttonText,
+      ...(values.isPro
+        ? {
+            maxGigsPerMonth: null,
+            maxBidsPerMonth: null,
+            rolesAllowed: ROLE_OPTIONS.map((role) => role.value.toLowerCase()), // Ensure lowercase role names
+          }
+        : {
+            maxGigsPerMonth: Number(values.maxGigsPerMonth) || 0,
+            maxBidsPerMonth: Number(values.maxBidsPerMonth) || 0,
+            rolesAllowed: values.rolesAllowed.map((role) => role.toLowerCase()), // Add rolesAllowed for non-pro plans too
+          }),
+    };
+
     try {
-      setIsSubmitting(true);
+      const response = await apiCall({
+        endPoint: "/subscription-plan",
+        method: "POST",
+        body: submissionData,
+      });
 
-      // Prepare the submission data
-      const submissionData = { ...values };
-
-      // If it's a Pro plan, set maxGigsPerMonth and maxBidsPerMonth to null
-      // and include all available roles
-      if (values.isPro) {
-        submissionData.maxGigsPerMonth = null;
-        submissionData.maxBidsPerMonth = null;
-        submissionData.rolesAllowed = ROLE_OPTIONS.map((role) => role.value);
+      // Check for successful response
+      if (response?.status === 201 || response?.status === 200) {
+        toast.success("Subscription plan created successfully!");
+        router.push("/admin/subscription-plan");
       }
-
-      console.log("Submitting subscription plan:", submissionData);
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      toast.success(`Subscription plan ${values.isPro ? "Pro" : ""} ${values.name} created successfully!`);
-      resetForm();
-    } catch (error) {
-      console.error("Error creating subscription plan:", error);
-      toast.error("Failed to create subscription plan");
+    } catch (error: any) {
+      console.log("Error creating/updating category:", error?.message || error);
+      const msg = error.response.data.message || "Something went wrong. Please try again later.";
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }

@@ -8,7 +8,7 @@ export interface ColumnConfig<T> {
   textAlign?: "left" | "center" | "right";
 }
 
-export interface DynamicTableProps<T extends { id: number | string }> {
+export interface DynamicTableProps<T extends { _id: string }> {
   data: T[];
   columns: ColumnConfig<T>[];
   actions?: (row: T) => React.ReactNode;
@@ -28,9 +28,10 @@ export interface DynamicTableProps<T extends { id: number | string }> {
   children?: React.ReactNode;
   title: string;
   onClickCreateButton: () => void;
+  isCreateButtonDisabled?: boolean;
 }
 export interface ISubscriptionPlan {
-  id: number;
+  _id: string;
   name: string;
   description: string;
   price: number;
@@ -46,10 +47,14 @@ export interface ISubscriptionPlan {
   canGetBadges: boolean;
 }
 
-export interface Data {
-  id: string;
-  name: string;
-  description: string;
-  create_at: string;
-  updated_at: string;
+export interface ISubscriptionPlanApiResponse {
+  status: number;
+  message: string;
+  data: ISubscriptionPlan[];
+  meta: {
+    page: number;
+    pageSize: number;
+    totalPages: number;
+    total: number;
+  };
 }
