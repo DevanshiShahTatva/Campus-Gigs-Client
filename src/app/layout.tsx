@@ -3,6 +3,7 @@ import { ToastContainer } from "react-toastify";
 import { DM_Sans } from "next/font/google";;
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
+import { ClientLayoutWrapper } from "@/components/Wrapper/ClientLayoutWrapper";
 
 const dmSans = DM_Sans({
   display: "swap",
@@ -19,12 +20,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${dmSans.className} antialiased`}
       >
         <ToastContainer />
-        {children}
+        <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
       </body>
     </html>
   );

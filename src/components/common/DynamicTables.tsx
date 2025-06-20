@@ -25,6 +25,7 @@ export function DynamicTable<T extends { id: number | string }>({
   handlePageChange,
   currentPage,
   onSearchSort,
+  defaultSortKey,
   defaultSortOrder = "asc",
   searchPlaceholder = "Search",
   children,
@@ -63,9 +64,9 @@ export function DynamicTable<T extends { id: number | string }>({
   };
 
   return (
-    <main className="isolate mx-auto w-full max-w-screen-2xl overflow-hidden p-4 md:p-6 2xl:p-10">
+    <main className="isolate mx-auto w-full max-w-screen-2xl overflow-hidden p-1">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-[26px] font-semibold leading-[30px] text-[var(--base)] whitespace-nowrap">{title}</h2>
+        <h2 className="text-2xl font-bold leading-[30px] text-[var(--base)] whitespace-nowrap">{title}</h2>
       </div>
 
       <div className="flex w-full items-center gap-2 mb-4">
@@ -75,13 +76,14 @@ export function DynamicTable<T extends { id: number | string }>({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full rounded-md border border-gray-200 bg-white py-2.5 pl-12 pr-4 text-base outline-none"
+            className="w-full rounded-md border border-gray-200 bg-white py-2 pl-12 pr-4 text-base focus:outline-none focus:ring-2 focus:ring-[var(--base)] text-[var(--text-dark)]"
           />
           <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>
         {children}
         <Button variant="green" className="flex items-center h-[46px]" onClick={onClickCreateButton}>
           <Plus size={20} />
+          Add
         </Button>
       </div>
 
