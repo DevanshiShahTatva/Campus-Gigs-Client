@@ -5,19 +5,17 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import Select from "react-select";
-import TagsInput from "react-tagsinput";
 import { toast } from "react-toastify";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { Formik, Form, FormikHelpers } from "formik";
 import { ChevronLeft, ChevronRight, User, Camera, FileText, Check, Tag, Info, BookOpen, ExternalLink } from "lucide-react";
 
+import TagsInput from "./TagInput";
 import Button from "@/components/common/Button";
 import FormikTextField from "@/components/common/FormikTextField";
 import { apiCall } from "@/utils/apiCall";
 import { SignupFormSchema, selectStyles, educationOptions } from "./helper";
 import { ISignupFormValues, Step, ApiResponse, EducationOption } from "./type";
-
-import 'react-tagsinput/react-tagsinput.css';
 
 const steps: Step[] = [
   {
@@ -122,6 +120,7 @@ const SignUpPage: React.FC = () => {
   };
 
   const handleSkillsChange = (tags: string[], setFieldValue: (field: string, value: any) => void) => {
+    console.log("first",tags);
     if (tags.length <= 10) {
       setFieldValue('skills', tags);
     } else {
@@ -394,43 +393,8 @@ const SignUpPage: React.FC = () => {
           </div>
           <div className="skill-tags-container">
             <TagsInput
-              addOnBlur={true}
-              onlyUnique={true}
-              addOnPaste={true}
-              validationRegex={/^[a-zA-Z0-9\-_\s]+$/}
-              value={Array.isArray(values.skills) ? values.skills : []}
-              onChange={(tags: any) => handleSkillsChange(tags, setFieldValue)}
-              pasteSplit={(data: any) => data.split(',').map((d: any) => d.trim())}
-              className="react-tagsinput custom-input-box"
-              focusedClassName="react-tagsinput--focused"
-              inputProps={{
-                placeholder: 'Type a skill and press Enter...',
-                className: 'react-tagsinput-input',
-                style: {
-                  background: 'transparent',
-                  border: 'none',
-                  outline: 'none',
-                  fontSize: '14px',
-                  padding: '4px 8px',
-                  minWidth: '150px'
-                }
-              }}
-              tagProps={{
-                className: 'react-tagsinput-tag',
-                style: {
-                  border: "none",
-                  background: 'var(--base)',
-                  color: 'white',
-                  borderRadius: '6px',
-                  padding: '4px 8px',
-                  margin: '2px',
-                  fontSize: '12px',
-                  fontWeight: '500',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }
-              }}
+              tags={values.skills || []}
+              handleSkillsChange={(tags: any) => handleSkillsChange(tags, setFieldValue)}
             />
           </div>
           <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
