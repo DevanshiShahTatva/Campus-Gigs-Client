@@ -7,11 +7,13 @@ import * as yup from "yup";
 import { toast } from "react-toastify";
 import { FiEye, FiEyeOff, FiX, FiCheck, FiAlertCircle, FiLoader } from "react-icons/fi";
 import { Formik, Form, FormikHelpers } from "formik";
-
 import { apiCall } from "@/utils/apiCall";
 import FormikTextField from "@/components/common/FormikTextField";
 import Button from "@/components/common/Button";
 import moment from "moment";
+import Cookie from 'js-cookie';
+
+import "./terms.css";
 
 interface ILogInFormValues {
   email: string;
@@ -159,7 +161,7 @@ const TermsModal = ({
             <div className="prose prose-sm max-w-none">
               <div className="space-y-6 text-gray-700">
                 <div
-                  className="text-sm leading-relaxed"
+                  className="text-sm terms-and-conditions"
                   dangerouslySetInnerHTML={{ __html: termsData.content }}
                 />
               </div>
@@ -234,7 +236,7 @@ const LogInPage = () => {
     actions.setSubmitting(false);
 
     if (response.success) {
-      if (response.data?.user?.isAgreed) {
+      if (response.data?.user?.isAgreed || response.data?.user?.role === "admin") {
         handleAllowedLogin(response);
       } else {
         setLoginResponse(response);
@@ -247,7 +249,8 @@ const LogInPage = () => {
 
   const handleAllowedLogin = (loginResponse: ILoginResponse | null) => {
     if (loginResponse) {
-      if (loginResponse.data.token) {
+      if (loginResponse.data?.token) {
+        Cookie.set("token", loginResponse.data.token);
         localStorage.setItem('token', loginResponse.data.token);
       }
       if (loginResponse.data.user) {
