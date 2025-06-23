@@ -13,7 +13,7 @@ api.interceptors.request.use(
     if (typeof window !== "undefined") {
       const token: string | null = getAuthToken();
       if (token && config.headers) {
-        config.headers["Authorization"] = `Bearer ${token}`;
+        config.headers['authorization'] = `Bearer ${token}`;
       }
     }
     return config;

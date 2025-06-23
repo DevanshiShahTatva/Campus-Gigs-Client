@@ -52,25 +52,24 @@ const TagsInput: React.FC<TagsInputProps> = ({ tags, handleSkillsChange }) => {
   };
 
   const removeTag = (indexToRemove: number) => {
-    console.log("rrr")
     handleSkillsChange(tags.filter((_, index) => index !== indexToRemove));
   };
 
   return (
     <div className="w-full space-y-2">
-      <div className="flex flex-wrap gap-2 items-center border rounded-lg p-2 min-h-12">
+      <div className="flex flex-wrap gap-2 items-center border border-gray-300 rounded-lg p-2 min-h-12 outline-none">
         {tags.map((tag, index) => (
           <div
             key={`${index + 1}`}
             className="flex items-center text-black bg-gray-200 rounded-full px-3 py-1 text-sm"
           >
             {tag}
-            <button
+            <div
               onClick={() => removeTag(index)}
-              className="ml-1.5 text-gray-500 hover:text-gray-700 focus:outline-none"
+              className="ml-1.5 text-gray-500 hover:text-gray-700 cursor-pointer focus:outline-none"
             >
               <XIcon size={12} />
-            </button>
+            </div>
           </div>
         ))}
         {tags.length < 10 && (
