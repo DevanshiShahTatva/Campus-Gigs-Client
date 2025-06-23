@@ -1,8 +1,15 @@
 import { CommonFormField } from "@/components/common/CommonFormModal";
 import { ColumnConfig, Data } from "@/utils/interface";
+import dayjs from "dayjs";
 
 export const tireFields: CommonFormField[] = [
-  { name: "tire", label: "Tire", type: "text", placeholder: "Please enter tire name", required: true },
+  {
+    name: "name",
+    label: "Name",
+    type: "text",
+    placeholder: "Please enter tire name",
+    required: true,
+  },
   {
     name: "description",
     label: "Description",
@@ -15,4 +22,16 @@ export const tireFields: CommonFormField[] = [
 export const tireTableColumns: ColumnConfig<Data>[] = [
   { key: "name", label: "Name" },
   { key: "description", label: "Description" },
+  {
+    key: "create_at",
+    label: "Created",
+    sortable: true,
+    render: (val) => dayjs(val).format("MMM DD, YYYY"),
+  },
+  {
+    key: "updated_at",
+    label: "Updated",
+    sortable: true,
+    render: (val) => dayjs(val).format("MMM DD, YYYY"),
+  },
 ];

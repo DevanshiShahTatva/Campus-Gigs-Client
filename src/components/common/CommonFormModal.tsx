@@ -203,8 +203,8 @@ const CommonFormModal: React.FC<CommonFormModalProps> = ({
               actions.setSubmitting(false);
             }}
           >
-            {({ values, setFieldValue, isSubmitting }) => (
-              <Form className="space-y-4">
+            {({ values, setFieldValue }) => (
+              <Form className="space-y-4" id="form-modal">
                 {fields.map((field) => {
                   const options: FieldOption[] = field.options || [];
                   switch (field.type) {

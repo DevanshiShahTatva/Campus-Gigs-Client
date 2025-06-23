@@ -52,3 +52,11 @@ export interface Data {
   create_at: string;
   updated_at: string;
 }
+
+export interface Tire {
+  _id: string;
+  name: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}
