@@ -11,8 +11,9 @@ export function ClientLayoutWrapper({
   const pathname = usePathname();
 
   const hideHeaderFooter =
-    pathname.startsWith("/admin") || // ✅ hides all /admin routes
+    pathname.startsWith("/admin") ||
     pathname === "/login" ||
+    pathname === "/forgot-password" ||
     pathname === "/reset-password" ||
     pathname === "/sign-up";
 
