@@ -8,7 +8,7 @@ import {
   tireTableColumns,
 } from "@/config/tire.config";
 import { DynamicTable } from "@/components/common/DynamicTables";
-import { Data, SortOrder, Tire } from "@/utils/interface";
+import { SortOrder, Tire } from "@/utils/interface";
 import { DEFAULT_PAGINATION } from "@/utils/constant";
 import { Edit, Trash } from "lucide-react";
 import { Button } from "@/components/common/ui/Button";
@@ -20,8 +20,8 @@ const PAGE_SIZE = 10;
 
 function TireService() {
   const [open, setOpen] = useState(false);
-  const [tires, setTires] = useState<Data[]>([]);
-  const [editTire, setEditTire] = useState<Data | null>(null);
+  const [tires, setTires] = useState<Tire[]>([]);
+  const [editTire, setEditTire] = useState<Tire | null>(null);
   const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
 
   const refetchCurrentPage = () => fetchTires(pagination.page);
@@ -83,8 +83,7 @@ function TireService() {
 
       if (resp) {
         if (resp.success) {
-          const tableData = handleChangeToTableData(resp.data);
-          setTires(tableData);
+          setTires(resp.data);
           setPagination(resp.meta);
         } else {
           toast.error(resp.message);
@@ -105,7 +104,7 @@ function TireService() {
 
   const handleEdit = (values: TireFormVal) => {
     handleApi(
-      { endPoint: `/tire/${editTire?.id}`, method: "PUT", body: values },
+      { endPoint: `/tire/${editTire?._id}`, method: "PUT", body: values },
       "Tire have been edited successfully",
       () => refetchCurrentPage()
     );
@@ -127,7 +126,7 @@ function TireService() {
     }
   };
 
-  const handleEditTire = (tire: Data) => {
+  const handleEditTire = (tire: Tire) => {
     setEditTire(tire);
     setOpen(true);
   };
@@ -145,7 +144,7 @@ function TireService() {
   return (
     <div>
       <div className="mb-8">
-        <DynamicTable<Data>
+        <DynamicTable<Tire>
           data={tires}
           title="Service Tire"
           onClickCreateButton={handleAdd}
@@ -163,7 +162,7 @@ function TireService() {
               <Button
                 className="bg-red-500 hover:bg-red-500"
                 size={"icon"}
-                onClick={() => handleDeleteTire(row.id)}
+                onClick={() => handleDeleteTire(row._id)}
               >
                 <Trash size={16} />
               </Button>
