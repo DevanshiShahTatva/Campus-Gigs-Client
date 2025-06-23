@@ -8,7 +8,7 @@ import {
   tireTableColumns,
 } from "@/config/tire.config";
 import { DynamicTable } from "@/components/common/DynamicTables";
-import { Data, Tire } from "@/utils/interface";
+import { Data, SortOrder, Tire } from "@/utils/interface";
 import { DEFAULT_PAGINATION } from "@/utils/constant";
 import { Edit, Trash } from "lucide-react";
 import { Button } from "@/components/common/ui/Button";
@@ -69,10 +69,15 @@ function TireService() {
     return tableData;
   };
 
-  const fetchTires = async (page: number, query: string = "") => {
+  const fetchTires = async (
+    page: number,
+    query: string = "",
+    key: string = "",
+    sortOrder: SortOrder = "asc"
+  ) => {
     try {
       const resp = await apiCall({
-        endPoint: `/tire?page=${page}&pageSize=${PAGE_SIZE}&searchQuery=${query}`,
+        endPoint: `/tire?page=${page}&pageSize=${PAGE_SIZE}&searchQuery=${query}&sortKey=${key}&sortOrder=${sortOrder}`,
         method: "GET",
       });
 
@@ -127,6 +132,15 @@ function TireService() {
     setOpen(true);
   };
 
+  const handleSearchSort = (
+    searchTerm: string,
+    key: string,
+    order: SortOrder,
+    page: number
+  ) => {
+    fetchTires(1, searchTerm);
+  };
+
   return (
     <div>
       <div className="mb-8">
@@ -138,7 +152,7 @@ function TireService() {
           searchPlaceholder="Search tire by name, description"
           currentPage={pagination.page}
           handlePageChange={(page) => fetchTires(page)}
-          onSearchSort={(query) => fetchTires(1, query)}
+          onSearchSort={handleSearchSort}
           columns={tireTableColumns}
           actions={(row) => (
             <div className="flex items-center justify-end gap-x-3">
