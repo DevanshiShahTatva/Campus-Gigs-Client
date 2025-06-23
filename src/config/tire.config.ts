@@ -20,16 +20,18 @@ export const tireFields: CommonFormField[] = [
 ];
 
 export const tireTableColumns: ColumnConfig<Data>[] = [
-  { key: "name", label: "Name" },
-  { key: "description", label: "Description" },
+  { key: "name", label: "Name", sortable: true },
+  { key: "description", label: "Description", sortable: true },
   {
     key: "create_at",
     label: "Created",
+    sortable: true,
     render: (val) => dayjs(val).format("MMM DD, YYYY"),
   },
   {
     key: "updated_at",
     label: "Updated",
+    sortable: true,
     render: (val) => dayjs(val).format("MMM DD, YYYY"),
   },
 ];

@@ -77,7 +77,7 @@ function TireService() {
   ) => {
     try {
       const resp = await apiCall({
-        endPoint: `/tire?page=${page}&pageSize=${PAGE_SIZE}&searchQuery=${query}&sortKey=${key}&sortOrder=${sortOrder}`,
+        endPoint: `/tire?page=${page}&pageSize=${PAGE_SIZE}&search=${query}&sortKey=${key}&sortOrder=${sortOrder}`,
         method: "GET",
       });
 
@@ -138,7 +138,8 @@ function TireService() {
     order: SortOrder,
     page: number
   ) => {
-    fetchTires(1, searchTerm);
+    page = page === 0 ? page + 1 : page;
+    fetchTires(page, searchTerm, key, order);
   };
 
   return (
