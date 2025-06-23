@@ -133,12 +133,12 @@ function TireService() {
         <DynamicTable<Data>
           data={tires}
           title="Service Tire"
-          onClickPlus={handleAdd}
+          onClickCreateButton={handleAdd}
           totalPages={pagination.totalPages}
           searchPlaceholder="Search tire by name, description"
           currentPage={pagination.page}
           handlePageChange={(page) => fetchTires(page)}
-          onSearch={(query) => fetchTires(1, query)}
+          onSearchSort={(query) => fetchTires(1, query)}
           columns={tireTableColumns}
           actions={(row) => (
             <div className="flex items-center justify-end gap-x-3">

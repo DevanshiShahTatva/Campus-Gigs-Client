@@ -285,6 +285,8 @@ button{
   body {
     @apply bg-background text-foreground;
   }
+}
+
 /* Quill editor CSS */
 .custom-quill .ql-editor {
   height: 200px;
