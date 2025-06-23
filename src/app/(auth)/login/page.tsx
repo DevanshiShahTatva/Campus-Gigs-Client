@@ -64,10 +64,12 @@ const LoadingSpinner = () => (
 
 const TermsModal = ({
   isOpen,
+  loginResponse,
   onAccept,
   onDecline
 }: {
   isOpen: boolean;
+  loginResponse: ILoginResponse | null;
   onAccept: () => void;
   onDecline: () => void;
 }) => {
@@ -105,6 +107,30 @@ const TermsModal = ({
     }
   };
 
+  const acceptTermAndCondition = async () => {
+    try {
+      const response = await apiCall({
+        endPoint: "/auth/agreed-terms-policy",
+        method: "PUT",
+        body: {
+          isAgreed: true,
+          userId: loginResponse?.data.user._id,
+        }
+      });
+
+      if (response.success) {
+        onAccept();
+      } else {
+        toast.error(response.message ?? "Failed to accept terms and conditions. Please try again.");
+      }
+    } catch (err) {
+      console.log("Err" + err);
+      toast.error("Failed to accept terms and conditions. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollTop + clientHeight >= scrollHeight - 10) {
@@ -130,7 +156,7 @@ const TermsModal = ({
               </h3>
             </div>
             <button
-              onClick={onDecline}
+              onClick={() => onDecline()}
               className="text-white hover:text-gray-200 transition-colors"
             >
               <FiX className="h-6 w-6" />
@@ -201,7 +227,7 @@ const TermsModal = ({
               Decline
             </button>
             <button
-              onClick={onAccept}
+              onClick={() => acceptTermAndCondition()}
               disabled={!hasScrolledToBottom || isLoading || !!error || !termsData}
               className="px-6 py-2 bg-[#218189] text-white rounded-lg hover:bg-[#1a6b72] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
@@ -262,10 +288,9 @@ const LogInPage = () => {
       } else {
         toast.error(loginResponse.message ?? "Login failed. Please try again.");
       }
-
-      const { role } = loginResponse.data;
+      const { role } = loginResponse.data.user;
       if (role === 'admin') {
-        router.push("/admin/subscription-plan");
+        router.push("/admin/dashboard");
       } else {
         router.push("/");
       }
@@ -365,6 +390,7 @@ const LogInPage = () => {
         </div>
       </section>
       <TermsModal
+        loginResponse={loginResponse}
         isOpen={showTermsModal}
         onDecline={handleTermsDecline}
         onAccept={() => handleAllowedLogin(loginResponse)}
