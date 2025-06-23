@@ -43,6 +43,11 @@ type FeatureFieldProps = {
   isDuplicateFeature: (index: number) => boolean;
 };
 
+// Fix the PageProps interface to match Next.js App Router expectations
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
 // Constants
 const ROLE_OPTIONS: RoleOption[] = [
   { value: ROLE.USER, label: "User" },
@@ -153,13 +158,9 @@ const FeatureField: React.FC<FeatureFieldProps> = ({ index, values, errors, touc
   );
 };
 
-interface PageParams {
-  id: string;
-}
-
-const CreateEditSubscriptionPlan = ({ params }: { params: PageParams }) => {
-  // Use React.use() to unwrap the params Promise with proper typing
-  const unwrappedParams = use<PageParams>(params as unknown as Promise<PageParams>);
+const CreateEditSubscriptionPlan = ({ params }: PageProps) => {
+  // Properly unwrap the params Promise using React.use()
+  const unwrappedParams = use(params);
   const isEditMode = unwrappedParams.id !== "new";
   const [isSubmitting, setIsSubmitting] = useState(false);
 
