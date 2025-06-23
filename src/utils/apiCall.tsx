@@ -1,9 +1,9 @@
-import api from './api';
-import { getAuthToken } from './helper';
+import api from "./api";
+import { getAuthToken } from "./helper";
 
 export interface IRequestParams {
   endPoint: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   headers?: Record<string, string>;
   body?: Record<string, unknown> | FormData | string | Blob | ArrayBuffer | null;
   withToken?: boolean;
@@ -23,25 +23,25 @@ export const apiCall = async ({
       ...headers,
     };
 
-    if (withToken && typeof window !== 'undefined') {
+    if (withToken && typeof window !== "undefined") {
       const token = getAuthToken();
       if (token) {
-        finalHeaders['token'] = `${token}`;
+        finalHeaders["token"] = `${token}`;
       }
     }
 
     const config = {
-      url: endPoint,
+      url:  endPoint,
       method,
       headers: finalHeaders,
       data: isFormData ? body : JSON.stringify(body),
     };
 
     const response = await api(config);
+    console.log(response);
     return response.data;
-
   } catch (err) {
-    console.error('API Error:', err);
+    console.error("API Error:", err);
     throw err;
   }
 };
