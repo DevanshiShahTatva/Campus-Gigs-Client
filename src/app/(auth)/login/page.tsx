@@ -74,7 +74,6 @@ const TermsModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch terms and conditions when modal opens
   useEffect(() => {
     if (isOpen && !termsData) {
       fetchTermsAndConditions();
@@ -210,7 +209,7 @@ const TermsModal = ({
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 
@@ -235,14 +234,18 @@ const LogInPage = () => {
     actions.setSubmitting(false);
 
     if (response.success) {
-      setLoginResponse(response);
-      setShowTermsModal(true);
+      if (response.data?.user?.isAgreed) {
+        handleAllowedLogin(response);
+      } else {
+        setLoginResponse(response);
+        setShowTermsModal(true);
+      }
     } else {
       toast.error(response.message ?? "Login failed. Please try again.");
     }
   };
 
-  const handleTermsAccept = () => {
+  const handleAllowedLogin = (loginResponse: ILoginResponse | null) => {
     if (loginResponse) {
       if (loginResponse.data.token) {
         localStorage.setItem('token', loginResponse.data.token);
@@ -251,11 +254,15 @@ const LogInPage = () => {
         localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
       }
 
-      toast.success(loginResponse.message);
+      if (loginResponse.success) {
+        toast.success(loginResponse.message);
+      } else {
+        toast.error(loginResponse.message ?? "Login failed. Please try again.");
+      }
 
       const { role } = loginResponse.data;
       if (role === 'admin') {
-        router.push("/admin/dashboard");
+        router.push("/admin/subscription-plan");
       } else {
         router.push("/");
       }
@@ -275,7 +282,12 @@ const LogInPage = () => {
     <>
       <section className="min-h-screen flex items-center justify-center bg-[#f9fafb] px-4 py-8">
         <div className="w-full max-w-6xl bg-white shadow-lg rounded-xl grid lg:grid-cols-2 overflow-hidden">
-          <div className="p-8 lg:p-16 flex flex-col justify-between h-full">
+          <div className="p-8 lg:p-16 pt-3 lg:pt-6 flex flex-col justify-between h-full">
+            <div>
+              <h1 className="text-2xl md:text-3xl text-[var(--base)] font-bold  mb-4 animate-fade-in">
+                CampusGig
+              </h1>
+            </div>
             <div>
               <div className="mb-8">
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
@@ -351,8 +363,8 @@ const LogInPage = () => {
       </section>
       <TermsModal
         isOpen={showTermsModal}
-        onAccept={handleTermsAccept}
         onDecline={handleTermsDecline}
+        onAccept={() => handleAllowedLogin(loginResponse)}
       />
     </>
   );

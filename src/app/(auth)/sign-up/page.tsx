@@ -120,7 +120,6 @@ const SignUpPage: React.FC = () => {
   };
 
   const handleSkillsChange = (tags: string[], setFieldValue: (field: string, value: any) => void) => {
-    console.log("first",tags);
     if (tags.length <= 10) {
       setFieldValue('skills', tags);
     } else {
@@ -190,16 +189,17 @@ const SignUpPage: React.FC = () => {
       <div className="space-y-6">
         <FormikTextField
           name="name"
+          type="text"
           label="Full Name"
           placeholder="Enter your full name"
-          type="text"
         />
         <div>
           <FormikTextField
             name="email"
+            type="email"
             label="Email Address"
             placeholder="Enter your email address"
-            type="email"
+            onChange={() => setEmailErr("")}
           />
           {emailErr && (
             <div className="text-red-500 text-sm mt-1">
@@ -483,13 +483,9 @@ const SignUpPage: React.FC = () => {
           <div>
             <div className="mb-8 text-center lg:text-left">
               <div className="flex items-center justify-center lg:justify-start mb-4">
-                <Image
-                  alt="logo"
-                  width={150}
-                  height={200}
-                  unselectable="on"
-                  src="https://eventlyfe.netlify.app/_next/static/media/eventlyLogo1.848f9dc8.png"
-                />
+                <h1 className="text-2xl md:text-3xl text-[var(--base)] font-bold  mb-4 animate-fade-in">
+                  CampusGig
+                </h1>
               </div>
             </div>
             {renderStepIndicator()}
