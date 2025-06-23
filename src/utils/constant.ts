@@ -16,19 +16,27 @@ export const DEFAULT_PAGINATION = {
   total: 1,
   totalPages: 1,
 };
+
 export const ROUTES = {
-    LOGIN: "/login",
-    ADMIN:{
-        DASHBOARD: "/admin/dashboard",
-        SUBSCRIPTION: "/admin/subscription-plan",
-        TIRE: "/admin/tire",
-        SUPPORT_REQUESTS: "/admin/support-requests",
-        FAQS: "/admin/faqs",
-        CREATE_FAQs: "/admin/faqs/create",
-        PRIVACY_POLICY: "/admin/privacy-policy",
-        TERMS_CONDITIONS: "/admin/terms-and-conditions",
-    }
-}
+  HOME: "/",
+  LOGIN: "/login",
+  SIGN_UP: "/sign-up",
+  FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
+  ADMIN: {
+    DASHBOARD: "/admin/dashboard",
+    SUBSCRIPTION: "/admin/subscription-plan",
+    SUPPORT_REQUESTS: "/admin/support-requests",
+    FAQS: "/admin/faqs",
+    CREATE_FAQs: "/admin/faqs/create",
+    PRIVACY_POLICY: "/admin/privacy-policy",
+    TERMS_CONDITIONS: "/admin/terms-and-conditions",
+    TIRE: "/admin/tire",
+  },
+  USER: {
+    DASHBOARD: "/user/dashboard",
+  }
+};
 
 export const API_ROUTES ={
     LOGIN: "/api/login",
@@ -41,19 +49,19 @@ export const API_ROUTES ={
     },
 }
 export enum ROLE {
-    Admin = "admin",
-    User = "user",
-    Organizer = "provider"
+  Admin = "admin",
+  User = "user",
+  Organizer = "provider"
 }
 
 export const USER_SIDEBAR_ITEMS = [
-    { id: 1, title: "Dashboard", route: ROUTES.ADMIN.DASHBOARD, icon: "/assets/DashboardIcon.svg" },
-    { id: 5, title: "Subscription Plan", route: ROUTES.ADMIN.SUBSCRIPTION, icon: "/assets/DashboardIcon.svg" },
-    { id: 7, title: "Service Tire", route: ROUTES.ADMIN.TIRE, icon: "/assets/services.svg" },
-    { id: 2, title: "Support Requests", route: ROUTES.ADMIN.SUPPORT_REQUESTS, icon: "/assets/support.svg" },
-    { id: 6, title: "Terms & Conditions", route: ROUTES.ADMIN.TERMS_CONDITIONS, icon:  "/assets/terms.svg"},
-    { id: 3, title: "Privacy Policy", route: ROUTES.ADMIN.PRIVACY_POLICY, icon:  "/assets/policy.svg"},
-    { id: 4, title: "FAQs", route: ROUTES.ADMIN.FAQS, icon:  "/assets/faqs.svg"},
+  { id: 1, title: "Dashboard", route: ROUTES.ADMIN.DASHBOARD, icon: "/assets/DashboardIcon.svg" },
+  { id: 2, title: "Subscription Plan", route: ROUTES.ADMIN.SUBSCRIPTION, icon: "/assets/DashboardIcon.svg" },
+  { id: 3, title: "Service Tire", route: ROUTES.ADMIN.TIRE, icon: "/assets/services.svg" },
+  { id: 4, title: "Support Requests", route: ROUTES.ADMIN.SUPPORT_REQUESTS, icon: "/assets/support.svg" },
+  { id: 5, title: "Terms & Conditions", route: ROUTES.ADMIN.TERMS_CONDITIONS, icon: "/assets/terms.svg" },
+  { id: 6, title: "Privacy Policy", route: ROUTES.ADMIN.PRIVACY_POLICY, icon: "/assets/policy.svg" },
+  { id: 7, title: "FAQs", route: ROUTES.ADMIN.FAQS, icon: "/assets/faqs.svg" },
 ]
 
 export const MESSAGES = {
