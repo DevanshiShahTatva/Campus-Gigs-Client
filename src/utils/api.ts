@@ -1,17 +1,16 @@
-import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { getAuthToken } from './helper';
+import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import { getAuthToken } from "./helper";
 
-const API_BASE_URL = process.env.BE_BASE_URL ?? "http://localhost:3001";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
 
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true
+  withCredentials: true,
 });
 
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const token: string | null = getAuthToken();
       if (token && config.headers) {
         config.headers['authorization'] = `Bearer ${token}`;

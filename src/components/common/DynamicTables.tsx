@@ -17,7 +17,7 @@ import { DynamicTableProps, SortOrder } from "@/utils/interface";
 import Button from "./Button";
 import useDebounce from "@/hooks/useDebounce";
 
-export function DynamicTable<T extends { id: number | string }>({
+export function DynamicTable<T extends { _id: string }>({
   data,
   columns,
   actions,
@@ -31,6 +31,7 @@ export function DynamicTable<T extends { id: number | string }>({
   children,
   title,
   onClickCreateButton,
+  isCreateButtonDisabled,
 }: DynamicTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
@@ -39,7 +40,7 @@ export function DynamicTable<T extends { id: number | string }>({
   const [sortOrder, setSortOrder] = useState<SortOrder>(defaultSortOrder);
 
   useEffect(() => {
-    onSearchSort?.(debouncedSearch, sortKey as keyof T, sortOrder, 0);
+    onSearchSort?.(debouncedSearch, sortKey as keyof T, sortOrder, 1);
   }, [debouncedSearch]);
 
   const handleSort = (key: keyof T) => {
@@ -81,7 +82,12 @@ export function DynamicTable<T extends { id: number | string }>({
           <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>
         {children}
-        <Button variant="green" className="flex items-center h-[46px]" onClick={onClickCreateButton}>
+        <Button
+          variant="green"
+          className="flex items-center h-[46px] disabled:opacity-50"
+          onClick={onClickCreateButton}
+          disabled={isCreateButtonDisabled}
+        >
           <Plus size={20} />
           Add
         </Button>
@@ -116,7 +122,7 @@ export function DynamicTable<T extends { id: number | string }>({
               </TableRow>
             ) : (
               data.map((row, rowIndex) => (
-                <TableRow key={row.id}>
+                <TableRow key={row._id}>
                   {columns.map((col) => (
                     <TableCell key={String(col.key)} className="whitespace-nowrap">
                       {col.render ? col.render(row[col.key], row, rowIndex) : String(row[col.key])}

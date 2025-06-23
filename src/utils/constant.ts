@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export enum ROLE {
   USER = "user",
-  ADMIN = "admin",
+  PROVIDER = "provider",
 }
 
 export const DEFAULT_PAGINATION = {
