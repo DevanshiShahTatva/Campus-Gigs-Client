@@ -64,14 +64,16 @@ const FormikTextField: React.FC<FormikTextFieldProps> = ({
           }}
           className={cn(
             `
-            w-full px-4 py-2 border text-black disabled:bg-gray-100 disabled:text-gray-500
+            w-full px-4 border text-black disabled:bg-gray-100 disabled:text-gray-500
             ${
               hasError
                 ? "border-red-500 focus:ring-red-500 focus:border-red-500"
                 : "border-gray-300 focus:ring-[var(--base)] focus:border-[var(--base)]"
             }
             rounded-lg focus:outline-none focus:ring-1 outline-none transition-all no-spinner
-            [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`,
+            [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none
+            ${type === "textarea" ? "min-h-[44px] py-2 resize-vertical" : "h-11 py-2"}
+            `,
             className
           )}
         />

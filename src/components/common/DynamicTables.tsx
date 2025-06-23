@@ -67,7 +67,7 @@ export function DynamicTable<T extends { _id: string }>({
   return (
     <main className="isolate mx-auto w-full max-w-screen-2xl overflow-hidden p-1">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-2xl font-bold leading-[30px] text-[var(--base)] whitespace-nowrap">{title}</h2>
+        <h2 className="text-[26px] mb-4 font-semibold leading-[30px] text-[var(--base)] whitespace-nowrap">{title}</h2>
       </div>
 
       <div className="flex w-full items-center gap-2 mb-4">
