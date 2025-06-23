@@ -25,40 +25,30 @@ const SubscriptionPlan = () => {
 
   const fetchSubscriptionPlan = useCallback(
     async (searchTerm: string, sortKey = "", sortOrder = "", page = 1) => {
-      try {
-        setIsLoading(true);
-        const { pageSize } = pagination;
-        // Build query parameters
-        const params = new URLSearchParams({
-          page: page.toString(),
-          pageSize: pageSize.toString(),
-          ...(searchTerm && { search: searchTerm }),
-          ...(sortKey && { sortBy: sortKey }),
-          ...(sortKey && sortOrder && { sortOrder }),
-        });
+      setIsLoading(true);
+      const { pageSize } = pagination;
+      // Build query parameters
+      const params = new URLSearchParams({
+        page: page.toString(),
+        pageSize: pageSize.toString(),
+        ...(searchTerm && { search: searchTerm }),
+        ...(sortKey && { sortBy: sortKey }),
+        ...(sortKey && sortOrder && { sortOrder }),
+      });
 
-        const res: ISubscriptionPlanApiResponse = await apiCall({
-          endPoint: `/subscription-plan?${params.toString()}`,
-          method: "GET",
-        });
+      const res: ISubscriptionPlanApiResponse = await apiCall({
+        endPoint: `/subscription-plan?${params.toString()}`,
+        method: "GET",
+      });
 
-        console.log(res);
-
-        if (res.status === 200) {
-          const { data, meta } = res;
-          console.log(data);
-          setPlans(data);
-          setPagination(meta);
-        }
-      } catch (error: any) {
-        if (!error?.response?.data?.success) {
-          toast.error(error.response?.data?.message);
-          return;
-        }
+      if (res.status === 200) {
+        const { data, meta } = res;
+        setPlans(data);
+        setPagination(meta);
+      } else {
         toast.error("Something went wrong, please try again later.");
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     },
     [pagination.page]
   );
