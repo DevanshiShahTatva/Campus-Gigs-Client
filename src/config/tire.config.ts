@@ -1,5 +1,5 @@
 import { CommonFormField } from "@/components/common/CommonFormModal";
-import { ColumnConfig, Data } from "@/utils/interface";
+import { ColumnConfig } from "@/utils/interface";
 import dayjs from "dayjs";
 
 export const tireFields: CommonFormField[] = [
@@ -19,7 +19,7 @@ export const tireFields: CommonFormField[] = [
   },
 ];
 
-export const tireTableColumns: ColumnConfig<Data>[] = [
+export const tireTableColumns: ColumnConfig<any>[] = [
   { key: "name", label: "Name", sortable: true },
   { key: "description", label: "Description", sortable: true },
   {
@@ -40,3 +40,4 @@ export interface TireFormVal {
   name: string,
   description: string
 }
+ 

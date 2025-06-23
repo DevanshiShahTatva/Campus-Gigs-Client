@@ -32,10 +32,12 @@ export const ROUTES = {
 
 export const API_ROUTES ={
     LOGIN: "/api/login",
+    CONTACT_US: "/contact-us",
     ADMIN: {
         TERMS_CONDITIONS: "/terms-conditions",
         FAQS:"/faqs",
         BULK_FAQS:"/faqs/bulk",
+        CONTACT_US_BULK: '/contact-us/bulk-delete'
     },
 }
 export enum ROLE {
@@ -66,4 +68,10 @@ export const MESSAGES = {
     FAQ_CREATE_ERROR: "Failed to create FAQs. Please try again",
     FAQ_DELETE_CONFIRMATION: "Are you sure you want to delete this FAQ?",
     FAQ_DELETE_SUCCESS: "FAQ deleted successfully",
+    CONTACT_US:{
+        STATUS_UPDATE_SUCCESS: "Status updated successfully",
+        STATUS_UPDATE_ERROR: "Failed to update the status",
+        BULK_DELETE_SUCCESS: "Requests deleted successfully",
+        BULK_DELETE_ERROR: 'Error deleting the requests'
+    }
 }

@@ -2,7 +2,7 @@ import * as Yup from "yup";
 import { IFAQFormValues, IFAQItem } from "../types";
 
 export const InitialFaqsValues: IFAQFormValues = {
-  faqs: [{ question: "", answer: "" }],
+  faqs: [{ _id: "" ,question: "", answer: "" }],
 };
 
 export const FaqsValidationSchema = Yup.object({
@@ -16,7 +16,7 @@ export const FaqsValidationSchema = Yup.object({
 
 
 export const InitialEditFaqsValues : IFAQItem = {
-    question: '', answer: '' 
+    question: '', answer: '', _id: '' 
  };
 
 export const FaqsEditValidationSchema = Yup.object({
