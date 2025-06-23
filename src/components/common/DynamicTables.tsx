@@ -24,30 +24,29 @@ export function DynamicTable<T extends { id: number | string }>({
   totalPages,
   handlePageChange,
   currentPage,
-  onSearch,
-  onSortChange,
-  onClickPlus,
+  onSearchSort,
   defaultSortKey,
   defaultSortOrder = "asc",
   searchPlaceholder = "Search",
   children,
   title,
+  onClickCreateButton,
 }: DynamicTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
 
-  const [sortKey, setSortKey] = useState<keyof T>(defaultSortKey ?? columns[0].key);
+  const [sortKey, setSortKey] = useState<keyof T | string>("");
   const [sortOrder, setSortOrder] = useState<SortOrder>(defaultSortOrder);
 
   useEffect(() => {
-    onSearch?.(debouncedSearch);
+    onSearchSort?.(debouncedSearch, sortKey as keyof T, sortOrder, 0);
   }, [debouncedSearch]);
 
   const handleSort = (key: keyof T) => {
     const newOrder = sortKey === key && sortOrder === "asc" ? "desc" : "asc";
     setSortKey(key);
     setSortOrder(newOrder);
-    onSortChange?.(key, newOrder);
+    onSearchSort?.(searchTerm, key, newOrder, currentPage);
   };
 
   const visiblePages = useMemo((): (number | "...")[] => {
@@ -65,7 +64,7 @@ export function DynamicTable<T extends { id: number | string }>({
   };
 
   return (
-    <main className="isolate mx-auto w-full max-w-screen-2xl overflow-hidden p-4 md:p-6 2xl:p-10">
+    <main className="isolate mx-auto w-full max-w-screen-2xl overflow-hidden p-1">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-[26px] mb-4 font-semibold leading-[30px] text-[var(--base)] whitespace-nowrap">{title}</h2>
       </div>
@@ -77,13 +76,14 @@ export function DynamicTable<T extends { id: number | string }>({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full rounded-md border border-gray-200 bg-white py-2.5 pl-12 pr-4 text-base outline-none"
+            className="w-full rounded-md border border-gray-200 bg-white py-2 pl-12 pr-4 text-base focus:outline-none focus:ring-2 focus:ring-[var(--base)] text-[var(--text-dark)]"
           />
           <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>
         {children}
-        <Button variant="green" className="flex items-center h-[46px]" onClick={onClickPlus}>
+        <Button variant="green" className="flex items-center h-[46px]" onClick={onClickCreateButton}>
           <Plus size={20} />
+          Add
         </Button>
       </div>
 
@@ -103,7 +103,7 @@ export function DynamicTable<T extends { id: number | string }>({
                   </span>
                 </TableHead>
               ))}
-              {actions && <TableHead textAlign="right">Actions</TableHead>}
+              {actions && <TableHead textAlign="center">Actions</TableHead>}
             </TableRow>
           </TableHeader>
 

@@ -18,8 +18,8 @@ type SubscriptionPlanFormValues = {
   icon: string;
   isPro: boolean;
   rolesAllowed: string[];
-  maxGigsPerMonth: string;
-  maxBidsPerMonth: string;
+  maxGigsPerMonth: string | null;
+  maxBidsPerMonth: string | null;
   features: string[];
   canGetBadges: boolean;
   mostPopular: boolean;
@@ -163,11 +163,24 @@ const CreateEditSubscriptionPlan = () => {
   const handleSubmit = async (values: SubscriptionPlanFormValues, { resetForm }: FormikHelpers<SubscriptionPlanFormValues>) => {
     try {
       setIsSubmitting(true);
-      console.log("Submitting subscription plan:", values);
 
+      // Prepare the submission data
+      const submissionData = { ...values };
+
+      // If it's a Pro plan, set maxGigsPerMonth and maxBidsPerMonth to null
+      // and include all available roles
+      if (values.isPro) {
+        submissionData.maxGigsPerMonth = null;
+        submissionData.maxBidsPerMonth = null;
+        submissionData.rolesAllowed = ROLE_OPTIONS.map((role) => role.value);
+      }
+
+      console.log("Submitting subscription plan:", submissionData);
+
+      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      toast.success("Subscription plan created successfully!");
+      toast.success(`Subscription plan ${values.isPro ? "Pro" : ""} ${values.name} created successfully!`);
       resetForm();
     } catch (error) {
       console.error("Error creating subscription plan:", error);
@@ -320,6 +333,32 @@ const CreateEditSubscriptionPlan = () => {
                       min={0}
                       className="w-full"
                     />
+
+                    <div className="w-full">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Available for Roles</label>
+                      <div className="flex flex-col gap-4">
+                        {ROLE_OPTIONS.map((role) => (
+                          <CheckboxCard
+                            key={role.value}
+                            name="rolesAllowed"
+                            value={role.value}
+                            label={role.label}
+                            checked={values.rolesAllowed.includes(role.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              const value = e.target.value;
+                              if (e.target.checked) {
+                                setFieldValue("rolesAllowed", [...values.rolesAllowed, value]);
+                              } else {
+                                setFieldValue(
+                                  "rolesAllowed",
+                                  values.rolesAllowed.filter((r) => r !== value)
+                                );
+                              }
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   </>
                 )}
 
@@ -369,31 +408,6 @@ const CreateEditSubscriptionPlan = () => {
                       onChange={() => setFieldValue("mostPopular", false)}
                     />
                   </div>
-                </div>
-              </div>
-              <div className="w-full sm:w-9/12 md:w-1/2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Available for Roles</label>
-                <div className="flex flex-col gap-4">
-                  {ROLE_OPTIONS.map((role) => (
-                    <CheckboxCard
-                      key={role.value}
-                      name="rolesAllowed"
-                      value={role.value}
-                      label={role.label}
-                      checked={values.rolesAllowed.includes(role.value)}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        const value = e.target.value;
-                        if (e.target.checked) {
-                          setFieldValue("rolesAllowed", [...values.rolesAllowed, value]);
-                        } else {
-                          setFieldValue(
-                            "rolesAllowed",
-                            values.rolesAllowed.filter((r) => r !== value)
-                          );
-                        }
-                      }}
-                    />
-                  ))}
                 </div>
               </div>
 

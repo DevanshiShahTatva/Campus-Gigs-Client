@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { getAuthToken } from './helper';
 
-const API_BASE_URL = process.env.BE_BASE_URL ?? "";
+const API_BASE_URL = process.env.BE_BASE_URL ?? "http://localhost:3001";
 
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
