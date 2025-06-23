@@ -2,7 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import CommonFormModal from "@/components/common/CommonFormModal";
-import { tireFields, tireTableColumns } from "@/config/tire.config";
+import {
+  tireFields,
+  TireFormVal,
+  tireTableColumns,
+} from "@/config/tire.config";
 import { DynamicTable } from "@/components/common/DynamicTables";
 import { Data, Tire } from "@/utils/interface";
 import { DEFAULT_PAGINATION } from "@/utils/constant";
@@ -12,11 +16,35 @@ import { toast } from "react-toastify";
 import { apiCall } from "@/utils/apiCall";
 import dayjs from "dayjs";
 
+const PAGE_SIZE = 10;
+
 function TireService() {
   const [open, setOpen] = useState(false);
   const [tires, setTires] = useState<Data[]>([]);
   const [editTire, setEditTire] = useState<Data | null>(null);
   const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
+
+  const refetchCurrentPage = () => fetchTires(pagination.page);
+
+  const handleApi = async (
+    config: any,
+    successMsg: string,
+    callback?: () => void
+  ) => {
+    try {
+      const resp = await apiCall(config);
+      if (resp?.success) {
+        toast.success(successMsg);
+        callback?.();
+      } else {
+        toast.error(resp?.message || "Something went wrong");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setOpen(false);
+    }
+  };
 
   useEffect(() => {
     fetchTires(1);
@@ -41,10 +69,10 @@ function TireService() {
     return tableData;
   };
 
-  const fetchTires = async (page: number) => {
+  const fetchTires = async (page: number, query: string = "") => {
     try {
       const resp = await apiCall({
-        endPoint: `/tire?page=${page}&pageSize=${10}`,
+        endPoint: `/tire?page=${page}&pageSize=${PAGE_SIZE}&searchQuery=${query}`,
         method: "GET",
       });
 
@@ -62,49 +90,28 @@ function TireService() {
     }
   };
 
-  const handleAddTire = async (values: any) => {
-    try {
-      const resp = await apiCall({
-        endPoint: `/tire`,
-        method: "POST",
-        body: values,
-      });
-
-      if (resp) {
-        if (resp.success) {
-          toast.success("Tire have been added successfully");
-          fetchTires(1);
-        } else {
-          toast.error(resp.message);
-        }
-        setOpen(false);
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    }
+  const handleAddTire = (values: TireFormVal) => {
+    handleApi(
+      { endPoint: `/tire`, method: "POST", body: values },
+      "Tire added successfully",
+      () => refetchCurrentPage()
+    );
   };
 
-  const handleEdit = async (values: any) => {
-    debugger;
-    try {
-      const resp = await apiCall({
-        endPoint: `/tire/${editTire?.id}`,
-        method: "PUT",
-        body: values,
-      });
+  const handleEdit = (values: TireFormVal) => {
+    handleApi(
+      { endPoint: `/tire/${editTire?.id}`, method: "PUT", body: values },
+      "Tire have been edited successfully",
+      () => refetchCurrentPage()
+    );
+  };
 
-      if (resp) {
-        if (resp.success) {
-          toast.success("Tire have been edited successfully");
-          fetchTires(1);
-        } else {
-          toast.error(resp.message);
-        }
-        setOpen(false);
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    }
+  const handleDeleteTire = (id: string) => {
+    handleApi(
+      { endPoint: `/tire/${id}`, method: "DELETE" },
+      "Tire have been deleted successfully",
+      () => refetchCurrentPage()
+    );
   };
 
   const handleSubmit = (values: any) => {
@@ -120,26 +127,6 @@ function TireService() {
     setOpen(true);
   };
 
-  const handleDeleteTire = async (id: string) => {
-    try {
-      const resp = await apiCall({
-        endPoint: `/tire/${id}`,
-        method: "DELETE",
-      });
-      if (resp) {
-        if (resp.success) {
-          toast.success("Tire have been deleted successfully");
-          fetchTires(1);
-        } else {
-          toast.error(resp.message);
-        }
-        setOpen(false);
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    }
-  };
-
   return (
     <div>
       <div className="mb-8">
@@ -148,8 +135,10 @@ function TireService() {
           title="Service Tire"
           onClickPlus={handleAdd}
           totalPages={pagination.totalPages}
+          searchPlaceholder="Search tire by name, description"
           currentPage={pagination.page}
-          handlePageChange={() => {}}
+          handlePageChange={(page) => fetchTires(page)}
+          onSearch={(query) => fetchTires(1, query)}
           columns={tireTableColumns}
           actions={(row) => (
             <div className="flex items-center justify-end gap-x-3">

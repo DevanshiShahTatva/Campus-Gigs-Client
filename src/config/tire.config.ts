@@ -25,13 +25,16 @@ export const tireTableColumns: ColumnConfig<Data>[] = [
   {
     key: "create_at",
     label: "Created",
-    sortable: true,
     render: (val) => dayjs(val).format("MMM DD, YYYY"),
   },
   {
     key: "updated_at",
     label: "Updated",
-    sortable: true,
     render: (val) => dayjs(val).format("MMM DD, YYYY"),
   },
 ];
+
+export interface TireFormVal {
+  name: string,
+  description: string
+}
