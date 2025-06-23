@@ -31,7 +31,7 @@ export const apiCall = async ({
     }
 
     const config = {
-      url: endPoint,
+      url:  endPoint,
       method,
       headers: finalHeaders,
       data: isFormData ? body : JSON.stringify(body),

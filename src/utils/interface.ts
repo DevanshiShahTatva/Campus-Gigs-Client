@@ -20,7 +20,7 @@ export interface DynamicTableProps<T extends { _id: string }> {
 
   // Optional search/sort handlers
   onSearchSort?: (search: string, sortKey: keyof T, sortOrder: SortOrder, page: number) => void;
-
+  
   // Optional overrides
   defaultSortKey?: keyof T;
   defaultSortOrder?: SortOrder;
