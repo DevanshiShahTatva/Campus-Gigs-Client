@@ -45,6 +45,8 @@ const ResetPassSchema = yup.object({
 
 const ResetPasswordPage = () => {
   const router = useRouter();
+
+  const [otpError, setOtpError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState({
     newPassword: false,
     confirmPassword: false,
@@ -60,7 +62,7 @@ const ResetPasswordPage = () => {
   ) => {
     actions.setSubmitting(true);
     const response = await apiCall({
-      endPoint: "/reset-password",
+      endPoint: "/auth/reset-password",
       method: "POST",
       body: {
         otp: values.otp.toString(),
@@ -70,9 +72,13 @@ const ResetPasswordPage = () => {
     });
 
     if (response.success) {
-      toast.success(response.message);
+      toast.success(response.data?.message ?? "Password reset successfully. You can now log in.");
       router.push("/login");
       localStorage.removeItem("resetPassEmail");
+    } else if (response.message === "Invalid otp") {
+      setOtpError("Invalid OTP!");
+    } else {
+      toast.error(response.message ?? "Something went wrong. Please try again.");
     }
     actions.setSubmitting(false);
   }
@@ -80,7 +86,10 @@ const ResetPasswordPage = () => {
   return (
     <section className="min-h-screen flex items-center justify-center bg-[#f9fafb] px-4 py-8">
       <div className="w-full max-w-6xl bg-white shadow-lg rounded-xl grid lg:grid-cols-2 overflow-hidden">
-        <div className="p-8 lg:p-16 flex flex-col justify-between h-full">
+        <div className="p-8 lg:p-16 pt-3 lg:pt-6 flex flex-col justify-between h-full">
+          <h1 className="text-2xl md:text-3xl text-[var(--base)] font-bold  mb-4 animate-fade-in">
+            CampusGig
+          </h1>
           <div>
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
@@ -102,13 +111,19 @@ const ResetPasswordPage = () => {
             >
               {({ isSubmitting }) => (
                 <Form className="space-y-5">
-                  <FormikTextField
-                    name="otp"
-                    label="OTP (6-digit code)"
-                    type="number"
-                    maxLength={6}
-                    placeholder="Enter OTP"
-                  />
+                  <div>
+                    <FormikTextField
+                      name="otp"
+                      label="OTP (6-digit code)"
+                      type="number"
+                      maxLength={6}
+                      placeholder="Enter OTP"
+                      onChange={() => setOtpError("")}
+                    />
+                    {otpError && (
+                      <p className="text-red-500 text-sm mt-1">{otpError}</p>
+                    )}
+                  </div>
                   <FormikTextField
                     name="newPassword"
                     label="New Password"

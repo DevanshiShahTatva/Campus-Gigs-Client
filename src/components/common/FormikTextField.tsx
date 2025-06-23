@@ -16,6 +16,7 @@ interface FormikTextFieldProps {
   min?: number;
   step?: number;
   className?: string;
+  onChange?: (e: React.ChangeEvent<any>) => void;
 }
 
 const FormikTextField: React.FC<FormikTextFieldProps> = ({
@@ -31,6 +32,7 @@ const FormikTextField: React.FC<FormikTextFieldProps> = ({
   min,
   step,
   className,
+  onChange
 }) => {
   const [field, meta] = useField(name);
   const hasError = meta.touched && meta.error;
@@ -56,6 +58,10 @@ const FormikTextField: React.FC<FormikTextFieldProps> = ({
           step={type === "number" ? step : undefined}
           placeholder={placeholder}
           as={type === "textarea" ? "textarea" : undefined}
+          onChange={(e: React.ChangeEvent<any>) => {
+            field.onChange(e);
+            if (onChange) onChange(e);
+          }}
           className={cn(
             `
             w-full px-4 border text-black disabled:bg-gray-100 disabled:text-gray-500

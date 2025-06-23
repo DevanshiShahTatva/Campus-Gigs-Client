@@ -29,7 +29,7 @@ function ForgotPasswordPage() {
   const handleForgotPassSubmit = async (values: IForgotPassValues, actions: FormikHelpers<IForgotPassValues>) => {
     actions.setSubmitting(true);
     const response = await apiCall({
-      endPoint: "/",
+      endPoint: "/auth/forgot-password",
       method: "POST",
       body: {
         email: values.email,
@@ -39,6 +39,8 @@ function ForgotPasswordPage() {
       toast.success(response.message);
       router.push("/reset-password");
       localStorage.setItem("resetPassEmail", values.email);
+    } else {
+      toast.error(response.message ?? "Something went wrong. Please try again.");
     }
     actions.setSubmitting(false);
   };
@@ -46,11 +48,11 @@ function ForgotPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f9fafb] px-4 py-8">
       <div className="w-full max-w-6xl bg-white shadow-lg rounded-xl grid lg:grid-cols-2 overflow-hidden">
-        <div className="p-8 lg:p-16 flex flex-col justify-between h-full">
+        <div className="p-8 lg:p-16 pt-3 lg:pt-6 flex flex-col justify-between h-full">
           <div>
-            <div className="mb-10">
-              aaa
-            </div>
+            <h1 className="text-2xl md:text-3xl text-[var(--base)] font-bold  mb-4 animate-fade-in">
+              CampusGig
+            </h1>
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
                 Forgot Password
