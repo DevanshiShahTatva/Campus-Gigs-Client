@@ -1,6 +1,7 @@
 "use client";
-import React from 'react';
-import { Field, ErrorMessage, useField } from 'formik';
+import React from "react";
+import { Field, ErrorMessage, useField } from "formik";
+import { cn } from "@/utils/constant";
 
 interface FormikTextFieldProps {
   name: string;
@@ -12,20 +13,25 @@ interface FormikTextFieldProps {
   readOnly?: boolean;
   disabled?: boolean;
   rows?: number;
+  min?: number;
+  step?: number;
+  className?: string;
 }
 
 const FormikTextField: React.FC<FormikTextFieldProps> = ({
   name,
-  label = '',
-  type = 'text',
-  placeholder = '',
+  label = "",
+  type = "text",
+  placeholder = "",
   maxLength,
   endIcon,
   readOnly = false,
   disabled = false,
   rows,
+  min,
+  step,
+  className,
 }) => {
-
   const [field, meta] = useField(name);
   const hasError = meta.touched && meta.error;
 
@@ -36,7 +42,7 @@ const FormikTextField: React.FC<FormikTextFieldProps> = ({
           {label}
         </label>
       )}
-      <div className='relative'>
+      <div className="relative">
         <Field
           {...field}
           id={name}
@@ -46,26 +52,26 @@ const FormikTextField: React.FC<FormikTextFieldProps> = ({
           readOnly={readOnly}
           disabled={disabled}
           maxLength={maxLength}
+          min={type === "number" ? min : undefined}
+          step={type === "number" ? step : undefined}
           placeholder={placeholder}
           as={type === "textarea" ? "textarea" : undefined}
-          className={`
+          className={cn(
+            `
             w-full px-4 py-2 border text-black disabled:bg-gray-100 disabled:text-gray-500
-            ${hasError ? "border-red-500 focus:ring-red-500 focus:border-red-500" : "border-gray-300 focus:ring-purple-500 focus:border-purple-500"}
+            ${
+              hasError
+                ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                : "border-gray-300 focus:ring-[var(--base)] focus:border-[var(--base)]"
+            }
             rounded-lg focus:outline-none focus:ring-1 outline-none transition-all no-spinner
-            [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`
-          }
+            [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`,
+            className
+          )}
         />
-        {endIcon && (
-          <div className="absolute right-3 top-[60%] transform -translate-y-[60%]">
-            {endIcon}
-          </div>
-        )}
+        {endIcon && <div className="absolute right-3 top-[60%] transform -translate-y-[60%]">{endIcon}</div>}
       </div>
-      <ErrorMessage
-        name={name}
-        component="div"
-        className="text-red-500 text-sm mt-1 whitespace-pre-line"
-      />
+      <ErrorMessage name={name} component="div" className="text-red-500 text-sm mt-1 whitespace-pre-line" />
     </div>
   );
 };
