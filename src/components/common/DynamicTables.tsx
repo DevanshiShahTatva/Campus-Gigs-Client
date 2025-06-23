@@ -81,7 +81,12 @@ export function DynamicTable<T extends { _id: string }>({
           <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>
         {children}
-        <Button variant="green" className="flex items-center h-[46px]" onClick={onClickCreateButton} disabled={isCreateButtonDisabled}>
+        <Button
+          variant="green"
+          className="flex items-center h-[46px] disabled:opacity-50"
+          onClick={onClickCreateButton}
+          disabled={isCreateButtonDisabled}
+        >
           <Plus size={20} />
         </Button>
       </div>

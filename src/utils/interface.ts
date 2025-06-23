@@ -51,10 +51,18 @@ export interface ISubscriptionPlanApiResponse {
   status: number;
   message: string;
   data: ISubscriptionPlan[];
-  meta: {
-    page: number;
-    pageSize: number;
-    totalPages: number;
-    total: number;
-  };
+  meta: IPagination;
+}
+
+export interface IPagination {
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  total: number;
+}
+
+export interface IPlanApiResponse {
+  status: number;
+  message: string;
+  data: ISubscriptionPlan[];
 }

@@ -1,15 +1,16 @@
 "use client";
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { Formik, Form, Field, FormikHelpers, FormikProps, FieldArray } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { FaPlus, FaTrash } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+
 import { ROLE } from "@/utils/constant";
 import Button from "@/components/common/Button";
 import FormikTextField from "@/components/common/FormikTextField";
 import CheckboxCard from "@/components/common/CheckboxCard";
 import RadioCard from "@/components/common/RadioCard";
-import { useRouter } from "next/navigation";
 import { apiCall } from "@/utils/apiCall";
 
 type SubscriptionPlanFormValues = {
@@ -152,7 +153,14 @@ const FeatureField: React.FC<FeatureFieldProps> = ({ index, values, errors, touc
   );
 };
 
-const CreateEditSubscriptionPlan = () => {
+interface PageParams {
+  id: string;
+}
+
+const CreateEditSubscriptionPlan = ({ params }: { params: PageParams }) => {
+  // Use React.use() to unwrap the params Promise with proper typing
+  const unwrappedParams = use<PageParams>(params as unknown as Promise<PageParams>);
+  const isEditMode = unwrappedParams.id !== "new";
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
@@ -184,36 +192,82 @@ const CreateEditSubscriptionPlan = () => {
         : {
             maxGigsPerMonth: Number(values.maxGigsPerMonth) || 0,
             maxBidsPerMonth: Number(values.maxBidsPerMonth) || 0,
-            rolesAllowed: values.rolesAllowed.map((role) => role.toLowerCase()), // Add rolesAllowed for non-pro plans too
+            rolesAllowed: values.rolesAllowed.map((role) => role.toLowerCase()),
           }),
     };
 
     try {
+      const method = isEditMode ? "PUT" : "POST";
+      const endpoint = isEditMode ? `/subscription-plan/${unwrappedParams.id}` : "/subscription-plan";
+
       const response = await apiCall({
-        endPoint: "/subscription-plan",
-        method: "POST",
+        endPoint: endpoint,
+        method,
         body: submissionData,
       });
 
+      if (!response) {
+        throw new Error("No response from server");
+      }
+
       // Check for successful response
-      if (response?.status === 201 || response?.status === 200) {
-        toast.success("Subscription plan created successfully!");
+      if (response?.status === 200 || response?.status === 201) {
+        toast.success(`Subscription plan ${isEditMode ? "updated" : "created"} successfully!`);
         router.push("/admin/subscription-plan");
       }
     } catch (error: any) {
-      console.log("Error creating/updating category:", error?.message || error);
-      const msg = error.response.data.message || "Something went wrong. Please try again later.";
-      toast.error(msg);
+      console.error(`Error ${isEditMode ? "updating" : "creating"} subscription plan:`, error);
+      const errorMessage = error.response?.data?.message || "Something went wrong. Please try again later.";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const [initialValues, setInitialValues] = useState(INITIAL_VALUES);
+
+  useEffect(() => {
+    if (isEditMode) {
+      const fetchSubscriptionPlan = async () => {
+        try {
+          const response = await apiCall({
+            endPoint: `/subscription-plan/${unwrappedParams.id}`,
+            method: "GET",
+          });
+
+          if (response?.status === 200) {
+            const data = response.data;
+            setInitialValues({
+              name: data.name,
+              description: data.description,
+              price: data.price,
+              icon: data.icon,
+              isPro: data.isPro,
+              rolesAllowed: data.rolesAllowed,
+              maxGigsPerMonth: data.maxGigsPerMonth,
+              maxBidsPerMonth: data.maxBidsPerMonth,
+              features: data.features,
+              canGetBadges: data.canGetBadges,
+              mostPopular: data.mostPopular,
+              buttonText: data.buttonText,
+            });
+          }
+        } catch (error: any) {
+          console.error(`Error fetching subscription plan:`, error);
+          const errorMessage = error.response?.data?.message || "Something went wrong. Please try again later.";
+          toast.error(errorMessage);
+        }
+      };
+
+      fetchSubscriptionPlan();
+    }
+  }, [isEditMode, unwrappedParams.id]);
+
   return (
     <main className="isolate mx-auto w-full max-w-screen-2xl overflow-hidden p-4 md:p-6 2xl:p-10">
-      <h2 className="mb-6 text-[26px] font-bold leading-[30px] text-dark">{false ? "Edit" : "Create"} Subscription Plan</h2>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">{isEditMode ? "Edit" : "Create New"} Subscription Plan</h1>
 
-      <Formik initialValues={INITIAL_VALUES} validationSchema={subscriptionPlanSchema} onSubmit={handleSubmit}>
+      <Formik initialValues={initialValues} validationSchema={subscriptionPlanSchema} onSubmit={handleSubmit} enableReinitialize>
         {(formikProps: FormikProps<SubscriptionPlanFormValues>) => {
           const { values, errors, touched, setFieldValue, handleBlur } = formikProps;
 
@@ -446,10 +500,10 @@ const CreateEditSubscriptionPlan = () => {
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      Creating Plan...
+                      Saving Plan...
                     </span>
                   ) : (
-                    "Create Subscription Plan"
+                    `${isEditMode ? "Update" : "Create"} Subscription Plan`
                   )}
                 </Button>
               </div>

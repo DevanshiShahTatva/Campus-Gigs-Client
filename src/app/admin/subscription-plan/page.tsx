@@ -87,7 +87,7 @@ const SubscriptionPlan = () => {
         handlePageChange={handlePageChange}
         onSearchSort={handleSearchSort}
         onClickCreateButton={handleCreatePlan}
-        isCreateButtonDisabled={true}
+        isCreateButtonDisabled={plans.length >= 3}
         columns={[
           {
             key: "name",
