@@ -94,7 +94,7 @@ const CommonUserLayout: React.FC<CommonUserLayoutProps> = ({
           <>
             {breadcrumb.length > 0 && (
               <nav
-                className="px-6 py-2  text-[var(--text-light)] text-sm"
+                className="px-6 pt-6 pb-4 text-[var(--text-light)] text-sm"
                 aria-label="Breadcrumb"
               >
                 <ol className="flex items-center space-x-2">
