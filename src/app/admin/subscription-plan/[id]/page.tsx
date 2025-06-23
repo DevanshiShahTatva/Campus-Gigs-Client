@@ -43,6 +43,11 @@ type FeatureFieldProps = {
   isDuplicateFeature: (index: number) => boolean;
 };
 
+// Fix the PageProps interface to match Next.js App Router expectations
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
 // Constants
 const ROLE_OPTIONS: RoleOption[] = [
   { value: ROLE.USER, label: "User" },
@@ -153,13 +158,9 @@ const FeatureField: React.FC<FeatureFieldProps> = ({ index, values, errors, touc
   );
 };
 
-interface PageParams {
-  id: string;
-}
-
-const CreateEditSubscriptionPlan = ({ params }: { params: PageParams }) => {
-  // Use React.use() to unwrap the params Promise with proper typing
-  const unwrappedParams = use<PageParams>(params as unknown as Promise<PageParams>);
+const CreateEditSubscriptionPlan = ({ params }: PageProps) => {
+  // Properly unwrap the params Promise using React.use()
+  const unwrappedParams = use(params);
   const isEditMode = unwrappedParams.id !== "new";
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -196,32 +197,28 @@ const CreateEditSubscriptionPlan = ({ params }: { params: PageParams }) => {
           }),
     };
 
-    try {
-      const method = isEditMode ? "PUT" : "POST";
-      const endpoint = isEditMode ? `/subscription-plan/${unwrappedParams.id}` : "/subscription-plan";
+    const method = isEditMode ? "PUT" : "POST";
+    const endpoint = isEditMode ? `/subscription-plan/${unwrappedParams.id}` : "/subscription-plan";
 
-      const response = await apiCall({
-        endPoint: endpoint,
-        method,
-        body: submissionData,
-      });
+    const response = await apiCall({
+      endPoint: endpoint,
+      method,
+      body: submissionData,
+    });
 
-      if (!response) {
-        throw new Error("No response from server");
-      }
-
-      // Check for successful response
-      if (response?.status === 200 || response?.status === 201) {
-        toast.success(`Subscription plan ${isEditMode ? "updated" : "created"} successfully!`);
-        router.push("/admin/subscription-plan");
-      }
-    } catch (error: any) {
-      console.error(`Error ${isEditMode ? "updating" : "creating"} subscription plan:`, error);
-      const errorMessage = error.response?.data?.message || "Something went wrong. Please try again later.";
-      toast.error(errorMessage);
-    } finally {
-      setIsSubmitting(false);
+    if (!response) {
+      throw new Error("No response from server");
     }
+
+    // Check for successful response
+    if (response?.status === 200 || response?.status === 201) {
+      toast.success(`Subscription plan ${isEditMode ? "updated" : "created"} successfully!`);
+      router.push("/admin/subscription-plan");
+    } else {
+      const errorMessage = response?.data?.message || "Something went wrong. Please try again later.";
+      toast.error(errorMessage);
+    }
+    setIsSubmitting(false);
   };
 
   const [initialValues, setInitialValues] = useState(INITIAL_VALUES);
@@ -229,34 +226,31 @@ const CreateEditSubscriptionPlan = ({ params }: { params: PageParams }) => {
   useEffect(() => {
     if (isEditMode) {
       const fetchSubscriptionPlan = async () => {
-        try {
-          const response = await apiCall({
-            endPoint: `/subscription-plan/${unwrappedParams.id}`,
-            method: "GET",
-          });
+        const response = await apiCall({
+          endPoint: `/subscription-plan/${unwrappedParams.id}`,
+          method: "GET",
+        });
 
-          if (response?.status === 200) {
-            const data = response.data;
-            setInitialValues({
-              name: data.name,
-              description: data.description,
-              price: data.price,
-              icon: data.icon,
-              isPro: data.isPro,
-              rolesAllowed: data.rolesAllowed,
-              maxGigsPerMonth: data.maxGigsPerMonth,
-              maxBidsPerMonth: data.maxBidsPerMonth,
-              features: data.features,
-              canGetBadges: data.canGetBadges,
-              mostPopular: data.mostPopular,
-              buttonText: data.buttonText,
-            });
-          }
-        } catch (error: any) {
-          console.error(`Error fetching subscription plan:`, error);
-          const errorMessage = error.response?.data?.message || "Something went wrong. Please try again later.";
-          toast.error(errorMessage);
+        if (response?.status === 200) {
+          const data = response.data;
+          setInitialValues({
+            name: data.name,
+            description: data.description,
+            price: data.price,
+            icon: data.icon,
+            isPro: data.isPro,
+            rolesAllowed: data.rolesAllowed,
+            maxGigsPerMonth: data.maxGigsPerMonth,
+            maxBidsPerMonth: data.maxBidsPerMonth,
+            features: data.features,
+            canGetBadges: data.canGetBadges,
+            mostPopular: data.mostPopular,
+            buttonText: data.buttonText,
+          });
+        } else {
+          toast.error("Subscription plan not found");
         }
+        console.log(response, "data");
       };
 
       fetchSubscriptionPlan();
@@ -291,9 +285,9 @@ const CreateEditSubscriptionPlan = ({ params }: { params: PageParams }) => {
 
           return (
             <Form className="flex flex-col gap-5">
-              <FormikTextField name="name" placeholder="Enter plan name" label="Plan Name *" type="text" className="w-full sm:w-9/12 md:w-1/2" />
+              <FormikTextField name="name" placeholder="Enter plan name" label="Plan Name *" type="text" className="w-full md:w-9/12 lg:w-1/2" />
 
-              <FormikTextField name="icon" placeholder="Enter plan icon" label="Plan Icon *" type="text" className="w-full sm:w-9/12 md:w-1/2" />
+              <FormikTextField name="icon" placeholder="Enter plan icon" label="Plan Icon *" type="text" className="w-full md:w-9/12 lg:w-1/2" />
 
               <FormikTextField
                 name="price"
@@ -302,7 +296,7 @@ const CreateEditSubscriptionPlan = ({ params }: { params: PageParams }) => {
                 type="number"
                 min={0}
                 step={0.01}
-                className="w-full sm:w-9/12 md:w-1/2"
+                className="w-full md:w-9/12 lg:w-1/2"
               />
 
               <FormikTextField
@@ -311,10 +305,10 @@ const CreateEditSubscriptionPlan = ({ params }: { params: PageParams }) => {
                 label="Plan Description *"
                 type="textarea"
                 rows={4}
-                className="w-full sm:w-9/12 md:w-1/2"
+                className="w-full md:w-9/12 lg:w-1/2"
               />
 
-              <div className="w-full sm:w-9/12 md:w-1/2 flex flex-col gap-2">
+              <div className="w-full md:w-9/12 lg:w-1/2 flex flex-col gap-2">
                 <label htmlFor="features" className="block text-sm font-medium text-gray-700 mb-1">
                   Features *
                 </label>
@@ -364,7 +358,7 @@ const CreateEditSubscriptionPlan = ({ params }: { params: PageParams }) => {
                   </button>
                 )}
               </div>
-              <div className="w-full sm:w-9/12 md:w-1/2 flex flex-col gap-4">
+              <div className="w-full md:w-9/12 lg:w-1/2 flex flex-col gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Plan Type</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -463,7 +457,7 @@ const CreateEditSubscriptionPlan = ({ params }: { params: PageParams }) => {
                   <label htmlFor="mostPopular" className="block text-sm font-medium text-gray-700 mb-1">
                     Most Popular
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <RadioCard
                       name="mostPopular"
                       description="Show label on the plan"
@@ -489,10 +483,10 @@ const CreateEditSubscriptionPlan = ({ params }: { params: PageParams }) => {
                 placeholder="e.g., Get Started, Subscribe Now"
                 label="Call-to-Action Button Text"
                 type="text"
-                className="w-full sm:w-9/12 md:w-1/2"
+                className="w-full md:w-9/12 lg:w-1/2"
               />
 
-              <div className="flex flex-col sm:flex-row justify-start gap-4 pt-6">
+              <div className="flex flex-col md:flex-row justify-start gap-4 pt-6">
                 <Button variant="outlined" className="font-medium hover:text-white" onClick={goBack}>
                   Cancel
                 </Button>

@@ -7,11 +7,13 @@ import * as yup from "yup";
 import { toast } from "react-toastify";
 import { FiEye, FiEyeOff, FiX, FiCheck, FiAlertCircle, FiLoader } from "react-icons/fi";
 import { Formik, Form, FormikHelpers } from "formik";
-
 import { apiCall } from "@/utils/apiCall";
 import FormikTextField from "@/components/common/FormikTextField";
 import Button from "@/components/common/Button";
 import moment from "moment";
+import Cookie from 'js-cookie';
+
+import "./terms.css";
 
 interface ILogInFormValues {
   email: string;
@@ -62,10 +64,12 @@ const LoadingSpinner = () => (
 
 const TermsModal = ({
   isOpen,
+  loginResponse,
   onAccept,
   onDecline
 }: {
   isOpen: boolean;
+  loginResponse: ILoginResponse | null;
   onAccept: () => void;
   onDecline: () => void;
 }) => {
@@ -103,6 +107,30 @@ const TermsModal = ({
     }
   };
 
+  const acceptTermAndCondition = async () => {
+    try {
+      const response = await apiCall({
+        endPoint: "/auth/agreed-terms-policy",
+        method: "PUT",
+        body: {
+          isAgreed: true,
+          userId: loginResponse?.data.user._id,
+        }
+      });
+
+      if (response.success) {
+        onAccept();
+      } else {
+        toast.error(response.message ?? "Failed to accept terms and conditions. Please try again.");
+      }
+    } catch (err) {
+      console.log("Err" + err);
+      toast.error("Failed to accept terms and conditions. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollTop + clientHeight >= scrollHeight - 10) {
@@ -128,7 +156,7 @@ const TermsModal = ({
               </h3>
             </div>
             <button
-              onClick={onDecline}
+              onClick={() => onDecline()}
               className="text-white hover:text-gray-200 transition-colors"
             >
               <FiX className="h-6 w-6" />
@@ -159,7 +187,7 @@ const TermsModal = ({
             <div className="prose prose-sm max-w-none">
               <div className="space-y-6 text-gray-700">
                 <div
-                  className="text-sm leading-relaxed"
+                  className="text-sm terms-and-conditions"
                   dangerouslySetInnerHTML={{ __html: termsData.content }}
                 />
               </div>
@@ -199,7 +227,7 @@ const TermsModal = ({
               Decline
             </button>
             <button
-              onClick={onAccept}
+              onClick={() => acceptTermAndCondition()}
               disabled={!hasScrolledToBottom || isLoading || !!error || !termsData}
               className="px-6 py-2 bg-[#218189] text-white rounded-lg hover:bg-[#1a6b72] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
@@ -234,7 +262,7 @@ const LogInPage = () => {
     actions.setSubmitting(false);
 
     if (response.success) {
-      if (response.data?.user?.isAgreed) {
+      if (response.data?.user?.isAgreed || response.data?.user?.role === "admin") {
         handleAllowedLogin(response);
       } else {
         setLoginResponse(response);
@@ -247,11 +275,14 @@ const LogInPage = () => {
 
   const handleAllowedLogin = (loginResponse: ILoginResponse | null) => {
     if (loginResponse) {
-      if (loginResponse.data.token) {
+      if (loginResponse.data?.token) {
+        Cookie.set("token", loginResponse.data.token);
         localStorage.setItem('token', loginResponse.data.token);
       }
       if (loginResponse.data.user) {
-        localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
+        localStorage.setItem('name', loginResponse.data.user.name);
+        localStorage.setItem('profile', loginResponse.data.user.profile);
+        localStorage.setItem('user_id', loginResponse.data.user._id);
       }
 
       if (loginResponse.success) {
@@ -259,10 +290,9 @@ const LogInPage = () => {
       } else {
         toast.error(loginResponse.message ?? "Login failed. Please try again.");
       }
-
-      const { role } = loginResponse.data;
+      const { role } = loginResponse.data.user;
       if (role === 'admin') {
-        router.push("/admin/subscription-plan");
+        router.push("/admin/dashboard");
       } else {
         router.push("/");
       }
@@ -362,6 +392,7 @@ const LogInPage = () => {
         </div>
       </section>
       <TermsModal
+        loginResponse={loginResponse}
         isOpen={showTermsModal}
         onDecline={handleTermsDecline}
         onAccept={() => handleAllowedLogin(loginResponse)}
