@@ -1,0 +1,148 @@
+"use client";
+import Button from "@/components/common/Button";
+import QuillEditor from "@/components/common/QuilEditor";
+import React, { useCallback, useEffect, useState } from "react";
+import { Trash2 } from "lucide-react";
+import { apiCall } from "@/utils/apiCall";
+import { API_ROUTES, MESSAGES } from "@/utils/constant";
+import { toast } from "react-toastify";
+import Loader from "@/components/common/Loader";
+
+// Types (copied from terms-and-conditions/types.ts)
+interface IApiResponse {
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  _id: string;
+}
+interface IPrivacyPolicyResponse {
+  success: boolean;
+  data: IApiResponse[];
+}
+
+const AdminPrivacyPolicy = () => {
+  const [loader, setLoader] = useState(false);
+  const [content, setContent] = useState("");
+  const [error, setError] = useState(false);
+  const [policyId, setPolicyId] = useState("");
+
+  const handleChange = (value: string) => {
+    if (value.length !== 11) {
+      setError(true);
+    } else {
+      setError(false);
+    }
+    setContent(value);
+  };
+
+  // TODO: Update these constants and endpoints for privacy policy
+  const PRIVACY_POLICY_API = "/privacy-policy";
+  const INITIAL_PRIVACY_POLICY = "<p>Initial Privacy Policy</p>";
+  const PRIVACY_POLICY_SUCCESS = "Privacy Policy updated successfully";
+  const PRIVACY_POLICY_ERROR = "Failed to update Privacy Policy";
+  const PRIVACY_POLICY_RESET_SUCCESS = "Privacy Policy reset successfully";
+  const PRIVACY_POLICY_RESET_ERROR = "Failed to reset Privacy Policy";
+
+  const updatePrivacyPolicy = async (reset?: boolean) => {
+    if (content.length < 20) {
+      setError(true);
+      return false;
+    }
+    setLoader(true);
+    try {
+      const httpBody = {
+        content: reset ? INITIAL_PRIVACY_POLICY : content,
+      };
+      const response = await apiCall({
+        endPoint: PRIVACY_POLICY_API + "/" + policyId,
+        method: "PUT",
+        body: httpBody,
+      });
+      if (response && response.success) {
+        await getPrivacyPolicy();
+        toast.success(
+          reset ? PRIVACY_POLICY_RESET_SUCCESS : PRIVACY_POLICY_SUCCESS
+        );
+      }
+    } catch (err) {
+      console.error("Error updating privacy policy", err);
+      toast.error(
+        reset ? PRIVACY_POLICY_RESET_ERROR : PRIVACY_POLICY_ERROR
+      );
+    } finally {
+      setLoader(false);
+    }
+  };
+
+  const getPrivacyPolicy = useCallback(async () => {
+    setLoader(true);
+    try {
+      const response: IPrivacyPolicyResponse = await apiCall({
+        endPoint: PRIVACY_POLICY_API,
+        method: "GET",
+        withToken: false,
+      });
+      if (response && response.success) {
+        const receivedObject = response.data[0];
+        setContent(receivedObject.content);
+        setPolicyId(receivedObject._id);
+      }
+    } catch (err) {
+      console.error("Error fetching privacy policy", err);
+    } finally {
+      setLoader(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    getPrivacyPolicy();
+  }, [getPrivacyPolicy]);
+
+  return (
+    <div className="h-full relative">
+      {loader && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <Loader size={48} colorClass="text-[var(--base)]" />
+        </div>
+      )}
+      <div className="mb-2 flex w-full justify-between">
+        <p className="text-2xl font-bold text-[var(--base)]">Privacy Policy</p>
+        <Button
+          onClick={() => updatePrivacyPolicy(true)}
+          variant="delete"
+          startIcon={<Trash2 className="w-5 h-5 font-bold" />}
+          className="disabled:bg-red-300 disabled:cursor-not-allowed md:flex gap-2 items-center cursor-pointer"
+        >
+          <p className="hidden md:block">Reset</p>
+        </Button>
+      </div>
+      <QuillEditor
+        name="privacy-policy"
+        value={content}
+        onChange={(value) => handleChange(value)}
+        label=""
+        errorKey={error}
+        errorMsg={content?.length > 20 ? "" : "Enter valid privacy policy content"}
+        placeholder="Enter Privacy Policy"
+      />
+      <div className="flex justify-end">
+        <button
+          className="relative group cursor-pointer"
+          onClick={() => updatePrivacyPolicy()}
+          disabled={loader}
+        >
+          <div className="absolute -inset-0.5  rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative bg-[var(--base)] text-[color:var(--text-light)] px-8 py-3 rounded-lg font-semibold hover:bg-[var(--base-hover)] transition-colors flex items-center justify-center min-h-[24px] min-w-[80px]">
+            {loader ? (
+              <Loader size={24} colorClass="text-[var(--text-light)]" />
+            ) : (
+              "Save"
+            )}
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default AdminPrivacyPolicy;

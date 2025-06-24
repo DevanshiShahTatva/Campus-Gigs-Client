@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { Edit } from "lucide-react";
-import dayjs from "dayjs";
 
 import { DynamicTable } from "@/components/common/DynamicTables";
 import { DEFAULT_PAGINATION } from "@/utils/constant";

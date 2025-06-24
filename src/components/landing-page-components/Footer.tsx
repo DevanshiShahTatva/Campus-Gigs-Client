@@ -205,6 +205,12 @@ const Footer = () => {
                 Terms & Conditions
               </Link>
               <Link
+                href="/ContactUs"
+                className="text-[color:var(--text-light)]/60 hover:text-[color:var(--base)] text-xs sm:text-sm transition-all duration-300 hover:underline"
+              >
+                Contact us
+              </Link>
+              <Link
                 href="/FAQs"
                 className="text-[color:var(--text-light)]/60 hover:text-[color:var(--base)] text-xs sm:text-sm transition-all duration-300 hover:underline"
               >
