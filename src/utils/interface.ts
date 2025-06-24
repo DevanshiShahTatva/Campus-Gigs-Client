@@ -62,6 +62,7 @@ export interface IPagination {
 }
 
 export interface IPlanApiResponse {
+  success: boolean;
   status: number;
   message: string;
   data: ISubscriptionPlan[];
