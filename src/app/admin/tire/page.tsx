@@ -2,11 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import CommonFormModal from "@/components/common/CommonFormModal";
-import {
-  tireFields,
-  TireFormVal,
-  tireTableColumns,
-} from "@/config/tire.config";
+import { tireFields, TireFormVal } from "@/config/tire.config";
 import { DynamicTable } from "@/components/common/DynamicTables";
 import { IDropdownOption, SortOrder, Tire } from "@/utils/interface";
 import { API_ROUTES, DEFAULT_PAGINATION } from "@/utils/constant";
@@ -14,14 +10,19 @@ import { Edit, Trash } from "lucide-react";
 import { Button } from "@/components/common/ui/Button";
 import { toast } from "react-toastify";
 import { apiCall } from "@/utils/apiCall";
-import dayjs from "dayjs";
 
 const PAGE_SIZE = 10;
+
+interface EditTire {
+  _id: string;
+  name: string;
+  categories: string[];
+}
 
 function TireService() {
   const [open, setOpen] = useState(false);
   const [tires, setTires] = useState<Tire[]>([]);
-  const [editTire, setEditTire] = useState<Tire | null>(null);
+  const [editTire, setEditTire] = useState<EditTire | null>(null);
   const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
   const [categories, setCategories] = useState<IDropdownOption[]>([]);
 
@@ -49,12 +50,14 @@ function TireService() {
 
   useEffect(() => {
     fetchTires(1);
-    handleApi({
-      endPoint: API_ROUTES.ADMIN.GIG_CATEGORY + "/dropdown",
-      method: "GET"
-    },
-    "",
-    (data) => setCategories(data))
+    handleApi(
+      {
+        endPoint: API_ROUTES.ADMIN.GIG_CATEGORY + "/dropdown",
+        method: "GET",
+      },
+      "",
+      (data) => setCategories(data)
+    );
   }, []);
 
   const handleAdd = () => {
@@ -97,7 +100,11 @@ function TireService() {
 
   const handleEdit = (values: TireFormVal) => {
     handleApi(
-      { endPoint: `${API_ROUTES.ADMIN.TIRE}/${editTire?._id}`, method: "PUT", body: values },
+      {
+        endPoint: `${API_ROUTES.ADMIN.TIRE}/${editTire?._id}`,
+        method: "PUT",
+        body: values,
+      },
       "Tire have been edited successfully",
       () => refetchCurrentPage()
     );
@@ -120,7 +127,11 @@ function TireService() {
   };
 
   const handleEditTire = (tire: Tire) => {
-    setEditTire(tire);
+    const editRow = {
+      ...tire,
+      categories: tire.categories.map((row) => row._id),
+    };
+    setEditTire(editRow);
     setOpen(true);
   };
 
@@ -132,6 +143,20 @@ function TireService() {
   ) => {
     page = page === 0 ? page + 1 : page;
     fetchTires(page, searchTerm, key, order);
+  };
+
+  const handleChip = (row: Tire) => {
+    return (
+      <div className="flex flex-row gap-2">
+        {row.categories.map((val) => {
+          return (
+            <span className="p-2 bg-[var(--base)] rounded-lg text-white">
+              {val.name}
+            </span>
+          );
+        })}
+      </div>
+    );
   };
 
   return (
@@ -146,9 +171,16 @@ function TireService() {
           currentPage={pagination.page}
           handlePageChange={(page) => fetchTires(page)}
           onSearchSort={handleSearchSort}
-          columns={tireTableColumns}
+          columns={[
+            { key: "name", label: "Name", sortable: true },
+            {
+              key: "categories",
+              label: "Gig category",
+              render: (_, row) => handleChip(row),
+            },
+          ]}
           actions={(row) => (
-            <div className="flex items-center justify-end gap-x-3">
+            <div className="flex items-center justify-center gap-x-3">
               <Button size={"icon"} onClick={() => handleEditTire(row)}>
                 <Edit size={16} />
               </Button>
