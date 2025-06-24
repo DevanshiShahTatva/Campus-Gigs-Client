@@ -31,6 +31,10 @@ const userRoutes = [
 export async function middleware(request: NextRequest) {
   const currentPath = request.nextUrl.pathname;
   const isPublicRoute = publicRoutes.includes(currentPath);
+  if (isPublicRoute) {
+    return NextResponse.next();
+  }
+
   const token = request.cookies.get("token")?.value;
   if (!token) {
     if (!isPublicRoute) {

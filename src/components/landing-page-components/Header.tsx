@@ -1,24 +1,34 @@
 "use client"
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import Link from "next/link";
+import Cookie from 'js-cookie';
 
 const Header = () => {
 
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const router = useRouter();
 
-    const scrollToSection = (sectionId: string) => {
-        const element = document.getElementById(sectionId);
-        if (element) {
-          const headerHeight = 64; // 16 * 4 = 64px (h-16)
-          const elementPosition = element.offsetTop - headerHeight;
-          window.scrollTo({
-            top: elementPosition,
-            behavior: 'smooth'
-          });
-        }
-        // Close mobile menu after clicking a link
-        setIsMobileMenuOpen(false);
-      };
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const onLogout = () => {
+    localStorage.clear();
+    Cookie.remove("token");
+    router.push("/login");
+  }
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const headerHeight = 64; // 16 * 4 = 64px (h-16)
+      const elementPosition = element.offsetTop - headerHeight;
+      window.scrollTo({
+        top: elementPosition,
+        behavior: 'smooth'
+      });
+    }
+    // Close mobile menu after clicking a link
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <header className="bg-[var(--bg-dark)]/95 backdrop-blur-sm shadow-sm fixed w-full top-0 z-50">
@@ -95,11 +105,17 @@ const Header = () => {
             Pricing
           </a>
 
-          <Link href="/login">
-            <button className="cursor-pointer bg-[var(--base)] text-[color:var(--text-light)] px-4 py-2 rounded-lg hover:bg-[var(--base-hover)] transition-all duration-300 transform hover:scale-105 font-semibold shadow-lg hover:shadow-xl">
-              Sign In
+          {localStorage.getItem("token") ? (
+            <button className='h-[41.80px] w-[41.80px] rounded-full bg-[color:var(--base)] text-white font-bold relative cursor-pointer' onClick={()=> onLogout()}>
+              {localStorage.getItem("name")?.charAt(0)?.toUpperCase()}
             </button>
-          </Link>
+          ) : (
+            <Link href="/login">
+              <button className="cursor-pointer bg-[var(--base)] text-[color:var(--text-light)] px-4 py-2 rounded-lg hover:bg-[var(--base-hover)] transition-all duration-300 transform hover:scale-105 font-semibold shadow-lg hover:shadow-xl">
+                Sign In
+              </button>
+            </Link>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
