@@ -8,8 +8,8 @@ import {
   tireTableColumns,
 } from "@/config/tire.config";
 import { DynamicTable } from "@/components/common/DynamicTables";
-import { SortOrder, Tire } from "@/utils/interface";
-import { DEFAULT_PAGINATION } from "@/utils/constant";
+import { IDropdownOption, SortOrder, Tire } from "@/utils/interface";
+import { API_ROUTES, DEFAULT_PAGINATION } from "@/utils/constant";
 import { Edit, Trash } from "lucide-react";
 import { Button } from "@/components/common/ui/Button";
 import { toast } from "react-toastify";
@@ -23,19 +23,20 @@ function TireService() {
   const [tires, setTires] = useState<Tire[]>([]);
   const [editTire, setEditTire] = useState<Tire | null>(null);
   const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
+  const [categories, setCategories] = useState<IDropdownOption[]>([]);
 
   const refetchCurrentPage = () => fetchTires(pagination.page);
 
   const handleApi = async (
     config: any,
-    successMsg: string,
-    callback?: () => void
+    successMsg?: string,
+    callback?: (data: any) => void
   ) => {
     try {
       const resp = await apiCall(config);
       if (resp?.success) {
-        toast.success(successMsg);
-        callback?.();
+        successMsg && toast.success(successMsg);
+        callback?.(resp.data);
       } else {
         toast.error(resp?.message || "Something went wrong");
       }
@@ -48,25 +49,17 @@ function TireService() {
 
   useEffect(() => {
     fetchTires(1);
+    handleApi({
+      endPoint: API_ROUTES.ADMIN.GIG_CATEGORY + "/dropdown",
+      method: "GET"
+    },
+    "",
+    (data) => setCategories(data))
   }, []);
 
   const handleAdd = () => {
     setEditTire(null);
     setOpen(true);
-  };
-
-  const handleChangeToTableData = (data: Tire[]) => {
-    const tableData = data.map((tire) => {
-      return {
-        id: tire._id,
-        name: tire.name,
-        description: tire.description,
-        create_at: dayjs(tire.createdAt).format("YYYY-MM-DD"),
-        updated_at: dayjs(tire.updatedAt).format("YYYY-MM-DD"),
-      };
-    });
-
-    return tableData;
   };
 
   const fetchTires = async (
@@ -77,7 +70,7 @@ function TireService() {
   ) => {
     try {
       const resp = await apiCall({
-        endPoint: `/tire?page=${page}&pageSize=${PAGE_SIZE}&search=${query}&sortKey=${key}&sortOrder=${sortOrder}`,
+        endPoint: `${API_ROUTES.ADMIN.TIRE}?page=${page}&pageSize=${PAGE_SIZE}&search=${query}&sortKey=${key}&sortOrder=${sortOrder}`,
         method: "GET",
       });
 
@@ -96,7 +89,7 @@ function TireService() {
 
   const handleAddTire = (values: TireFormVal) => {
     handleApi(
-      { endPoint: `/tire`, method: "POST", body: values },
+      { endPoint: API_ROUTES.ADMIN.TIRE, method: "POST", body: values },
       "Tire added successfully",
       () => refetchCurrentPage()
     );
@@ -104,7 +97,7 @@ function TireService() {
 
   const handleEdit = (values: TireFormVal) => {
     handleApi(
-      { endPoint: `/tire/${editTire?._id}`, method: "PUT", body: values },
+      { endPoint: `${API_ROUTES.ADMIN.TIRE}/${editTire?._id}`, method: "PUT", body: values },
       "Tire have been edited successfully",
       () => refetchCurrentPage()
     );
@@ -112,7 +105,7 @@ function TireService() {
 
   const handleDeleteTire = (id: string) => {
     handleApi(
-      { endPoint: `/tire/${id}`, method: "DELETE" },
+      { endPoint: `${API_ROUTES.ADMIN.TIRE}/${id}`, method: "DELETE" },
       "Tire have been deleted successfully",
       () => refetchCurrentPage()
     );
@@ -175,7 +168,7 @@ function TireService() {
         open={open}
         setOpen={setOpen}
         title={editTire ? "Edit Tire" : "Add Tire"}
-        fields={tireFields}
+        fields={tireFields(categories)}
         initialValues={editTire || undefined}
         onSubmit={handleSubmit}
         submitLabel={editTire ? "Update Tire" : "Save Tire"}

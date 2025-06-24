@@ -1,23 +1,26 @@
 import { CommonFormField } from "@/components/common/CommonFormModal";
-import { ColumnConfig } from "@/utils/interface";
+import { ColumnConfig, IDropdownOption } from "@/utils/interface";
 import dayjs from "dayjs";
 
-export const tireFields: CommonFormField[] = [
-  {
-    name: "name",
-    label: "Name",
-    type: "text",
-    placeholder: "Please enter tire name",
-    required: true,
-  },
-  {
-    name: "description",
-    label: "Description",
-    type: "textarea",
-    required: true,
-    placeholder: "Describe the tire...",
-  },
-];
+export const tireFields = (categories: IDropdownOption[]) => {
+  return [
+    {
+      name: "name",
+      label: "Name",
+      type: "text",
+      placeholder: "Please enter tire name",
+      required: true,
+    },
+    {
+      name: "categories",
+      label: "Gig Category",
+      type: "multiselect",
+      options: categories ? categories : [],
+      placeholder: "Please select category",
+      required: true,
+    },
+  ] as CommonFormField[];
+};
 
 export const tireTableColumns: ColumnConfig<any>[] = [
   { key: "name", label: "Name", sortable: true },
@@ -37,6 +40,6 @@ export const tireTableColumns: ColumnConfig<any>[] = [
 ];
 
 export interface TireFormVal {
-  name: string,
-  description: string
+  name: string;
+  description: string;
 }

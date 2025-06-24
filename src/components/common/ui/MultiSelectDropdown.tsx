@@ -53,7 +53,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
           }),
           menuList: (base) => ({
             ...base,
-            maxHeight: '170px',
+            maxHeight: '150px',
             overflowY: 'auto',
             borderRadius: '8px',
           }),

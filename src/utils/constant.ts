@@ -45,6 +45,8 @@ export const API_ROUTES = {
     TERMS_CONDITIONS: "/terms-conditions",
     FAQS: "/faqs",
     BULK_FAQS: "/faqs/bulk",
+    TIRE: "/tire",
+    GIG_CATEGORY: "/gig-category",
   },
 }
 export enum ROLE {

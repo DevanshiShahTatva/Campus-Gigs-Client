@@ -9,7 +9,7 @@ import {
 } from "@/config/gigcategory.config";
 import { DynamicTable } from "@/components/common/DynamicTables";
 import { GigCategory, SortOrder } from "@/utils/interface";
-import { DEFAULT_PAGINATION } from "@/utils/constant";
+import { API_ROUTES, DEFAULT_PAGINATION } from "@/utils/constant";
 import { Edit, Trash } from "lucide-react";
 import { Button } from "@/components/common/ui/Button";
 import { toast } from "react-toastify";
@@ -64,7 +64,7 @@ function GigsCategory() {
   ) => {
     try {
       const resp = await apiCall({
-        endPoint: `/gig-category?page=${page}&pageSize=${PAGE_SIZE}&search=${query}&sortKey=${key}&sortOrder=${sortOrder}`,
+        endPoint: `${API_ROUTES.ADMIN.GIG_CATEGORY}?page=${page}&pageSize=${PAGE_SIZE}&search=${query}&sortKey=${key}&sortOrder=${sortOrder}`,
         method: "GET",
       });
 
@@ -83,7 +83,7 @@ function GigsCategory() {
 
   const handleAddGigCategory = (values: GigCategoryFormVal) => {
     handleApi(
-      { endPoint: `/gig-category`, method: "POST", body: values },
+      { endPoint: API_ROUTES.ADMIN.GIG_CATEGORY, method: "POST", body: values },
       "Gig category added successfully",
       () => refetchCurrentPage()
     );
@@ -92,7 +92,7 @@ function GigsCategory() {
   const handleEdit = (values: GigCategoryFormVal) => {
     handleApi(
       {
-        endPoint: `/gig-category/${editGigCategory?._id}`,
+        endPoint: `${API_ROUTES.ADMIN.GIG_CATEGORY}/${editGigCategory?._id}`,
         method: "PUT",
         body: values,
       },
@@ -103,7 +103,7 @@ function GigsCategory() {
 
   const handleDeleteGigCategory = (id: string) => {
     handleApi(
-      { endPoint: `/gig-category/${id}`, method: "DELETE" },
+      { endPoint: `${API_ROUTES.ADMIN.GIG_CATEGORY}/${id}`, method: "DELETE" },
       "Gig category have been deleted successfully",
       () => refetchCurrentPage()
     );

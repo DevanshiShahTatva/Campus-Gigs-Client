@@ -67,6 +67,11 @@ export interface IPlanApiResponse {
   data: ISubscriptionPlan[];
 }
 
+export interface IDropdownOption {
+  label: string,
+  id: string
+}
+
 export interface Tire {
   _id: string;
   name: string;
