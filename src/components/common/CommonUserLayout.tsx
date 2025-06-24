@@ -14,7 +14,7 @@ import Link from "next/link";
 
 interface CommonUserLayoutProps {
   children: ReactNode;
-  role: ROLE.Admin | ROLE.User | ROLE.Organizer;
+  role: ROLE.Admin | ROLE.User;
 }
 
 // Define BreadcrumbItem type locally
@@ -43,9 +43,6 @@ const CommonUserLayout: React.FC<CommonUserLayoutProps> = ({
   const handleCollapse = () => {
     setCollapseSidebar(!collapseSidebar);
   };
-
-  const adminRoleType = role === ROLE.Admin ? true : false;
-  const organizerRoleType = role === ROLE.Organizer ? true : false;
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
