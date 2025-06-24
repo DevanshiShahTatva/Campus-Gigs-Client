@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowUp, Plus, SearchIcon } from "lucide-react";
+import { ArrowDown, ArrowUp, Plus, SearchIcon, Trash2Icon } from "lucide-react";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/common/ui/Table";
 import {
@@ -32,6 +32,7 @@ export function DynamicTable<T extends { _id: string }>({
   title,
   onClickCreateButton,
   isCreateButtonDisabled,
+  hasDeleteButton
 }: DynamicTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
@@ -83,13 +84,21 @@ export function DynamicTable<T extends { _id: string }>({
         </div>
         {children}
         <Button
-          variant="green"
-          className="flex items-center h-[46px] disabled:opacity-50"
+          variant={hasDeleteButton ? "delete" :"green"}
+          className={` ${isCreateButtonDisabled?  'opacity-40 !cursor-not-allowed' : ''}  flex items-center h-[46px] disabled:opacity-50`}
           onClick={onClickCreateButton}
           disabled={isCreateButtonDisabled}
         >
-          <Plus size={20} />
-          Add
+         {hasDeleteButton ? (
+            <>
+              <Trash2Icon /> <span className="ml-1">Delete</span>{" "}
+            </>
+          ) : (
+            <>
+              <Plus size={20} />
+              Add
+            </>
+          )}
         </Button>
       </div>
 

@@ -1,11 +1,10 @@
-"use client"
+"use client";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import Link from "next/link";
-import Cookie from 'js-cookie';
+import Cookie from "js-cookie";
 
 const Header = () => {
-
   const router = useRouter();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -14,7 +13,7 @@ const Header = () => {
     localStorage.clear();
     Cookie.remove("token");
     router.push("/login");
-  }
+  };
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -23,7 +22,7 @@ const Header = () => {
       const elementPosition = element.offsetTop - headerHeight;
       window.scrollTo({
         top: elementPosition,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     }
     // Close mobile menu after clicking a link
@@ -105,9 +104,12 @@ const Header = () => {
             Pricing
           </a>
 
-          {localStorage.getItem("token") ? (
-            <button className='h-[41.80px] w-[41.80px] rounded-full bg-[color:var(--base)] text-white font-bold relative cursor-pointer' onClick={()=> onLogout()}>
-              {localStorage.getItem("name")?.charAt(0)?.toUpperCase()}
+          {localStorage?.getItem("token") ? (
+            <button
+              className="h-[41.80px] w-[41.80px] rounded-full bg-[color:var(--base)] text-white font-bold relative cursor-pointer"
+              onClick={() => onLogout()}
+            >
+              {localStorage?.getItem("name")?.charAt(0)?.toUpperCase()}
             </button>
           ) : (
             <Link href="/login">
@@ -122,32 +124,14 @@ const Header = () => {
         <div className="md:hidden">
           <button
             className="text-[color:var(--text-light)] hover:text-[color:var(--base)] transition-colors duration-300 p-2"
-            aria-label={
-              isMobileMenuOpen ? "Close mobile menu" : "Open mobile menu"
-            }
+            aria-label={isMobileMenuOpen ? "Close mobile menu" : "Open mobile menu"}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               {isMobileMenuOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               )}
             </svg>
           </button>

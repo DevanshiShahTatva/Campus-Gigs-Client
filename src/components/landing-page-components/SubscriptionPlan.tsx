@@ -18,30 +18,21 @@ const SubscriptionPlan = () => {
   }, []);
 
   const fetchSubscriptionPlan = useCallback(async () => {
-    try {
-      setIsLoading(true);
+    setIsLoading(true);
 
-      const res: IPlanApiResponse = await apiCall({
-        endPoint: `/subscription/plans`,
-        method: "GET",
-      });
+    const res: IPlanApiResponse = await apiCall({
+      endPoint: `/subscription/plans`,
+      method: "GET",
+    });
 
-      console.log(res);
-
-      if (res.status === 200) {
-        const { data } = res;
-        console.log(data);
-        setPlans(data);
-      }
-    } catch (error: any) {
-      if (!error?.response?.data?.success) {
-        toast.error(error.response?.data?.message);
-        return;
-      }
+    if (res.status === 200) {
+      const { data } = res;
+      setPlans(data);
+    } else {
       toast.error("Something went wrong, please try again later.");
-    } finally {
-      setIsLoading(false);
     }
+
+    setIsLoading(false);
   }, []);
 
   const categories = [

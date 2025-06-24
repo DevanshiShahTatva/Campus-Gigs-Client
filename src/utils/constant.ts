@@ -39,19 +39,22 @@ export const ROUTES = {
   }
 };
 
-export const API_ROUTES = {
-  LOGIN: "/api/login",
-  ADMIN: {
-    TERMS_CONDITIONS: "/terms-conditions",
-    FAQS: "/faqs",
-    BULK_FAQS: "/faqs/bulk",
-    TIRE: "/tire",
-    GIG_CATEGORY: "/gig-category",
-  },
+export const API_ROUTES ={
+    LOGIN: "/api/login",
+    CONTACT_US: "/contact-us",
+    ADMIN: {
+        TERMS_CONDITIONS: "/terms-conditions",
+        FAQS:"/faqs",
+        BULK_FAQS:"/faqs/bulk",
+        CONTACT_US_BULK: '/contact-us/bulk-delete',
+        TIRE: "/tire",
+        GIG_CATEGORY: "/gig-category",
+    },
 }
 export enum ROLE {
   Admin = "admin",
-  User = "user"
+  User = "user",
+  Organizer = "provider"
 }
 
 export const USER_SIDEBAR_ITEMS = [
@@ -66,15 +69,21 @@ export const USER_SIDEBAR_ITEMS = [
 ]
 
 export const MESSAGES = {
-  SUCCESS: "Success",
-  ERROR: "Something went wrong!",
-  INITIAL_TERMS_CONDITIONS: "<p>Initial Terms and Conditions</p>",
-  TERMS_CONDITIONS_SUCCESS: "Terms and Conditions updated successfully",
-  TERMS_CONDITIONS_ERROR: "Failed to update Terms and Conditions",
-  TERMS_CONDITIONS_RESET_SUCCESS: "Terms and Conditions reset successfully",
-  TERMS_CONDITIONS_RESET_ERROR: "Failed to reset Terms and Conditions",
-  FAQ_CREATE_SUCCESS: "FAQs created successfully",
-  FAQ_CREATE_ERROR: "Failed to create FAQs. Please try again",
-  FAQ_DELETE_CONFIRMATION: "Are you sure you want to delete this FAQ?",
-  FAQ_DELETE_SUCCESS: "FAQ deleted successfully",
+    SUCCESS: "Success",
+    ERROR: "Something went wrong!",
+    INITIAL_TERMS_CONDITIONS:"<p>Initial Terms and Conditions</p>",
+    TERMS_CONDITIONS_SUCCESS: "Terms and Conditions updated successfully",
+    TERMS_CONDITIONS_ERROR: "Failed to update Terms and Conditions",
+    TERMS_CONDITIONS_RESET_SUCCESS: "Terms and Conditions reset successfully",
+    TERMS_CONDITIONS_RESET_ERROR: "Failed to reset Terms and Conditions",
+    FAQ_CREATE_SUCCESS: "FAQs created successfully",
+    FAQ_CREATE_ERROR: "Failed to create FAQs. Please try again",
+    FAQ_DELETE_CONFIRMATION: "Are you sure you want to delete this FAQ?",
+    FAQ_DELETE_SUCCESS: "FAQ deleted successfully",
+    CONTACT_US:{
+        STATUS_UPDATE_SUCCESS: "Status updated successfully",
+        STATUS_UPDATE_ERROR: "Failed to update the status",
+        BULK_DELETE_SUCCESS: "Requests deleted successfully",
+        BULK_DELETE_ERROR: 'Error deleting the requests'
+    }
 }

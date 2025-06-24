@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { Edit } from "lucide-react";
-import dayjs from "dayjs";
 
 import { DynamicTable } from "@/components/common/DynamicTables";
 import { DEFAULT_PAGINATION } from "@/utils/constant";
@@ -132,7 +131,7 @@ const SubscriptionPlan = () => {
             render: (_, plan) => (
               <div className="text-sm">
                 <div className="text-gray-900 font-medium mb-1">{plan.features.length} features</div>
-                <div className="space-y-1 max-h-20 overflow-y-auto">
+                <div className="space-y-1">
                   {plan.features.map((feature, idx) => (
                     <div key={idx} className="text-xs text-gray-600 flex items-center gap-1 whitespace-nowrap">
                       <div className="w-1 min-w-1 h-1 bg-gray-400 rounded-full"></div>
