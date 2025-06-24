@@ -29,6 +29,7 @@ export interface DynamicTableProps<T extends { _id: string }> {
   title: string;
   onClickCreateButton: () => void;
   isCreateButtonDisabled?: boolean;
+  hasDeleteButton?: boolean;
 }
 export interface ISubscriptionPlan {
   _id: string;
