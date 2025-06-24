@@ -41,6 +41,9 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
         placeholder={placeholder}
         classNamePrefix="react-select"
         className="react-select-container"
+        menuPortalTarget={typeof window !== "undefined" ? document.body : null}
+        menuPosition="fixed"
+        closeMenuOnSelect={false}
         styles={{
           control: (base) => ({
             ...base,
@@ -56,6 +59,11 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
             maxHeight: '150px',
             overflowY: 'auto',
             borderRadius: '8px',
+          }),
+          menuPortal: (base) => ({
+            ...base,
+            zIndex: 9999,
+            pointerEvents: 'auto',
           }),
           option: (base, state) => ({
             ...base,
