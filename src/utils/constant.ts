@@ -28,6 +28,7 @@ export const ROUTES = {
     SUBSCRIPTION: "/admin/subscription-plan",
     SUPPORT_REQUESTS: "/admin/support-requests",
     FAQS: "/admin/faqs",
+    GIGCATEGORY: "/admin/gig-category",
     CREATE_FAQs: "/admin/faqs/create",
     PRIVACY_POLICY: "/admin/privacy-policy",
     TERMS_CONDITIONS: "/admin/terms-and-conditions",
@@ -54,11 +55,12 @@ export enum ROLE {
 export const USER_SIDEBAR_ITEMS = [
   { id: 1, title: "Dashboard", route: ROUTES.ADMIN.DASHBOARD, icon: "/assets/DashboardIcon.svg" },
   { id: 2, title: "Subscription Plan", route: ROUTES.ADMIN.SUBSCRIPTION, icon: "/assets/DashboardIcon.svg" },
-  { id: 3, title: "Service Tire", route: ROUTES.ADMIN.TIRE, icon: "/assets/services.svg" },
-  { id: 4, title: "Support Requests", route: ROUTES.ADMIN.SUPPORT_REQUESTS, icon: "/assets/support.svg" },
-  { id: 5, title: "Terms & Conditions", route: ROUTES.ADMIN.TERMS_CONDITIONS, icon: "/assets/terms.svg" },
-  { id: 6, title: "Privacy Policy", route: ROUTES.ADMIN.PRIVACY_POLICY, icon: "/assets/policy.svg" },
-  { id: 7, title: "FAQs", route: ROUTES.ADMIN.FAQS, icon: "/assets/faqs.svg" },
+  { id: 3, title: "Gig Category", route: ROUTES.ADMIN.GIGCATEGORY, icon: "/assets/gigcategory.svg" },
+  { id: 4, title: "Service Tire", route: ROUTES.ADMIN.TIRE, icon: "/assets/services.svg" },
+  { id: 5, title: "Support Requests", route: ROUTES.ADMIN.SUPPORT_REQUESTS, icon: "/assets/support.svg" },
+  { id: 6, title: "Terms & Conditions", route: ROUTES.ADMIN.TERMS_CONDITIONS, icon: "/assets/terms.svg" },
+  { id: 7, title: "Privacy Policy", route: ROUTES.ADMIN.PRIVACY_POLICY, icon: "/assets/policy.svg" },
+  { id: 8, title: "FAQs", route: ROUTES.ADMIN.FAQS, icon: "/assets/faqs.svg" },
 ]
 
 export const MESSAGES = {

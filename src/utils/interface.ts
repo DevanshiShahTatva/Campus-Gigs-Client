@@ -74,3 +74,10 @@ export interface Tire {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface GigCategory {
+  _id: string;
+  name: string;
+  description: string;
+  isUsed: boolean;
+}

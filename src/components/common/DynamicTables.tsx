@@ -125,7 +125,7 @@ export function DynamicTable<T extends { _id: string }>({
                 <TableRow key={row._id}>
                   {columns.map((col) => (
                     <TableCell key={String(col.key)} className="whitespace-nowrap">
-                      {col.render ? col.render(row[col.key], row, rowIndex) : String(row[col.key])}
+                      {col.render ? col.render(row[col.key], row, rowIndex) : String(row[col.key]) || "---"}
                     </TableCell>
                   ))}
                   {actions && <TableCell>{actions(row)}</TableCell>}
