@@ -67,14 +67,16 @@ const ResetPasswordPage = () => {
       body: {
         otp: values.otp.toString(),
         password: values.confirmPassword,
-        email: localStorage.getItem("resetPassEmail"),
+        email: typeof window !== "undefined" ? localStorage?.getItem("resetPassEmail") : undefined,
       },
     });
 
     if (response.success) {
       toast.success(response.data?.message ?? "Password reset successfully. You can now log in.");
       router.push("/login");
-      localStorage.removeItem("resetPassEmail");
+      if (typeof window !== "undefined") {
+        localStorage?.removeItem("resetPassEmail");
+      }
     } else if (response.message === "Invalid otp") {
       setOtpError("Invalid OTP!");
     } else {
@@ -87,9 +89,9 @@ const ResetPasswordPage = () => {
     <section className="min-h-screen flex items-center justify-center bg-[#f9fafb] px-4 py-8">
       <div className="w-full max-w-6xl bg-white shadow-lg rounded-xl grid lg:grid-cols-2 overflow-hidden">
         <div className="p-8 lg:p-16 pt-3 lg:pt-6 flex flex-col justify-between h-full">
-          <h1 className="text-2xl md:text-3xl text-[var(--base)] font-bold  mb-4 animate-fade-in">
-            CampusGig
-          </h1>
+          <div className="mb-10">
+            <img src="/logo.svg" alt="" height={36} width={208} />
+          </div>
           <div>
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">

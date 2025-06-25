@@ -21,3 +21,17 @@ export interface IDeleteFaqModalProps {
   onDelete: (faq: IFAQItem) => void;
   faqsValues: IFAQItem;
 }
+
+export interface IFaqsApiResponse {
+  status: number;
+  message: string;
+  data: IFAQItem[];
+  meta: IFaqsPagination;
+}
+
+export interface IFaqsPagination {
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  total: number;
+}

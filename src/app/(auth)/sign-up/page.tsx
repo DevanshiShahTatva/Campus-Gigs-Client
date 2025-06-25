@@ -8,7 +8,7 @@ import Select from "react-select";
 import { toast } from "react-toastify";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { Formik, Form, FormikHelpers } from "formik";
-import { ChevronLeft, ChevronRight, User, Camera, FileText, Check, Tag, Info, BookOpen, ExternalLink } from "lucide-react";
+import { ChevronLeft, ChevronRight, User, Camera, FileText, Check, Tag, Info, ExternalLink } from "lucide-react";
 
 import TagsInput from "./TagInput";
 import Button from "@/components/common/Button";
@@ -237,7 +237,7 @@ const SignUpPage: React.FC = () => {
           <div>
             <div className="mb-6 flex gap-3 lg:gap-6 items items-center">
               <div className="relative min-w-16 h-16 lg:w-23 lg:h-23">
-                <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+                <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
                   {profileImage ? (
                     <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
@@ -300,7 +300,6 @@ const SignUpPage: React.FC = () => {
 
         <div className="space-y-4">
           <h4 className="text-lg font-semibold text-gray-900 mb-1 flex items-center space-x-2">
-            <BookOpen className="w-5 h-5 text-blue-600" />
             <span>Education (Optional)</span>
           </h4>
 
@@ -331,7 +330,7 @@ const SignUpPage: React.FC = () => {
                   name="customEducation"
                   value={values.customEducation || ''}
                   onChange={(e) => setFieldValue('customEducation', e.target.value)}
-                  className="w-full px-4 py-3 border border-blue-300 rounded-lg outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-black placeholder-gray-500 bg-white shadow-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[var(--base)] focus:border-[var(--base)] transition-all duration-200 text-black placeholder-gray-500 bg-white"
                   placeholder="e.g., Trade School, Bootcamp, Self-taught, Online Courses..."
                 />
               </div>
@@ -354,7 +353,7 @@ const SignUpPage: React.FC = () => {
             name="professionalInterests"
             value={values.professionalInterests}
             onChange={(e) => setFieldValue('professionalInterests', e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none text-black"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[var(--base)] focus:border-[var(--base)] transition-colors resize-none text-black"
             placeholder="What are your professional interests and career goals? (Optional)"
           />
         </div>
@@ -367,7 +366,7 @@ const SignUpPage: React.FC = () => {
             name="extracurriculars"
             value={values.extracurriculars}
             onChange={(e) => setFieldValue('extracurriculars', e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none text-black"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[var(--base)] focus:border-[var(--base)] transition-colors resize-none text-black"
             placeholder="Sports, clubs, volunteer work, hobbies, community involvement... (Optional)"
           />
         </div>
@@ -380,7 +379,7 @@ const SignUpPage: React.FC = () => {
             name="certifications"
             value={values.certifications}
             onChange={(e) => setFieldValue('certifications', e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-black"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[var(--base)] focus:border-[var(--base)] transition-colors text-black"
             placeholder="List your certifications (e.g., PMP, AWS, Google Analytics...) (Optional)"
           />
         </div>
@@ -397,13 +396,13 @@ const SignUpPage: React.FC = () => {
               handleSkillsChange={(tags: any) => handleSkillsChange(tags, setFieldValue)}
             />
           </div>
-          <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="mt-3 bg-[#2181890f] rounded-lg p-3">
             <div className="flex items-start space-x-2">
-              <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-blue-800">
+              <Info className="w-4 h-4 text-[var(--base)] mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-[var(--base)]">
                 <div className="font-medium mb-1">How to add skills:</div>
                 <ul className="space-y-1 text-xs">
-                  <li>• Press <kbd className="px-1 py-0.5 bg-blue-200 rounded text-xs">Enter</kbd> to add a tag</li>
+                  <li>• Press <kbd className="px-1 py-0.5 bg-[#014c4329] rounded text-xs">Enter</kbd> to add a tag</li>
                   <li>• Maximum <strong>10 tags</strong> allowed ({Array.isArray(values.skills) ? values.skills.length : 0}/10)</li>
                   <li>• Allowed characters: letters, numbers, space, dash (-), and underscore (_)</li>
                   <li>• Examples: JavaScript, React, Project-Management, UI_UX</li>
@@ -425,7 +424,7 @@ const SignUpPage: React.FC = () => {
                         checked={acceptedTerms}
                         onChange={(e) => setAcceptedTerms(e.target.checked)}
                         className="appearance-none w-6 h-6 border-[1.5px] border-gray-300 rounded-sm
-                        bg-white checked:bg-purple-500 checked:border-purple-500 cursor-pointer
+                        bg-white checked:bg-[var(--base)] checked:border-[var(--base)] cursor-pointer
                           relative transition-colors duration-200  checked:after:content-['✓']
                           checked:after:font-bold checked:after:left-[5px] checked:after:absolute 
                         checked:after:text-white checked:after:text-sm checked:after:top-[0px]"
@@ -435,7 +434,7 @@ const SignUpPage: React.FC = () => {
                       <div className="mt-[4px] text-sm text-gray-700">
                         I agree to the{" "}
                         <Link
-                          href="/terms"
+                          href="/TermsConditions"
                           target="_blank"
                           className="text-blue-600 hover:text-blue-800 font-medium underline inline-flex items-center"
                         >
@@ -444,7 +443,7 @@ const SignUpPage: React.FC = () => {
                         </Link>
                         {" "}and{" "}
                         <Link
-                          href="/privacy"
+                          href="/PrivacyPolicy"
                           target="_blank"
                           className="text-blue-600 hover:text-blue-800 font-medium underline inline-flex items-center"
                         >
@@ -481,12 +480,8 @@ const SignUpPage: React.FC = () => {
       <div className="w-full max-w-6xl bg-white shadow-2xl rounded-2xl grid lg:grid-cols-2 overflow-hidden">
         <div className="p-8 lg:p-12 lg:pt-6 flex flex-col justify-between h-full">
           <div>
-            <div className="mb-8 text-center lg:text-left">
-              <div className="flex items-center justify-center lg:justify-start mb-4">
-                <h1 className="text-2xl md:text-3xl text-[var(--base)] font-bold  mb-4 animate-fade-in">
-                  CampusGig
-                </h1>
-              </div>
+            <div className="mb-10">
+              <img src="/logo.svg" alt="" height={36} width={208} />
             </div>
             {renderStepIndicator()}
             <div>
@@ -522,9 +517,9 @@ const SignUpPage: React.FC = () => {
                         type="button"
                         onClick={prevStep}
                         disabled={currentStep === 0}
-                        className={`flex items-center space-x-2 text-[13px] lg:text-[15px] px-3 lg:px-8 py-3 rounded-lg lg:font-medium transition-all duration-200 ${currentStep === 0
+                        className={`flex items-center text-[13px] lg:text-[15px] px-2 lg:px-5 py-3 rounded-lg lg:font-medium transition-all duration-200 bg-gray-100 ${currentStep === 0
                           ? 'text-gray-400 cursor-not-allowed'
-                          : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 cursor-pointer'
+                          : 'text-gray-600 hover:text-gray-800 cursor-pointer'
                           }`}
                       >
                         <ChevronLeft className="w-4 h-4" />
@@ -535,7 +530,7 @@ const SignUpPage: React.FC = () => {
                           type="submit"
                           variant="green"
                           disabled={isSubmitting || !isStepValid(currentStep, values, errors) || !acceptedTerms}
-                          className="flex items-center space-x-2 text-[13px] lg:text-[15px] lg:font-medium px-3 lg:px-8 py-3 rounded-lg transition-all duration-200 disabled:opacity-50"
+                          className="flex items-center space-x-2 text-[13px] lg:text-[15px] lg:font-medium px-3 lg:px-5 py-3 rounded-lg transition-all duration-200 disabled:opacity-50"
                         >
                           {isSubmitting ? "Creating Account..." : "Create Account"}
                           <Check className="w-4 h-4 ml-2" />
