@@ -31,20 +31,22 @@ function TireService() {
   const handleApi = async (
     config: any,
     successMsg?: string,
-    callback?: (data: any) => void
+    callback?: (data: any) => void,
+    closeOnError: boolean = false
   ) => {
     try {
       const resp = await apiCall(config);
       if (resp?.success) {
         successMsg && toast.success(successMsg);
         callback?.(resp.data);
+        setOpen(false);
       } else {
         toast.error(resp?.message || "Something went wrong");
+        closeOnError && setOpen(false);
       }
     } catch {
       toast.error("Something went wrong");
-    } finally {
-      setOpen(false);
+      closeOnError && setOpen(false);
     }
   };
 
@@ -145,18 +147,8 @@ function TireService() {
     fetchTires(page, searchTerm, key, order);
   };
 
-  const handleChip = (row: Tire) => {
-    return (
-      <div className="flex flex-row gap-2">
-        {row.categories.map((val) => {
-          return (
-            <span className="p-2 bg-[var(--base)] rounded-lg text-white">
-              {val.name}
-            </span>
-          );
-        })}
-      </div>
-    );
+  const handleChip = (row: Tire): string[] => {
+    return row.categories.map((val) => val.name);
   };
 
   return (
@@ -176,7 +168,8 @@ function TireService() {
             {
               key: "categories",
               label: "Gig category",
-              render: (_, row) => handleChip(row),
+              render: (_, row) => handleChip(row).join(", "),
+              sortable: true
             },
           ]}
           actions={(row) => (

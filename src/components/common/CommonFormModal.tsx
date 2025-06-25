@@ -199,7 +199,6 @@ const CommonFormModal: React.FC<CommonFormModalProps> = ({
             validationSchema={validationSchema}
             onSubmit={async (values, actions) => {
               await onSubmit(values);
-              setOpen(false);
               actions.setSubmitting(false);
             }}
           >
