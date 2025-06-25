@@ -53,7 +53,7 @@ function ForgotPasswordPage() {
         <div className="p-8 lg:p-16 pt-3 lg:pt-6 flex flex-col justify-between h-full">
           <div>
             <div className="mb-10">
-              <img src="/logo.svg" alt="" height={36} width={208} />
+              <img src="/logo.svg" alt="" height={40} width={266} />
             </div>
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
@@ -99,13 +99,8 @@ function ForgotPasswordPage() {
             Copyright © {new Date().getFullYear()} All Rights Reserved.
           </p>
         </div>
-        <div className="relative w-full h-full bg-[#fff] text-white">
-          <Image
-            fill
-            className="object-contain p-8"
-            alt="forgot password illustration"
-            src="https://rsssc.org/assest/img/Login.jpg"
-          />
+        <div className="relative w-full h-full bg-[#fff] text-white hidden lg:block">
+          <img src="/illustration.svg" alt="" />
         </div>
       </div>
     </div>

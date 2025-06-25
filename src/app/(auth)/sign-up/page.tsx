@@ -481,7 +481,7 @@ const SignUpPage: React.FC = () => {
         <div className="p-8 lg:p-12 lg:pt-6 flex flex-col justify-between h-full">
           <div>
             <div className="mb-10">
-              <img src="/logo.svg" alt="" height={36} width={208} />
+              <img src="/logo.svg" alt="" height={40} width={266} />
             </div>
             {renderStepIndicator()}
             <div>
@@ -562,14 +562,8 @@ const SignUpPage: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="relative w-full h-full bg-[#fff] text-white min-h-[600px] hidden lg:block">
-          <Image
-            fill
-            priority
-            alt="signup"
-            className="object-contain p-8"
-            src="https://rsssc.org/assest/img/Login.jpg"
-          />
+        <div className="relative w-full h-full bg-[#fff] text-white hidden lg:block">
+          <img src="/illustration.svg" alt="" />
         </div>
       </div>
     </section>

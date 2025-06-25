@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Cookie from "js-cookie";
 
@@ -8,6 +8,7 @@ const Header = () => {
   const router = useRouter();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isToken, setIsToken] = useState("");
 
   const onLogout = () => {
     if (typeof window !== "undefined") {
@@ -16,6 +17,12 @@ const Header = () => {
     Cookie.remove("token");
     router.push("/login");
   };
+
+  useEffect(() => {
+    if (localStorage) {
+      setIsToken(localStorage.getItem("token") as string);
+    }
+  }, [])
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -107,7 +114,7 @@ const Header = () => {
             Pricing
           </a>
 
-          {typeof window !== "undefined" && localStorage?.getItem("token") ? (
+          {isToken ? (
             <button
               className="h-[41.80px] w-[41.80px] rounded-full bg-[color:var(--base)] text-white font-bold relative cursor-pointer"
               onClick={() => onLogout()}
