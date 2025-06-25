@@ -1,21 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { X } from "lucide-react";
+import Select from "react-select";
 
-import { Badge } from "@/components/ui/badge";
-import {
-  Command,
-  CommandGroup,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { Command as CommandPrimitive } from "cmdk";
-
-type Framework = Record<"id" | "label", string>;
+export interface Option {
+  value: string;
+  label: string;
+}
 
 interface MultiSelectProps {
-  options: Framework[];
+  options: Option[];
   value?: string[];
   onValueChange?: (value: string[]) => void;
   defaultValue?: string[];
@@ -26,190 +20,152 @@ interface MultiSelectProps {
   error?: boolean;
 }
 
-export function MultiSelectDropdown({
+export function MultiSelectDropdown({ 
   options,
-  value,
+  value = [],
   onValueChange,
   defaultValue = [],
   placeholder = "Select options...",
   maxCount = 3,
   className = "",
   disabled = false,
-  error = false,
+  error = false
 }: MultiSelectProps) {
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const [open, setOpen] = React.useState(false);
-  const [selected, setSelected] = React.useState<Framework[]>(() => {
-    if (value) {
-      return options.filter((option) => value.includes(option.id));
-    }
-    return defaultValue.length > 0
-      ? options.filter((option) => defaultValue.includes(option.id))
-      : [];
-  });
-  const [inputValue, setInputValue] = React.useState("");
-
-  React.useEffect(() => {
-    if (value) {
-      setSelected(options.filter((option) => value.includes(option.id)));
-    }
-  }, [value, options]);
-
-  const handleUnselect = React.useCallback(
-    (framework: Framework) => {
-      const newSelected = selected.filter((s) => s.id !== framework.id);
-      setSelected(newSelected);
-      onValueChange?.(newSelected.map((s) => s.id));
-    },
-    [selected, onValueChange]
+  
+  // Convert string array to react-select format
+  const selectedOptions = options.filter(option => 
+    value.includes(option.value)
   );
 
-  const handleSelect = React.useCallback(
-    (framework: Framework) => {
-      setInputValue("");
-      const newSelected = [...selected, framework];
-      setSelected(newSelected);
-      onValueChange?.(newSelected.map((s) => s.id));
-    },
-    [selected, onValueChange]
-  );
+  // Convert react-select format back to string array
+  const handleChange = (selected: any) => {
+    const selectedValues = selected ? selected.map((option: Option) => option.value) : [];
+    onValueChange?.(selectedValues);
+  };
 
-  const handleKeyDown = React.useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>) => {
-      const input = inputRef.current;
-      if (input) {
-        if (e.key === "Delete" || e.key === "Backspace") {
-          if (input.value === "") {
-            setSelected((prev) => {
-              const newSelected = [...prev];
-              newSelected.pop();
-              const newIds = newSelected.map((s) => s.id);
-              onValueChange?.(newIds);
-              return newSelected;
-            });
-          }
-        }
-        if (e.key === "Escape") {
-          input.blur();
-          setOpen(false);
-        }
-      }
-    },
-    [onValueChange]
-  );
-
-  const selectables = options.filter(
-    (framework) => !selected.some((s) => s.id === framework.id)
-  );
-
-  const filteredSelectables = selectables.filter((framework) =>
-    framework.label.toLowerCase().includes(inputValue.toLowerCase())
-  );
+  // Custom styles to match your theme
+  const customStyles = {
+    control: (provided: any, state: any) => ({
+      ...provided,
+      minHeight: '44px',
+      border: error ? '1px solid #ef4444' : state.isFocused ? '1px solid var(--base)' : '1px solid #d1d5db',
+      borderRadius: '8px',
+      boxShadow: state.isFocused ? '0 0 0 1px var(--base)' : 'none',
+      backgroundColor: disabled ? '#f3f4f6' : '#ffffff',
+      '&:hover': {
+        border: error ? '1px solid #ef4444' : '1px solid var(--base)',
+      },
+      transition: 'all 0.2s ease',
+    }),
+    multiValue: (provided: any) => ({
+      ...provided,
+      backgroundColor: '#f3f4f6',
+      border: '1px solid #e5e7eb',
+      borderRadius: '6px',
+      padding: '2px',
+      margin: '2px',
+    }),
+    multiValueLabel: (provided: any) => ({
+      ...provided,
+      color: '#374151',
+      fontSize: '14px',
+      fontWeight: '500',
+    }),
+    multiValueRemove: (provided: any) => ({
+      ...provided,
+      color: '#6b7280',
+      '&:hover': {
+        backgroundColor: '#d1d5db',
+        color: '#374151',
+      },
+      borderRadius: '50%',
+      padding: '2px',
+    }),
+    menu: (provided: any) => ({
+      ...provided,
+      border: '1px solid #e5e7eb',
+      borderRadius: '8px',
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+      zIndex: 9999,
+    }),
+    option: (provided: any, state: any) => ({
+      ...provided,
+      backgroundColor: state.isSelected 
+        ? 'var(--base)' 
+        : state.isFocused 
+        ? '#f3f4f6' 
+        : '#ffffff',
+      color: state.isSelected ? '#ffffff' : '#374151',
+      padding: '8px 12px',
+      cursor: 'pointer',
+      '&:hover': {
+        backgroundColor: state.isSelected ? 'var(--base)' : '#f3f4f6',
+      },
+    }),
+    placeholder: (provided: any) => ({
+      ...provided,
+      color: '#6b7280',
+      fontSize: '14px',
+    }),
+    input: (provided: any) => ({
+      ...provided,
+      color: '#000000',
+      fontSize: '14px',
+    }),
+    singleValue: (provided: any) => ({
+      ...provided,
+      color: '#000000',
+    }),
+    valueContainer: (provided: any) => ({
+      ...provided,
+      padding: '8px 12px',
+    }),
+    indicatorsContainer: (provided: any) => ({
+      ...provided,
+      color: '#6b7280',
+    }),
+    indicatorSeparator: (provided: any) => ({
+      ...provided,
+      backgroundColor: '#e5e7eb',
+    }),
+    dropdownIndicator: (provided: any) => ({
+      ...provided,
+      color: '#6b7280',
+      '&:hover': {
+        color: '#374151',
+      },
+    }),
+    clearIndicator: (provided: any) => ({
+      ...provided,
+      color: '#6b7280',
+      '&:hover': {
+        color: '#374151',
+      },
+    }),
+  };
 
   return (
-    <Command
-      onKeyDown={handleKeyDown}
-      className={`overflow-visible bg-transparent ${className}`}
-    >
-      <div
-        className={`group rounded-lg border bg-background px-4 py-3 text-sm focus-within:outline-none focus-within:ring-1 focus-within:ring-[var(--base)] focus-within:border-[var(--base)] transition-all ${
-          error ? "border-red-500" : "border-gray-300"
-        }`}
-      >
-        <div className="flex flex-wrap gap-1">
-          {selected.slice(0, maxCount).map((framework) => {
-            return (
-              <Badge
-                key={framework.id}
-                variant="secondary"
-                className="bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
-              >
-                {framework.label}
-                <button
-                  className="ml-1 rounded-full outline-none focus:ring-2 focus:ring-[var(--base)] focus:ring-offset-1 hover:bg-gray-300 transition-colors"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleUnselect(framework);
-                    }
-                  }}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleUnselect(framework);
-                  }}
-                  disabled={disabled}
-                >
-                  <X className="h-3 w-3 text-gray-500 hover:text-gray-700 transition-colors" />
-                </button>
-              </Badge>
-            );
-          })}
-          {selected.length > maxCount && (
-            <Badge
-              variant="secondary"
-              className="bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
-            >
-              +{selected.length - maxCount} more
-              <button
-                className="ml-1 rounded-full outline-none focus:ring-2 focus:ring-[var(--base)] focus:ring-offset-1 hover:bg-gray-300 transition-colors"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  const newSelected = selected.slice(0, maxCount);
-                  setSelected(newSelected);
-                  onValueChange?.(newSelected.map((s) => s.id));
-                }}
-                disabled={disabled}
-              >
-                <X className="h-3 w-3 text-gray-500 hover:text-gray-700 transition-colors" />
-              </button>
-            </Badge>
-          )}
-          <CommandPrimitive.Input
-            ref={inputRef}
-            value={inputValue}
-            onValueChange={setInputValue}
-            onBlur={() => setOpen(false)}
-            onFocus={() => setOpen(true)}
-            placeholder={selected.length === 0 ? placeholder : ""}
-            className="ml-2 flex-1 bg-transparent outline-none placeholder:text-gray-500 text-black disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-500"
-            disabled={disabled}
-          />
-        </div>
-      </div>
-      <div className="relative mt-2">
-        <CommandList>
-          {open && filteredSelectables.length > 0 ? (
-            <div className="absolute top-0 z-[9999] w-full rounded-lg border border-gray-200 bg-white text-gray-900 shadow-lg outline-none animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2">
-              <CommandGroup className="max-h-[200px] overflow-y-auto">
-                {filteredSelectables.map((framework) => {
-                  return (
-                    <CommandItem
-                      key={framework.id}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                      onSelect={() => handleSelect(framework)}
-                      className="cursor-pointer hover:bg-gray-100 hover:text-gray-900 aria-selected:bg-[var(--base)] aria-selected:text-white transition-colors px-3 py-2"
-                    >
-                      {framework.label}
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-            </div>
-          ) : null}
-        </CommandList>
-      </div>
-    </Command>
+    <div className={className}>
+      <Select
+        isMulti
+        options={options}
+        value={selectedOptions}
+        onChange={handleChange}
+        placeholder={placeholder}
+        isDisabled={disabled}
+        styles={customStyles}
+        className="react-select-container"
+        classNamePrefix="react-select"
+        menuPlacement="bottom"
+        menuPosition="absolute"
+        maxMenuHeight={200}
+        closeMenuOnSelect={false}
+        hideSelectedOptions={true}
+        isClearable={true}
+        isSearchable={true}
+        noOptionsMessage={() => "No options available"}
+        loadingMessage={() => "Loading..."}
+      />
+    </div>
   );
-}
+} 
