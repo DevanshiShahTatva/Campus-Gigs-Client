@@ -39,19 +39,16 @@ export const educationOptions = [
 ];
 
 export const selectStyles = {
-  control: (base: any) => ({
+  control: (base: any, state: any) => ({
     ...base,
     minHeight: '43px',
-    border: '1px solid #d1d5db',
+    border: state.isFocused ? '1px solid var(--base)' : '1px solid #d1d5db',
     borderRadius: '8px',
     fontSize: '14px',
+    boxShadow: state.isFocused ? '0 0 0 1px var(--base)' : 'none',
     '&:hover': {
-      borderColor: '#3b82f6'
+      borderColor: 'var(--base)'
     },
-    '&:focus-within': {
-      borderColor: '#3b82f6',
-      boxShadow: '0 0 0 1px #3b82f6'
-    }
   }),
   menuList: (base: any) => ({
     ...base,
