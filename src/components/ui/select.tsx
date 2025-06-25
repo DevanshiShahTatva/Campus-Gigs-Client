@@ -6,10 +6,27 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+// Context to pass custom props
+type CustomSelectContextType = {
+  showCheckIcon?: boolean;
+  optionWidth?: string | number;
+  optionHoverBg?: string;
+};
+const CustomSelectContext = React.createContext<CustomSelectContextType>({});
+
 function Select({
+  showCheckIcon = true,
+  optionWidth,
+  optionHoverBg,
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Root>) {
-  return <SelectPrimitive.Root data-slot="select" {...props} />
+}: React.ComponentProps<typeof SelectPrimitive.Root> & CustomSelectContextType) {
+  // Provide context only for this instance and its children
+  const contextValue = React.useMemo(() => ({ showCheckIcon, optionWidth, optionHoverBg }), [showCheckIcon, optionWidth, optionHoverBg]);
+  return (
+    <CustomSelectContext.Provider value={contextValue}>
+      <SelectPrimitive.Root data-slot="select" {...props} />
+    </CustomSelectContext.Provider>
+  );
 }
 
 function SelectGroup({
@@ -56,6 +73,14 @@ function SelectContent({
   position = "popper",
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
+  const contextContent = React.useContext(CustomSelectContext) || {};
+  const optionWidth = contextContent.optionWidth;
+  // Type guard for width
+  const widthStyle = optionWidth !== undefined
+    ? typeof optionWidth === 'number'
+      ? { width: optionWidth + 'px', minWidth: optionWidth+'px' }
+      : { width: optionWidth }
+    : undefined;
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
@@ -66,6 +91,7 @@ function SelectContent({
             "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
           className
         )}
+        style={widthStyle}
         position={position}
         {...props}
       >
@@ -103,20 +129,26 @@ function SelectItem({
   children,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Item>) {
+  const contextItem = React.useContext(CustomSelectContext) || {};
+  const showCheckIcon = contextItem.showCheckIcon !== undefined ? contextItem.showCheckIcon : true;
+  const optionHoverBg = contextItem.optionHoverBg;
   return (
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        "focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        optionHoverBg && `focus:bg-[${optionHoverBg}] data-[state=checked]:bg-[${optionHoverBg}] focus:text-black data-[state=checked]:text-black`,
         className
       )}
       {...props}
     >
-      <span className="absolute right-2 flex size-3.5 items-center justify-center">
-        <SelectPrimitive.ItemIndicator>
-          <CheckIcon className="size-4" />
-        </SelectPrimitive.ItemIndicator>
-      </span>
+      {showCheckIcon && (
+        <span className="absolute right-2 flex size-3.5 items-center justify-center">
+          <SelectPrimitive.ItemIndicator>
+            <CheckIcon className="size-4" />
+          </SelectPrimitive.ItemIndicator>
+        </span>
+      )}
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
     </SelectPrimitive.Item>
   )

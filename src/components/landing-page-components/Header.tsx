@@ -11,7 +11,9 @@ const Header = () => {
   const [isToken, setIsToken] = useState("");
 
   const onLogout = () => {
-    localStorage.clear();
+    if (typeof window !== "undefined") {
+      localStorage?.clear();
+    }
     Cookie.remove("token");
     router.push("/login");
   };
@@ -44,7 +46,8 @@ const Header = () => {
             className="text-xl sm:text-2xl font-bold text-[color:var(--base)] hover:text-[color:var(--base-hover)] transition-colors duration-300 cursor-pointer"
             onClick={() => scrollToSection("hero")}
           >
-            CampusGig
+            {/* CampusGig */}
+            <img src="/light-logo.svg" alt="CampusGig Logo" className="h-8 w-auto sm:h-10 object-contain min-w-[40px] mr-2" />
           </span>
         </div>
 

@@ -309,3 +309,13 @@ button{
   font-family: 'DM Sans', 'DM Sans Fallback', sans-serif;
   content: attr(data-placeholder); /* fallback if needed */
 }
+
+
+/* Contact us form */
+.contact-us-form input, .contact-us-form textarea {
+  background-color: #fff;
+}
+
+.contact-us-form input:disabled{
+  background-color: #f3f4f6;
+}

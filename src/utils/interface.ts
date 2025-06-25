@@ -69,10 +69,20 @@ export interface IPlanApiResponse {
   data: ISubscriptionPlan[];
 }
 
+export interface IDropdownOption {
+  label: string,
+  id: string
+}
+
 export interface Tire {
   _id: string;
   name: string;
+  categories: { _id: string, name: string}[];
+}
+
+export interface GigCategory {
+  _id: string;
+  name: string;
   description: string;
-  createdAt: string;
-  updatedAt: string;
+  isUsed: boolean;
 }

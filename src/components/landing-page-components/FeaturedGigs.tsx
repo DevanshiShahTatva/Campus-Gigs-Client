@@ -1,84 +1,10 @@
 'use client'
 import { useState } from 'react';
+import { FEATURED_GIGS_PROVIDERS, FEATURED_GIGS } from "@/utils/constant";
 
 const FeaturedGigs = () => {
   const [hoveredProvider, setHoveredProvider] = useState<number | null>(null);
   const [hoveredGig, setHoveredGig] = useState<number | null>(null);
-
-  const providers = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      tier: "Tier 3",
-      rating: 5,
-      reviews: 50,
-      image: "/profile1.jpg",
-      specialty: "Computer Science"
-    },
-    {
-      id: 2,
-      name: "Michael Chen",
-      tier: "Tier 2",
-      rating: 4,
-      reviews: 35,
-      image: "/profile2.jpg",
-      specialty: "Business"
-    },
-    {
-      id: 3,
-      name: "Emily Rodriguez",
-      tier: "Tier 3",
-      rating: 5,
-      reviews: 42,
-      image: "/profile3.jpg",
-      specialty: "Engineering"
-    },
-    {
-      id: 4,
-      name: "David Kim",
-      tier: "Tier 1",
-      rating: 4,
-      reviews: 28,
-      image: "/profile1.jpg",
-      specialty: "General Services"
-    }
-  ];
-
-  const featuredGigs = [
-    {
-      id: 1,
-      title: "Advanced Algorithms Tutoring",
-      provider: "Sarah Johnson",
-      price: "$45/hour",
-      category: "Tutoring",
-      rating: 5,
-      reviews: 12,
-      image: "/tier3.jpg",
-      description: "Expert help with advanced algorithms and data structures"
-    },
-    {
-      id: 2,
-      title: "Resume Review & Optimization",
-      provider: "Michael Chen",
-      price: "$30",
-      category: "Career",
-      rating: 4,
-      reviews: 8,
-      image: "/tier2.jpg",
-      description: "Professional resume review with optimization tips"
-    },
-    {
-      id: 3,
-      title: "Campus Food Delivery",
-      provider: "David Kim",
-      price: "$8",
-      category: "Delivery",
-      rating: 4,
-      reviews: 25,
-      image: "/tier1.jpg",
-      description: "Quick and reliable food delivery across campus"
-    }
-  ];
 
   const renderStars = (rating: number) => {
     return "★".repeat(rating) + "☆".repeat(5 - rating);
@@ -98,7 +24,7 @@ const FeaturedGigs = () => {
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredGigs.map((gig) => (
+            {FEATURED_GIGS.map((gig) => (
               <div
                 key={gig.id}
                 className="cursor-pointer bg-[var(--card-dark)] rounded-xl p-6 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 hover:scale-105 group relative overflow-hidden"
@@ -161,7 +87,7 @@ const FeaturedGigs = () => {
             Top Providers
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {providers.map((provider) => (
+            {FEATURED_GIGS_PROVIDERS.map((provider) => (
               <div
                 key={provider.id}
                 className="cursor-pointer bg-[var(--card-dark)] rounded-xl p-6 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 hover:scale-105 text-center group relative overflow-hidden"

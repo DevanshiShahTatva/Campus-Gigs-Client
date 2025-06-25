@@ -30,29 +30,32 @@ const CommonUserLayout: React.FC<CommonUserLayoutProps> = ({
   const pathname = usePathname();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [collapseSidebar, setCollapseSidebar] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const toggleSidebar = () => {
-    setIsSidebarOpen((prev) => !prev);
+    if (isMobile) {
+      setIsSidebarOpen((prev) => !prev);
+    } else {
+      setSidebarCollapsed((prev) => !prev);
+    }
   };
 
   const closeSidebar = () => {
     setIsSidebarOpen(false);
   };
 
-  const handleCollapse = () => {
-    setCollapseSidebar(!collapseSidebar);
-  };
+  const adminRoleType = role === ROLE.Admin ? true : false;
+  // const organizerRoleType = role === ROLE.Organizer ? true : false;
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 767px)");
-
+    const mediaQuery = window.matchMedia("(max-width: 679px)") ;
     const handleResize = () => {
+      setIsMobile(mediaQuery.matches);
       if (mediaQuery.matches) {
-        setCollapseSidebar(false); // force collapse off on small screens
+        setSidebarCollapsed(false); // force collapse off on small screens
       }
     };
-
     handleResize(); // initial check
     mediaQuery.addEventListener("change", handleResize);
     return () => mediaQuery.removeEventListener("change", handleResize);
@@ -83,11 +86,23 @@ const CommonUserLayout: React.FC<CommonUserLayoutProps> = ({
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 h-full">
       {/* Header at the top */}
-      <AdminHeader pageTitle="Admin Panel" adminName="Admin" />
+      <AdminHeader 
+        pageTitle="Admin Panel" 
+        adminName="Admin" 
+        onSidebarToggle={toggleSidebar}
+      />
       {/* Sidebar and main content */}
       <div className="flex flex-1 min-h-0 h-full">
-        <AdminSidebar activeRoute={pathname} />
-        <main className="flex-1 flex flex-col min-h-0 overflow-auto">
+        {/* Sidebar: static/collapsed on desktop, overlay on mobile */}
+        <AdminSidebar 
+          activeRoute={pathname} 
+          isOpen={isMobile ? isSidebarOpen : false}
+          onClose={isMobile ? closeSidebar : undefined}
+          collapsed={!isMobile && sidebarCollapsed}
+        />
+        <main
+          className={`flex-1 flex flex-col min-h-0 overflow-auto transition-all duration-200 `}
+        >
           <>
             {breadcrumb.length > 0 && (
               <nav
@@ -133,7 +148,7 @@ const CommonUserLayout: React.FC<CommonUserLayoutProps> = ({
           <div className="p-6 pt-2">
             <div className="border border-gray-200 bg-white rounded-md shadow-lg p-6 h-auto">
               {children}
-              </div>
+            </div>
           </div>
         </main>
       </div>
