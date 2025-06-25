@@ -269,7 +269,7 @@ const CommonFormModal: React.FC<CommonFormModalProps> = ({
                           <MultiSelectDropdown
                             options={
                               field.options?.map((opt) => ({
-                                value: String(opt.id),
+                                id: String(opt.id),
                                 label: opt.label,
                               })) || []
                             }

@@ -1,15 +1,22 @@
 "use client";
 
 import * as React from "react";
-import Select from "react-select";
+import { X } from "lucide-react";
+import ReactDOM from "react-dom";
 
-export interface Option {
-  value: string;
-  label: string;
-}
+import { Badge } from "@/components/ui/badge";
+import {
+  Command,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+  CommandInput,
+} from "@/components/ui/command";
+
+type Framework = Record<"id" | "label", string>;
 
 interface MultiSelectProps {
-  options: Option[];
+  options: Framework[];
   value?: string[];
   onValueChange?: (value: string[]) => void;
   defaultValue?: string[];
@@ -20,152 +27,207 @@ interface MultiSelectProps {
   error?: boolean;
 }
 
-export function MultiSelectDropdown({ 
+export function MultiSelectDropdown({
   options,
-  value = [],
+  value,
   onValueChange,
   defaultValue = [],
   placeholder = "Select options...",
   maxCount = 3,
   className = "",
   disabled = false,
-  error = false
+  error = false,
 }: MultiSelectProps) {
-  
-  // Convert string array to react-select format
-  const selectedOptions = options.filter(option => 
-    value.includes(option.value)
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const [open, setOpen] = React.useState(false);
+  const [selected, setSelected] = React.useState<Framework[]>(() => {
+    if (value) {
+      return options.filter((option) => value.includes(option.id));
+    }
+    return defaultValue.length > 0
+      ? options.filter((option) => defaultValue.includes(option.id))
+      : [];
+  });
+  const [inputValue, setInputValue] = React.useState("");
+  const [dropdownPosition, setDropdownPosition] = React.useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
+
+  React.useEffect(() => {
+    if (value) {
+      setSelected(options.filter((option) => value.includes(option.id)));
+    }
+  }, [value, options]);
+
+  const handleUnselect = React.useCallback(
+    (framework: Framework) => {
+      const newSelected = selected.filter((s) => s.id !== framework.id);
+      setSelected(newSelected);
+      onValueChange?.(newSelected.map((s) => s.id));
+    },
+    [selected, onValueChange]
   );
 
-  // Convert react-select format back to string array
-  const handleChange = (selected: any) => {
-    const selectedValues = selected ? selected.map((option: Option) => option.value) : [];
-    onValueChange?.(selectedValues);
-  };
+  const handleSelect = React.useCallback(
+    (framework: Framework) => {
+      setInputValue("");
+      const newSelected = [...selected, framework];
+      setSelected(newSelected);
+      onValueChange?.(newSelected.map((s) => s.id));
+    },
+    [selected, onValueChange]
+  );
 
-  // Custom styles to match your theme
-  const customStyles = {
-    control: (provided: any, state: any) => ({
-      ...provided,
-      minHeight: '44px',
-      border: error ? '1px solid #ef4444' : state.isFocused ? '1px solid var(--base)' : '1px solid #d1d5db',
-      borderRadius: '8px',
-      boxShadow: state.isFocused ? '0 0 0 1px var(--base)' : 'none',
-      backgroundColor: disabled ? '#f3f4f6' : '#ffffff',
-      '&:hover': {
-        border: error ? '1px solid #ef4444' : '1px solid var(--base)',
-      },
-      transition: 'all 0.2s ease',
-    }),
-    multiValue: (provided: any) => ({
-      ...provided,
-      backgroundColor: '#f3f4f6',
-      border: '1px solid #e5e7eb',
-      borderRadius: '6px',
-      padding: '2px',
-      margin: '2px',
-    }),
-    multiValueLabel: (provided: any) => ({
-      ...provided,
-      color: '#374151',
-      fontSize: '14px',
-      fontWeight: '500',
-    }),
-    multiValueRemove: (provided: any) => ({
-      ...provided,
-      color: '#6b7280',
-      '&:hover': {
-        backgroundColor: '#d1d5db',
-        color: '#374151',
-      },
-      borderRadius: '50%',
-      padding: '2px',
-    }),
-    menu: (provided: any) => ({
-      ...provided,
-      border: '1px solid #e5e7eb',
-      borderRadius: '8px',
-      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-      zIndex: 9999,
-    }),
-    option: (provided: any, state: any) => ({
-      ...provided,
-      backgroundColor: state.isSelected 
-        ? 'var(--base)' 
-        : state.isFocused 
-        ? '#f3f4f6' 
-        : '#ffffff',
-      color: state.isSelected ? '#ffffff' : '#374151',
-      padding: '8px 12px',
-      cursor: 'pointer',
-      '&:hover': {
-        backgroundColor: state.isSelected ? 'var(--base)' : '#f3f4f6',
-      },
-    }),
-    placeholder: (provided: any) => ({
-      ...provided,
-      color: '#6b7280',
-      fontSize: '14px',
-    }),
-    input: (provided: any) => ({
-      ...provided,
-      color: '#000000',
-      fontSize: '14px',
-    }),
-    singleValue: (provided: any) => ({
-      ...provided,
-      color: '#000000',
-    }),
-    valueContainer: (provided: any) => ({
-      ...provided,
-      padding: '8px 12px',
-    }),
-    indicatorsContainer: (provided: any) => ({
-      ...provided,
-      color: '#6b7280',
-    }),
-    indicatorSeparator: (provided: any) => ({
-      ...provided,
-      backgroundColor: '#e5e7eb',
-    }),
-    dropdownIndicator: (provided: any) => ({
-      ...provided,
-      color: '#6b7280',
-      '&:hover': {
-        color: '#374151',
-      },
-    }),
-    clearIndicator: (provided: any) => ({
-      ...provided,
-      color: '#6b7280',
-      '&:hover': {
-        color: '#374151',
-      },
-    }),
-  };
+  const handleKeyDown = React.useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      const input = inputRef.current;
+      if (input) {
+        if (e.key === "Delete" || e.key === "Backspace") {
+          if (input.value === "") {
+            setSelected((prev) => {
+              const newSelected = [...prev];
+              newSelected.pop();
+              const newIds = newSelected.map((s) => s.id);
+              onValueChange?.(newIds);
+              return newSelected;
+            });
+          }
+        }
+        if (e.key === "Escape") {
+          input.blur();
+          setOpen(false);
+        }
+      }
+    },
+    [onValueChange]
+  );
+
+  const selectables = options.filter(
+    (framework) => !selected.some((s) => s.id === framework.id)
+  );
+
+  const filteredSelectables = selectables.filter((framework) =>
+    framework.label.toLowerCase().includes(inputValue.toLowerCase())
+  );
+
+  React.useLayoutEffect(() => {
+    if (open && wrapperRef.current) {
+      const rect = wrapperRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 4,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  }, [open]);
+
+  const dropdownContainer =
+    (typeof document !== "undefined" &&
+      wrapperRef.current?.closest(".dialog-content")) ||
+    document.body;
 
   return (
     <div className={className}>
-      <Select
-        isMulti
-        options={options}
-        value={selectedOptions}
-        onChange={handleChange}
-        placeholder={placeholder}
-        isDisabled={disabled}
-        styles={customStyles}
-        className="react-select-container"
-        classNamePrefix="react-select"
-        menuPlacement="bottom"
-        menuPosition="absolute"
-        maxMenuHeight={200}
-        closeMenuOnSelect={false}
-        hideSelectedOptions={true}
-        isClearable={true}
-        isSearchable={true}
-        noOptionsMessage={() => "No options available"}
-        loadingMessage={() => "Loading..."}
-      />
+      <div
+        ref={wrapperRef}
+        className={`group rounded-lg border bg-background px-4 py-3 text-sm focus-within:outline-none focus-within:ring-1 focus-within:ring-[var(--base)] focus-within:border-[var(--base)] transition-all ${
+          error ? "border-red-500" : "border-gray-300"
+        } ${disabled ? "bg-gray-100" : ""}`}
+      >
+        <div className="flex flex-wrap items-center gap-1 min-h-[20px]">
+          {selected.slice(0, maxCount).map((framework) => (
+            <Badge
+              key={framework.id}
+              variant="secondary"
+              className="bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+            >
+              {framework.label}
+              <button
+                className="ml-1 rounded-full outline-none focus:ring-2 focus:ring-[var(--base)] focus:ring-offset-1 hover:bg-gray-300 transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleUnselect(framework);
+                }}
+                disabled={disabled}
+              >
+                <X className="h-3 w-3 text-gray-500 hover:text-gray-700 transition-colors" />
+              </button>
+            </Badge>
+          ))}
+
+          {selected.length > maxCount && (
+            <Badge
+              variant="secondary"
+              className="bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+            >
+              +{selected.length - maxCount} more
+              <button
+                className="ml-1 rounded-full outline-none focus:ring-2 focus:ring-[var(--base)] focus:ring-offset-1 hover:bg-gray-300 transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const newSelected = selected.slice(0, maxCount);
+                  setSelected(newSelected);
+                  onValueChange?.(newSelected.map((s) => s.id));
+                }}
+                disabled={disabled}
+              >
+                <X className="h-3 w-3 text-gray-500 hover:text-gray-700 transition-colors" />
+              </button>
+            </Badge>
+          )}
+
+          <div className="flex-1 min-w-[120px]">
+            <input
+              ref={inputRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onBlur={() => setOpen(false)}
+              onFocus={() => setOpen(true)}
+              placeholder={selected.length === 0 ? placeholder : ""}
+              disabled={disabled}
+              className="w-full bg-transparent outline-none placeholder:text-gray-500 text-black border-none shadow-none focus:ring-0 px-0 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </div>
+        </div>
+      </div>
+
+      {open && filteredSelectables.length > 0 && typeof window !== "undefined"
+        ? ReactDOM.createPortal(
+            <div
+              style={{
+                top: dropdownPosition.top,
+                left: dropdownPosition.left,
+                width: dropdownPosition.width,
+                position: "absolute",
+                zIndex: 9999,
+                pointerEvents: "auto",
+              }}
+              className="rounded-lg border border-gray-200 bg-white text-gray-900 shadow-lg"
+            >
+              <div className="max-h-[200px] overflow-y-auto">
+                {filteredSelectables.map((framework) => (
+                  <div
+                    key={framework.id}
+                    className="cursor-pointer hover:bg-gray-100 px-3 py-2 text-sm transition-colors"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onClick={() => handleSelect(framework)}
+                  >
+                    {framework.label}
+                  </div>
+                ))}
+              </div>
+            </div>,
+            dropdownContainer as Element
+          )
+        : null}
     </div>
   );
-} 
+}
