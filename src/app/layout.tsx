@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
-import { DM_Sans } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 import { ClientLayoutWrapper } from "@/components/Wrapper/ClientLayoutWrapper";
 
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
-
-const dmSans = DM_Sans({
-  display: "swap",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Campus Gigs",
@@ -26,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${dmSans.className} antialiased`}>
+      <body className={`antialiased`}>
         <ToastContainer />
         <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
       </body>
