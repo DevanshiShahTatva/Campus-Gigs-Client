@@ -6,6 +6,16 @@ import { IQuillEditorProps } from "./types";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
+const defaultModules = {
+  toolbar: [
+    [{ header: [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    ['blockquote'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    ['clean'],
+  ],
+};
+
 const QuillEditor: React.FC<IQuillEditorProps> = ({
   label,
   value,
@@ -40,6 +50,7 @@ const QuillEditor: React.FC<IQuillEditorProps> = ({
             className={name === "tc" ? "custom-tc-quill" : "custom-quill"}
             value={value}
             onChange={onChange}
+            modules={defaultModules}
           />
 
           {errorKey && <p className="text-red-500 text-sm mt-1">{errorMsg}</p>}

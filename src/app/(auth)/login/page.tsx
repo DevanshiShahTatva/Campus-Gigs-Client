@@ -277,12 +277,16 @@ const LogInPage = () => {
     if (loginResponse) {
       if (loginResponse.data?.token) {
         Cookie.set("token", loginResponse.data.token);
-        localStorage.setItem('token', loginResponse.data.token);
+        if (typeof window !== "undefined") {
+          localStorage?.setItem('token', loginResponse.data.token);
+        }
       }
       if (loginResponse.data.user) {
-        localStorage.setItem('name', loginResponse.data.user.name);
-        localStorage.setItem('profile', loginResponse.data.user.profile);
-        localStorage.setItem('user_id', loginResponse.data.user._id);
+        if (typeof window !== "undefined") {
+          localStorage?.setItem('name', loginResponse.data.user.name);
+          localStorage?.setItem('profile', loginResponse.data.user.profile);
+          localStorage?.setItem('user_id', loginResponse.data.user._id);
+        }
       }
 
       if (loginResponse.success) {

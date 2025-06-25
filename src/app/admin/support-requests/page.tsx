@@ -7,70 +7,65 @@ import ModalLayout from "@/components/common/Modals/CommonModalLayout";
 import { FiEye } from "react-icons/fi";
 import { Mail, CheckCircle } from "lucide-react";
 import Loader from "@/components/common/Loader";
-import { getAuthToken } from "@/utils/helper";
 import { toast } from "react-toastify";
-import { API_ROUTES, MESSAGES } from "@/utils/constant";
-
-interface SupportRequest {
-  id: string;
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  responded?: boolean;
-  _id: string;
-}
+import { API_ROUTES } from "@/utils/constant";
+import { ISupportRequest, ISupportRequestApiResponse } from "./types";
 
 const SupportRequestsPage = () => {
-  const [requests, setRequests] = useState<SupportRequest[]>([]);
+  const [requests, setRequests] = useState<ISupportRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalRequest, setModalRequest] = useState<SupportRequest | null>(null);
+  const [modalRequest, setModalRequest] = useState<ISupportRequest | null>(null);
   const [statusLoading, setStatusLoading] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [filteredRequests, setFilteredRequests] = useState<SupportRequest[]>([]);
+  const [pagination, setPagination] = useState({ page: 1, pageSize: 10, total: 1, totalPages: 1 });
+  const [sortKey, setSortKey] = useState<keyof ISupportRequest | string>("name");
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>("asc");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Pagination (for now, just page 1)
-  const [currentPage] = useState(1);
-  const [totalPages] = useState(1);
+  const fetchRequests = async (
+    searchTerm = "",
+    sortKeyParam = "name",
+    sortOrderParam = "asc",
+    page = 1,
+    pageSizeOverride?: number
+  ) => {
+    setLoading(true);
+    const pageSize = pageSizeOverride ?? pagination.pageSize;
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+      ...(searchTerm && { search: searchTerm }),
+      ...(sortKeyParam && { sortBy: sortKeyParam }),
+      ...(sortKeyParam && sortOrderParam && { sortOrder: sortOrderParam }),
+    });
+    try {
+      const res: ISupportRequestApiResponse = await apiCall({
+        endPoint: `${API_ROUTES.CONTACT_US}?${params.toString()}`,
+        method: "GET",
+        withToken: true,
+      });
+      if (res && res.status === 200) {
+        setRequests(res.data.map((r: any) => ({ ...r, id: r._id, responded: r.status === 'responded' })));
+        setPagination(res.meta);
+      } else {
+        setError(res?.message || "Failed to fetch support requests.");
+      }
+    } catch (err) {
+      setError("Failed to fetch support requests.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchRequests = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const res = await apiCall({
-          endPoint: API_ROUTES.CONTACT_US,
-          method: "GET",
-          withToken: true,
-        });
-        if (res && res.success && Array.isArray(res.data)) {
-          setRequests(res.data.map((r: any) => ({
-            ...r,
-            id: r._id,
-            responded: r.status === 'responded',
-          })));
-        } else {
-          setError(res?.message || "Failed to fetch support requests.");
-        }
-      } catch (err) {
-        setError("Failed to fetch support requests.");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchRequests();
   }, []);
 
-  useEffect(() => {
-    // When requests change, reset filteredRequests
-    setFilteredRequests(requests);
-  }, [requests]);
-
   // Selection logic
-  const allVisibleIds = useMemo(() => filteredRequests.map((r) => r.id), [filteredRequests]);
+  const allVisibleIds = useMemo(() => requests.map((r) => r.id), [requests]);
   const allSelected = useMemo(() => allVisibleIds.length > 0 && allVisibleIds.every((id) => selected.includes(id)), [selected, allVisibleIds]);
   const isSelected = (id: string) => selected.includes(id);
   const toggleSelect = (id: string) => {
@@ -82,7 +77,7 @@ const SupportRequestsPage = () => {
   };
 
   // Table columns
-  const columns: ColumnConfig<SupportRequest>[] = [
+  const columns: ColumnConfig<ISupportRequest>[] = [
     {
       key: "id",
       label: (
@@ -111,9 +106,9 @@ const SupportRequestsPage = () => {
       ),
       textAlign: "center",
     },
-    { key: "name", label: "Name" },
-    { key: "email", label: "Email" },
-    { key: "subject", label: "Subject" },
+    { key: "name", label: "Name", sortable: true },
+    { key: "email", label: "Email", sortable: true },
+    { key: "subject", label: "Subject", sortable: true },
     {
       key: "status",
       label: "Status",
@@ -123,6 +118,7 @@ const SupportRequestsPage = () => {
         </span>
       ),
       textAlign: "center",
+      sortable: true,
     },
     {
       key: "actions" as any,
@@ -161,13 +157,13 @@ const SupportRequestsPage = () => {
                   });
                   if (response && response.success) {
                     setRequests((prev) => prev.map((r) => r.id === row.id ? { ...r, responded: true } : r));
-                    toast.success(MESSAGES.CONTACT_US.STATUS_UPDATE_SUCCESS)
+                    toast.success("Support request marked as responded");
                   } else {
-                    toast.error(response?.message || MESSAGES.CONTACT_US.STATUS_UPDATE_ERROR);
+                    toast.error(response?.message || "Failed to update status");
                     console.error("API error:", response);
                   }
                 } catch (err: any) {
-                  toast.error(MESSAGES.CONTACT_US.STATUS_UPDATE_ERROR);
+                  toast.error("Failed to update status");
                   console.error("API exception:", err);
                 } finally {
                   setStatusLoading(null);
@@ -176,7 +172,7 @@ const SupportRequestsPage = () => {
             }}
             disabled={row.responded || statusLoading === row.id}
             title={row.responded ? "Already Responded" : "Mark as Responded"}
-            className={`p-2 rounded ${row.responded ? "text-[var(--base)] !cursor-not-allowed" : "hover:bg-[var(--base)]/10 text-[var(--text-semi-dark)]/50"}`}
+            className={`p-2 rounded ${row.responded ? "text-[var(--base)] !cursor-not-allowed" : "hover:bg-[var(--base)]/10 text-[var(--text-semi-dark)]/90"}`}
           >
             {statusLoading === row.id ? (
               <Loader size={18} colorClass="text-[var(--base)]" />
@@ -206,33 +202,28 @@ const SupportRequestsPage = () => {
       if (response && response.success) {
         setRequests((prev) => prev.filter((r) => !toDelete.includes(r.id)));
         setSelected((prev) => prev.filter((id) => !toDelete.includes(id)));
-        toast.success(MESSAGES.CONTACT_US.BULK_DELETE_SUCCESS);
+        toast.success("Support requests deleted successfully");
       } else {
-        toast.error(response?.message || MESSAGES.CONTACT_US.BULK_DELETE_ERROR);
+        toast.error(response?.message || "Failed to delete support requests.");
       }
     } catch (err) {
-      toast.error(MESSAGES.CONTACT_US.BULK_DELETE_ERROR);
+      toast.error("Failed to delete support requests.");
     } finally {
       setDeleting(false);
     }
   };
 
   // Search/sort handler for DynamicTable
-  const handleSearchSort = (search: string) => {
-    if (!search) {
-      setFilteredRequests(requests);
-      return;
-    }
-    const lower = search.toLowerCase();
-    setFilteredRequests(
-      requests.filter(
-        (r) =>
-          r.name?.toLowerCase().includes(lower) ||
-          r.email?.toLowerCase().includes(lower) ||
-          r.subject?.toLowerCase().includes(lower) ||
-          r.message?.toLowerCase().includes(lower)
-      )
-    );
+  const handleSearchSort = (
+    search: string,
+    sortKeyParam: keyof ISupportRequest,
+    sortOrderParam: 'asc' | 'desc',
+    page: number
+  ) => {
+    setSearchQuery(search);
+    setSortKey(sortKeyParam);
+    setSortOrder(sortOrderParam);
+    fetchRequests(search, sortKeyParam, sortOrderParam, page);
   };
 
   return (
@@ -246,19 +237,24 @@ const SupportRequestsPage = () => {
         {error ? (
           <div className="text-center text-red-600 font-medium py-8">{error}</div>
         ) : (
-          <DynamicTable<SupportRequest>
-            data={filteredRequests}
+          <DynamicTable<ISupportRequest>
+            data={requests}
             columns={columns}
             actions={undefined}
-            totalPages={totalPages}
-            handlePageChange={() => {}}
-            currentPage={currentPage}
+            totalPages={pagination.totalPages}
+            handlePageChange={(page) => fetchRequests(searchQuery, sortKey, sortOrder, page)}
+            currentPage={pagination.page}
             title="Support Requests"
             onClickCreateButton={handleBulkDelete}
             hasDeleteButton
             isCreateButtonDisabled={!(selected.length > 0 && !deleting)}
             searchPlaceholder="Search requests..."
             onSearchSort={handleSearchSort}
+            pageSize={pagination.pageSize}
+            onPageSizeChange={(size) => {
+              setPagination((prev) => ({ ...prev, pageSize: size, page: 1 }));
+              fetchRequests(searchQuery, sortKey, sortOrder, 1, size);
+            }}
           />
         )}
       </div>

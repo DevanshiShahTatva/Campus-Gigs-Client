@@ -4,21 +4,10 @@ import QuillEditor from "@/components/common/QuilEditor";
 import React, { useCallback, useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { apiCall } from "@/utils/apiCall";
-import { API_ROUTES, MESSAGES } from "@/utils/constant";
 import { toast } from "react-toastify";
 import Loader from "@/components/common/Loader";
+import { IPrivacyPolicyResponse } from "./types";
 
-// Types (copied from terms-and-conditions/types.ts)
-interface IApiResponse {
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-  _id: string;
-}
-interface IPrivacyPolicyResponse {
-  success: boolean;
-  data: IApiResponse[];
-}
 
 const AdminPrivacyPolicy = () => {
   const [loader, setLoader] = useState(false);
@@ -117,7 +106,7 @@ const AdminPrivacyPolicy = () => {
         </Button>
       </div>
       <QuillEditor
-        name="privacy-policy"
+        name="tc"
         value={content}
         onChange={(value) => handleChange(value)}
         label=""
