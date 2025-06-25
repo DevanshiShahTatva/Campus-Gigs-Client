@@ -314,11 +314,10 @@ const LogInPage = () => {
         <div className="w-full max-w-6xl bg-white shadow-lg rounded-xl grid lg:grid-cols-2 overflow-hidden">
           <div className="p-8 lg:p-16 pt-3 lg:pt-6 flex flex-col justify-between h-full">
             <div className="mb-10">
-              <img src="/logo.svg" alt="" height={36} width={208} />
+              <img src="/logo.svg" alt="" height={40} width={266} />
             </div>
             <div>
-              <div className="mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+              <div className="mb-5">
                 <p className="text-sm text-gray-500">Enter your email and password to access your account.</p>
               </div>
               <Formik
@@ -379,13 +378,8 @@ const LogInPage = () => {
               Copyright © {new Date().getFullYear()} All Rights Reserved.
             </p>
           </div>
-          <div className="relative w-full h-full bg-[#fff] text-white">
-            <Image
-              fill
-              alt="dashboard preview"
-              className="object-contain p-8"
-              src="https://rsssc.org/assest/img/Login.jpg"
-            />
+          <div className="relative w-full h-full bg-[#fff] text-white hidden lg:block">
+            <img src="/illustration.svg" alt="" />
           </div>
         </div>
       </section>
