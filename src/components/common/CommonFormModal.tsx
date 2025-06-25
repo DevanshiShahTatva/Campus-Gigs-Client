@@ -280,7 +280,7 @@ const CommonFormModal: React.FC<CommonFormModalProps> = ({
                             error={Boolean(isTouched && error)}
                           />
                           {isTouched && error && (
-                            <div className="text-red-500 text-xs mt-1">{String(error)}</div>
+                            <div className="text-red-500 text-sm mt-1 whitespace-pre-line">{String(error)}</div>
                           )}
                         </div>
                       );
