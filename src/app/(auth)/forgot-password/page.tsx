@@ -38,7 +38,9 @@ function ForgotPasswordPage() {
     if (response.success) {
       toast.success(response.message);
       router.push("/reset-password");
-      localStorage.setItem("resetPassEmail", values.email);
+      if (typeof window !== "undefined") {
+        localStorage?.setItem("resetPassEmail", values.email);
+      }
     } else {
       toast.error(response.message ?? "Something went wrong. Please try again.");
     }

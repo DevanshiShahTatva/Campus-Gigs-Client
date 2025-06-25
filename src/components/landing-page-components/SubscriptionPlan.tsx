@@ -5,6 +5,8 @@ import { IPlanApiResponse, ISubscriptionPlan } from "@/utils/interface";
 import { apiCall } from "@/utils/apiCall";
 import { toast } from "react-toastify";
 import SkeletonSubscriptionPlan from "./SkeletonSubscriptionPlan";
+import { SUBSCRIPTION_PLAN_CATEGORIES } from "@/utils/constant";
+import IconMap from "@/components/common/IconMap";
 
 const SubscriptionPlan = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -34,24 +36,6 @@ const SubscriptionPlan = () => {
 
     setIsLoading(false);
   }, []);
-
-  const categories = [
-    {
-      title: "Security & Support",
-      features: ["Secure payment processing", "24/7 customer support", "UMich student verification"],
-      icon: "🛡️",
-    },
-    {
-      title: "Platform Features",
-      features: ["Review system", "Dispute resolution", "Safety guidelines"],
-      icon: "⚙️",
-    },
-    {
-      title: "Community Benefits",
-      features: ["Access to student network", "Campus events", "Resource sharing"],
-      icon: "🤝",
-    },
-  ];
 
   return (
     <section id="pricing" className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-white via-[var(--bg-light)] to-white">
@@ -111,14 +95,7 @@ const SubscriptionPlan = () => {
                           style={{ transitionDelay: `${i * 100}ms` }}
                         >
                           <div className="w-5 h-5 sm:w-6 sm:h-6 bg-[var(--base)]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-[var(--base)] group-hover:scale-110 transition-all duration-300">
-                            <svg
-                              className="w-3 h-3 sm:w-4 sm:h-4 text-[var(--base)] group-hover:text-white transition-colors duration-300"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
+                            <IconMap name="check_hover" />
                           </div>
                           <span className="text-[var(--text-semi-dark)] group-hover:text-[var(--text-dark)] transition-colors duration-300 text-sm sm:text-base">
                             {feature}
@@ -145,7 +122,7 @@ const SubscriptionPlan = () => {
         <div className="text-center">
           <h3 className="text-xl sm:text-2xl font-semibold mb-8 text-[var(--text-dark)]">All Plans Include</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
-            {categories.map((category, index) => (
+            {SUBSCRIPTION_PLAN_CATEGORIES.map((category, index) => (
               <div
                 key={index}
                 className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 group border border-[var(--base)]/10"
@@ -162,14 +139,7 @@ const SubscriptionPlan = () => {
                       style={{ transitionDelay: `${i * 100}ms` }}
                     >
                       <div className="w-4 h-4 sm:w-5 sm:h-5 bg-[var(--base)]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-[var(--base)] group-hover:scale-110 transition-all duration-300">
-                        <svg
-                          className="w-2 h-2 sm:w-3 sm:h-3 text-[var(--base)] group-hover:text-white transition-colors duration-300"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
+                        <IconMap name="check_hover" />
                       </div>
                       <span className="text-[var(--text-semi-dark)] group-hover:text-[var(--text-dark)] transition-colors duration-300 text-sm sm:text-base">
                         {feature}

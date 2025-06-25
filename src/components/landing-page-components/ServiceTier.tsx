@@ -1,88 +1,9 @@
 "use client";
 import { useState } from "react";
+import { SERVICE_TIERS, SERVICE_TIER_CONTENT } from "@/utils/constant";
 
 const ServiceTier = () => {
   const [activeTier, setActiveTier] = useState("tier1");
-
-  const tiers = [
-    {
-      id: "tier1",
-      label: "Tier 1",
-      services: [
-        "Campus delivery",
-        "Laundry pickup",
-        "Basic errands",
-        "Simple tasks",
-      ],
-    },
-    {
-      id: "tier2",
-      label: "Tier 2",
-      services: [
-        "Study tips",
-        "Course selection",
-        "Job search help",
-        "Campus navigation",
-        "Tutoring",
-      ],
-    },
-    {
-      id: "tier3",
-      label: "Tier 3",
-      services: [
-        "Subject tutoring",
-        "Resume review",
-        "Interview prep",
-        "Project help",
-      ],
-    },
-  ];
-
-  const tierContent = [
-    {
-      id: "tier1",
-      tier: "Tier 1",
-      title: "Basic Tasks",
-      description: "Laundry, delivery, and other simple services",
-      examples: [
-        "Campus delivery",
-        "Laundry pickup",
-        "Basic errands",
-        "Simple tasks",
-      ],
-      price: "Starting at $10",
-      image: "/tier1.jpg",
-    },
-    {
-      id: "tier2",
-      tier: "Tier 2",
-      title: "Advice",
-      description: "Class help, job search assistance, and guidance",
-      examples: [
-        "Study tips",
-        "Course selection",
-        "Job search help",
-        "Campus navigation",
-        "Tutoring",
-      ],
-      price: "Starting at $20",
-      image: "/tier2.jpg",
-    },
-    {
-      id: "tier3",
-      tier: "Tier 3",
-      title: "Expert Help",
-      description: "Tutoring, resume review, and specialized services",
-      examples: [
-        "Subject tutoring",
-        "Resume review",
-        "Interview prep",
-        "Project help",
-      ],
-      price: "Starting at $30",
-      image: "/tier3.jpg",
-    },
-  ];
 
   const handleServiceClick = (service: string, tierId: string) => {
     console.log(`Selected service: ${service} from ${tierId}`);
@@ -104,7 +25,7 @@ const ServiceTier = () => {
           {/* Tier Selection Tabs with Animated Underline */}
           <div className="flex justify-center mb-8 relative">
             <div className="flex space-x-4 relative">
-              {tiers.map((tab) => (
+              {SERVICE_TIERS.map((tab) => (
                 <button
                   key={tab.id}
                   className={`relative cursor-pointer px-6 py-3 rounded-lg font-semibold transition-all duration-300 ease-in-out ${
@@ -125,7 +46,7 @@ const ServiceTier = () => {
 
           {/* Service Buttons with Animation */}
           <div className="flex flex-wrap gap-3 justify-center mb-8">
-            {tiers.map((tab) => (
+            {SERVICE_TIERS.map((tab) => (
               <div
                 key={tab.id}
                 className={`cursor-pointer flex flex-wrap gap-2 transition-all duration-500 ease-in-out ${
@@ -152,7 +73,7 @@ const ServiceTier = () => {
 
           {/* Tier Content with Smooth Animations */}
           <div className="bg-white rounded-xl p-8 hover:shadow-md transition-all duration-300 relative overflow-hidden">
-            {tierContent.map((tier) => (
+            {SERVICE_TIER_CONTENT.map((tier) => (
               <div
                 key={tier.id}
                 className={`transition-all duration-500 ease-in-out ${

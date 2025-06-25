@@ -1,14 +1,11 @@
 "use client";
-import AdminTitle from "@/components/common/AdminTitle";
-import Button from "@/components/common/Button";
-import SearchInput from "@/components/common/CommonSearchBar";
 import { ROUTES } from "@/utils/constant";
-import { Edit, PlusIcon, Trash } from "lucide-react";
+import { Edit, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { apiCall } from "@/utils/apiCall";
 import { API_ROUTES, MESSAGES } from "@/utils/constant";
-import { IFAQItem } from "./types";
+import { IFAQItem, IFaqsApiResponse, IFaqsPagination } from "./types";
 import Loader from "@/components/common/Loader";
 import { toast } from "react-toastify";
 import EditFaqModal from "@/components/common/Modals/EditFaqModal";
@@ -18,6 +15,7 @@ import { DynamicTable } from "@/components/common/DynamicTables";
 const AdminFAQs = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [pagination, setPagination] = useState<IFaqsPagination>({ page: 1, pageSize: 10, total: 1, totalPages: 1 });
   const [faqs, setFaqs] = useState<IFAQItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -37,24 +35,36 @@ const AdminFAQs = () => {
     sortOrderParam: 'asc' | 'desc',
     page: number
   ) => {
-    setSearchQuery(search);
-    setSortKey(sortKeyParam);
-    setSortOrder(sortOrderParam);
-    if (page > 0) setCurrentPage(page);
+    fetchFaqs(search, sortKeyParam, sortOrderParam, page);
   };
 
   const handleCloseEditModal = () => setIsEditModalOpen(false);
 
-  const fetchFaqs = async () => {
+  const fetchFaqs = async (
+    searchTerm = "",
+    sortKey = "question",
+    sortOrder = "asc",
+    page = 1,
+    pageSizeOverride?: number
+  ) => {
     setLoading(true);
+    const pageSize = pageSizeOverride ?? pagination.pageSize;
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+      ...(searchTerm && { search: searchTerm }),
+      ...(sortKey && { sortBy: sortKey }),
+      ...(sortKey && sortOrder && { sortOrder }),
+    });
     try {
-      const res = await apiCall({
-        endPoint: API_ROUTES.ADMIN.FAQS,
+      const res: IFaqsApiResponse = await apiCall({
+        endPoint: `${API_ROUTES.ADMIN.FAQS}?${params.toString()}`,
         method: "GET",
         withToken: true,
       });
-      if (res && res.success) {
+      if (res && res.status === 200) {
         setFaqs(res.data);
+        setPagination(res.meta);
       } else {
         setFaqs([]);
       }
@@ -154,14 +164,8 @@ const AdminFAQs = () => {
     }
   };
 
-  const filteredFaqs = faqs.filter(
-    (faq) =>
-      faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   // For DynamicTable: map _id to id for compatibility
-  const faqsWithId = filteredFaqs.map((faq) => ({ ...faq, id: faq._id || "" }));
+  const faqsWithId = faqs.map((faq) => ({ ...faq, id: faq._id || "" }));
 
   // Columns for DynamicTable
   const columns: import("@/utils/interface").ColumnConfig<
@@ -181,15 +185,6 @@ const AdminFAQs = () => {
     },
   ];
 
-  // Pagination (simple, can be improved)
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
-  const totalPages = Math.ceil(faqsWithId.length / pageSize) || 1;
-  const paginatedFaqs = faqsWithId.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
-
   const navigateToCreate = () => router.push(ROUTES.ADMIN.CREATE_FAQs)
 
   return (
@@ -200,7 +195,7 @@ const AdminFAQs = () => {
         </div>
       )}
       <DynamicTable
-        data={paginatedFaqs}
+        data={faqsWithId}
         columns={columns}
         actions={(row) => (
           <div className="flex gap-2 justify-end">
@@ -220,13 +215,18 @@ const AdminFAQs = () => {
             </button>
           </div>
         )}
-        totalPages={totalPages}
-        handlePageChange={setCurrentPage}
-        currentPage={currentPage}
+        totalPages={pagination.totalPages}
+        handlePageChange={(page) => fetchFaqs(searchQuery, sortKey, sortOrder, page)}
+        currentPage={pagination.page}
         onSearchSort={handleSearchSort}
         title="All FAQs"
         searchPlaceholder="Search FAQs"
         onClickCreateButton={navigateToCreate}
+        pageSize={pagination.pageSize}
+        onPageSizeChange={(size) => {
+          setPagination((prev) => ({ ...prev, pageSize: size, page: 1 }));
+          fetchFaqs(searchQuery, sortKey, sortOrder, 1, size);
+        }}
       />
       <EditFaqModal
         isOpen={isEditModalOpen}
