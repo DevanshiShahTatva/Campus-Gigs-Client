@@ -20,9 +20,9 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import MultiSelectDropdown from "./ui/MultiSelectDropdown";
+import { MultiSelectDropdown } from "./ui/MultiSelectDropdown";
 
-type FieldOption = { id: string | number; label: string };
+export type FieldOption = { id: string | number; label: string };
 type FieldType =
   | "text"
   | "textarea"
@@ -199,14 +199,15 @@ const CommonFormModal: React.FC<CommonFormModalProps> = ({
             validationSchema={validationSchema}
             onSubmit={async (values, actions) => {
               await onSubmit(values);
-              setOpen(false);
               actions.setSubmitting(false);
             }}
           >
-            {({ values, setFieldValue }) => (
+            {({ values, setFieldValue, errors, touched }) => (
               <Form className="space-y-4" id="form-modal">
                 {fields.map((field) => {
                   const options: FieldOption[] = field.options || [];
+                  const error = errors[field.name];
+                  const isTouched = touched[field.name];
                   switch (field.type) {
                     case "text":
                     case "number":
@@ -257,16 +258,30 @@ const CommonFormModal: React.FC<CommonFormModalProps> = ({
                       );
                     case "multiselect":
                       return (
-                        <MultiSelectDropdown
-                          key={field.name}
-                          options={options}
-                          value={values[field.name] || []}
-                          onChange={(val) =>
-                            setFieldValue(field.name, val.map(String))
-                          }
-                          label={field.label}
-                          placeholder={field.placeholder}
-                        />
+                        <div key={field.name} className="w-full">
+                          <label className="block text-sm font-medium mb-1">
+                            {field.label}
+                            {field.required && (
+                              <span className="text-red-500">*</span>
+                            )}
+                          </label>
+                          <MultiSelectDropdown
+                            options={
+                              field.options?.map((opt) => ({
+                                id: String(opt.id),
+                                label: opt.label,
+                              })) || []
+                            }
+                            value={(values[field.name] || []).map(String)}
+                            onValueChange={(val) => setFieldValue(field.name, val)}
+                            placeholder={field.placeholder}
+                            className="mt-1"
+                            error={Boolean(isTouched && error)}
+                          />
+                          {isTouched && error && (
+                            <div className="text-red-500 text-sm mt-1 whitespace-pre-line">{String(error)}</div>
+                          )}
+                        </div>
                       );
                     case "checkbox":
                       return (

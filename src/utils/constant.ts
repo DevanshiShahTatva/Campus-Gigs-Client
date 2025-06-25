@@ -28,6 +28,7 @@ export const ROUTES = {
     SUBSCRIPTION: "/admin/subscription-plan",
     SUPPORT_REQUESTS: "/admin/support-requests",
     FAQS: "/admin/faqs",
+    GIGCATEGORY: "/admin/gig-category",
     CREATE_FAQs: "/admin/faqs/create",
     PRIVACY_POLICY: "/admin/privacy-policy",
     TERMS_CONDITIONS: "/admin/terms-and-conditions",
@@ -46,6 +47,8 @@ export const API_ROUTES = {
     FAQS: "/faqs",
     BULK_FAQS: "/faqs/bulk",
     CONTACT_US_BULK: "/contact-us/bulk-delete",
+    TIRE: "/tire",
+    GIG_CATEGORY: "/gig-category",
   },
 };
 export enum ROLE {
@@ -69,29 +72,35 @@ export const USER_SIDEBAR_ITEMS = [
   },
   {
     id: 3,
+    title: "Gig Category",
+    route: ROUTES.ADMIN.GIGCATEGORY,
+    icon: "/assets/gigcategory.svg",
+  },
+  {
+    id: 4,
     title: "Service Tire",
     route: ROUTES.ADMIN.TIRE,
     icon: "/assets/services.svg",
   },
   {
-    id: 4,
+    id: 5,
     title: "Support Requests",
     route: ROUTES.ADMIN.SUPPORT_REQUESTS,
     icon: "/assets/support.svg",
   },
   {
-    id: 5,
+    id: 6,
     title: "Terms & Conditions",
     route: ROUTES.ADMIN.TERMS_CONDITIONS,
     icon: "/assets/terms.svg",
   },
   {
-    id: 6,
+    id: 7,
     title: "Privacy Policy",
     route: ROUTES.ADMIN.PRIVACY_POLICY,
     icon: "/assets/policy.svg",
   },
-  { id: 7, title: "FAQs", route: ROUTES.ADMIN.FAQS, icon: "/assets/faqs.svg" },
+  { id: 8, title: "FAQs", route: ROUTES.ADMIN.FAQS, icon: "/assets/faqs.svg" },
 ];
 
 export const MESSAGES = {
@@ -457,6 +466,6 @@ export const CONTACT_US_TEXT = {
   THANK_YOU: "Thank you!",
   GET_BACK_SOON: "Your message has been sent. We'll get back to you soon.",
   OTHER_WAYS: "Other ways to reach us",
-  EMAIL:" support@campusgig.com",
-  NOTE:'For urgent issues, please mention "URGENT" in your subject line.'
+  EMAIL: " support@campusgig.com",
+  NOTE: 'For urgent issues, please mention "URGENT" in your subject line.',
 };
