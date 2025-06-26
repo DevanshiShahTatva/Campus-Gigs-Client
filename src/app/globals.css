@@ -319,3 +319,11 @@ button{
 .contact-us-form input:disabled{
   background-color: #f3f4f6;
 }
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker-wrapper .react-datepicker__input-container {
+  width: 100%;
+}

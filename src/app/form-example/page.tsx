@@ -32,6 +32,24 @@ const CreateGigPage = () => {
       section: true,
       subfields: [
         {
+          id: "eventDate",
+          name: "eventDate",
+          label: "Event Date",
+          type: "datetime",
+          required: true,
+          enableTimeSelect: true,
+          placeholder: "Choose date and time",
+        },
+        {
+          id: "publishDate",
+          name: "publishDate",
+          label: "Publish Date",
+          type: "datetime",
+          required: true,
+          enableTimeSelect: false,
+          placeholder: "Choose publish date",
+        },
+        {
           id: "title",
           name: "title",
           label: "Gig Title",

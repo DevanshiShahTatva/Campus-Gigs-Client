@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import FileUpload from "./FileUpload";
+import FormikDateTimePicker from "./FormikDateTimePicker";
 
 export type FormSubFieldConfig = {
   id: string;
@@ -39,7 +40,8 @@ export type FormSubFieldConfig = {
     | "checkbox"
     | "array"
     | "tags"
-    | "fileupload";
+    | "fileupload"
+    | "datetime";
   placeholder?: string;
   errorMessage?: string;
   options?: { value: string; label: string }[];
@@ -49,6 +51,7 @@ export type FormSubFieldConfig = {
   multiple?: boolean;
   accept?: string;
   maxSize?: number;
+  enableTimeSelect?: boolean;
 };
 
 export type FormFieldConfig = {
@@ -127,35 +130,38 @@ const DynamicForm = ({
               );
             }
             break;
-            case "fileupload":
-          validator = Yup.array();
-          if (subfield.required) {
-            validator = validator.min(1, `At least one file is required`);
-          }
-          if (subfield.minItems) {
-            validator = validator.min(
-              subfield.minItems,
-              `At least ${subfield.minItems} files required`
-            );
-          }
-          if (subfield.maxItems) {
-            validator = validator.max(
-              subfield.maxItems,
-              `Maximum ${subfield.maxItems} files allowed`
-            );
-          }
-          break;
+          case "fileupload":
+            validator = Yup.array();
+            if (subfield.required) {
+              validator = validator.min(1, `At least one file is required`);
+            }
+            if (subfield.minItems) {
+              validator = validator.min(
+                subfield.minItems,
+                `At least ${subfield.minItems} files required`
+              );
+            }
+            if (subfield.maxItems) {
+              validator = validator.max(
+                subfield.maxItems,
+                `Maximum ${subfield.maxItems} files allowed`
+              );
+            }
+            break;
+          case "datetime":
+            validator = Yup.date().typeError(`${label} must be a valid date`);
+            break;
           default:
             validator = Yup.string();
         }
 
         if (subfield.required) {
-        validator = validator.required(
-          subfield.errorMessage || `${label} is required`
-        );
-      }
+          validator = validator.required(
+            subfield.errorMessage || `${label} is required`
+          );
+        }
 
-      acc[subfield.name] = validator;
+        acc[subfield.name] = validator;
       }
     });
     return acc;
@@ -296,9 +302,7 @@ const InnerForm = ({
               id={field.id}
               name={field.name}
               checked={value}
-              onCheckedChange={(checked) =>
-                setFieldValue(field.name, checked)
-              }
+              onCheckedChange={(checked) => setFieldValue(field.name, checked)}
               disabled={isDisabled}
             />
             {field.label && (
@@ -434,31 +438,43 @@ const InnerForm = ({
           </div>
         );
 
-        case "fileupload":
-      return (
-        <div key={field.id} className="space-y-2">
-          {field.label && (
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {field.label}
-              {field.required && (
-                <span className="text-destructive ml-1">*</span>
-              )}
-            </label>
-          )}
-          <FileUpload
-            value={value || []}
-            onChange={(files) => setFieldValue(field.name, files)}
-            multiple={field.multiple}
-            accept={field.accept}
-            maxSize={field.maxSize}
+      case "fileupload":
+        return (
+          <div key={field.id} className="space-y-2">
+            {field.label && (
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {field.label}
+                {field.required && (
+                  <span className="text-destructive ml-1">*</span>
+                )}
+              </label>
+            )}
+            <FileUpload
+              value={value || []}
+              onChange={(files) => setFieldValue(field.name, files)}
+              multiple={field.multiple}
+              accept={field.accept}
+              maxSize={field.maxSize}
+              disabled={isDisabled}
+              placeholder={field.placeholder}
+            />
+            {error && (
+              <div className="text-sm text-destructive">{String(error)}</div>
+            )}
+          </div>
+        );
+
+      case "datetime":
+        return (
+          <FormikDateTimePicker
+            key={field.id}
+            name={field.name}
+            label={field.label}
             disabled={isDisabled}
             placeholder={field.placeholder}
+            enableTimeSelect={field.enableTimeSelect}
           />
-          {error && (
-            <div className="text-sm text-destructive">{String(error)}</div>
-          )}
-        </div>
-      );
+        );
 
       default:
         return null;
