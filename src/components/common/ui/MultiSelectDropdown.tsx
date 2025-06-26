@@ -125,9 +125,9 @@ export function MultiSelectDropdown({
   }, [open]);
 
   const dropdownContainer =
-    ((typeof document !== "undefined" || typeof window !== "undefined") &&
+    (typeof document !== "undefined" &&
       wrapperRef.current?.closest(".dialog-content")) ||
-    document.body;
+    (typeof window !== "undefined" && document.body);
 
   return (
     <div className={className}>
