@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import FileUpload from "./FileUpload";
 
 export type FormSubFieldConfig = {
   id: string;
@@ -37,13 +38,17 @@ export type FormSubFieldConfig = {
     | "multiselect"
     | "checkbox"
     | "array"
-    | "tags";
+    | "tags"
+    | "fileupload";
   placeholder?: string;
   errorMessage?: string;
   options?: { value: string; label: string }[];
   minItems?: number;
   maxItems?: number;
   disabled?: boolean;
+  multiple?: boolean;
+  accept?: string;
+  maxSize?: number;
 };
 
 export type FormFieldConfig = {
@@ -122,17 +127,35 @@ const DynamicForm = ({
               );
             }
             break;
+            case "fileupload":
+          validator = Yup.array();
+          if (subfield.required) {
+            validator = validator.min(1, `At least one file is required`);
+          }
+          if (subfield.minItems) {
+            validator = validator.min(
+              subfield.minItems,
+              `At least ${subfield.minItems} files required`
+            );
+          }
+          if (subfield.maxItems) {
+            validator = validator.max(
+              subfield.maxItems,
+              `Maximum ${subfield.maxItems} files allowed`
+            );
+          }
+          break;
           default:
             validator = Yup.string();
         }
 
         if (subfield.required) {
-          validator = validator.required(
-            subfield.errorMessage || `${label} is required`
-          );
-        }
+        validator = validator.required(
+          subfield.errorMessage || `${label} is required`
+        );
+      }
 
-        acc[subfield.name] = validator;
+      acc[subfield.name] = validator;
       }
     });
     return acc;
@@ -221,7 +244,7 @@ const InnerForm = ({
               onValueChange={(val) => setFieldValue(field.name, val)}
               disabled={isDisabled}
             >
-              <SelectTrigger className={error ? "border-destructive" : ""}>
+              <SelectTrigger className={error ? "border-destructive w-full" : "w-full"}>
                 <SelectValue placeholder={field.placeholder} />
               </SelectTrigger>
               <SelectContent>
@@ -410,6 +433,32 @@ const InnerForm = ({
             </div>
           </div>
         );
+
+        case "fileupload":
+      return (
+        <div key={field.id} className="space-y-2">
+          {field.label && (
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {field.label}
+              {field.required && (
+                <span className="text-destructive ml-1">*</span>
+              )}
+            </label>
+          )}
+          <FileUpload
+            value={value || []}
+            onChange={(files) => setFieldValue(field.name, files)}
+            multiple={field.multiple}
+            accept={field.accept}
+            maxSize={field.maxSize}
+            disabled={isDisabled}
+            placeholder={field.placeholder}
+          />
+          {error && (
+            <div className="text-sm text-destructive">{String(error)}</div>
+          )}
+        </div>
+      );
 
       default:
         return null;
