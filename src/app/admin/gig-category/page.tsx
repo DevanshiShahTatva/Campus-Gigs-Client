@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import CommonFormModal from "@/components/common/CommonFormModal";
+import CommonFormModal from "@/components/common/form/CommonFormModal";
 import {
   GigCategoryTableColumns,
   gigCategoryFields,

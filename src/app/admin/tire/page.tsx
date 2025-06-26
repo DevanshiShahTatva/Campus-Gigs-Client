@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import CommonFormModal from "@/components/common/CommonFormModal";
+import CommonFormModal from "@/components/common/form/CommonFormModal";
 import { tireFields, TireFormVal } from "@/config/tire.config";
 import { DynamicTable } from "@/components/common/DynamicTables";
 import { IDropdownOption, SortOrder, Tire } from "@/utils/interface";
