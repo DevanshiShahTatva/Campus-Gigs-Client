@@ -28,7 +28,7 @@ const CreateGigPage = () => {
     {
       title: "Basic Information",
       description: "Provide the essential details about your gig",
-      groupSize: 1,
+      groupSize: 2,
       section: true,
       subfields: [
         {
@@ -97,7 +97,7 @@ const CreateGigPage = () => {
     {
       title: "Pricing & Delivery",
       description: "Set your price and delivery timeline",
-      groupSize: 1, // Explicit 2 as literal type
+      groupSize: 2,
       section: true,
       subfields: [
         {
@@ -119,6 +119,19 @@ const CreateGigPage = () => {
             { value: "3-days", label: "3 days" },
             { value: "1-week", label: "1 week" },
             { value: "2-weeks", label: "2 weeks" },
+          ],
+        },
+        {
+          id: "fileTypes",
+          name: "fileTypes",
+          label: "Supported File Types",
+          type: "multiselect",
+          required: true,
+          options: [
+            { value: "pdf", label: "PDF" },
+            { value: "doc", label: "Word Document" },
+            { value: "psd", label: "Photoshop" },
+            { value: "ai", label: "Illustrator" },
           ],
         },
       ],
@@ -167,18 +180,6 @@ const CreateGigPage = () => {
           label: "Allow commercial use",
           type: "checkbox",
         },
-        {
-          id: "fileTypes",
-          name: "fileTypes",
-          label: "Supported File Types",
-          type: "multiselect",
-          options: [
-            { value: "pdf", label: "PDF" },
-            { value: "doc", label: "Word Document" },
-            { value: "psd", label: "Photoshop" },
-            { value: "ai", label: "Illustrator" },
-          ],
-        },
       ],
     },
   ];
@@ -208,11 +209,11 @@ const CreateGigPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-18">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Create New Gig
+            Create New Form
           </h1>
           <p className="text-gray-600">
             Tell us about the service you want to offer

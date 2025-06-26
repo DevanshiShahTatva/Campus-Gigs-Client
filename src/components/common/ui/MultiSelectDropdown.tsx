@@ -5,13 +5,6 @@ import { X } from "lucide-react";
 import ReactDOM from "react-dom";
 
 import { Badge } from "@/components/ui/badge";
-import {
-  Command,
-  CommandGroup,
-  CommandItem,
-  CommandList,
-  CommandInput,
-} from "@/components/ui/command";
 
 type Framework = Record<"id" | "label", string>;
 
@@ -79,30 +72,6 @@ export function MultiSelectDropdown({
       onValueChange?.(newSelected.map((s) => s.id));
     },
     [selected, onValueChange]
-  );
-
-  const handleKeyDown = React.useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>) => {
-      const input = inputRef.current;
-      if (input) {
-        if (e.key === "Delete" || e.key === "Backspace") {
-          if (input.value === "") {
-            setSelected((prev) => {
-              const newSelected = [...prev];
-              newSelected.pop();
-              const newIds = newSelected.map((s) => s.id);
-              onValueChange?.(newIds);
-              return newSelected;
-            });
-          }
-        }
-        if (e.key === "Escape") {
-          input.blur();
-          setOpen(false);
-        }
-      }
-    },
-    [onValueChange]
   );
 
   const selectables = options.filter(
