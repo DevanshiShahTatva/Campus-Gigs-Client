@@ -83,6 +83,5 @@ export interface Tire {
 export interface GigCategory {
   _id: string;
   name: string;
-  description: string;
-  isUsed: boolean;
+  tire: { _id: string, name: string };
 }

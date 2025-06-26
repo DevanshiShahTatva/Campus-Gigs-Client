@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import { tireFields, TireFormVal } from "@/config/tire.config";
 import { DynamicTable } from "@/components/common/DynamicTables";
@@ -15,9 +15,18 @@ function TireService() {
   const [open, setOpen] = useState(false);
   const [tires, setTires] = useState<Tire[]>([]);
   const [editTire, setEditTire] = useState<Tire | null>(null);
-  const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
+  const [totalPages, setTotalPages] = useState(DEFAULT_PAGINATION.totalPages);
 
-  const refetchCurrentPage = () => fetchTires();
+  const [queryParams, setQueryParams] = useState({
+    page: DEFAULT_PAGINATION.page,
+    pageSize: DEFAULT_PAGINATION.pageSize,
+    search: "",
+    sortKey: "",
+    sortOrder: "asc" as SortOrder,
+  });
+
+  const queryParamsRef = useRef(queryParams);
+  queryParamsRef.current = queryParams;
 
   const handleApi = async (
     config: any,
@@ -41,74 +50,68 @@ function TireService() {
     }
   };
 
+  const fetchTires = async () => {
+    try {
+      const { page, pageSize, search, sortKey, sortOrder } =
+        queryParamsRef.current;
+
+      const resp = await apiCall({
+        endPoint: `${API_ROUTES.ADMIN.TIRE}?page=${page}&pageSize=${pageSize}&search=${search}&sortKey=${sortKey}&sortOrder=${sortOrder}`,
+        method: "GET",
+      });
+
+      if (resp?.success) {
+        setTires(resp.data);
+        setTotalPages(resp.meta.totalPages);
+      } else {
+        toast.error(resp?.message || "Error fetching tires");
+      }
+    } catch (error) {
+      toast.error("Failed to fetch tires");
+    }
+  };
+
   useEffect(() => {
     fetchTires();
-  }, []);
+  }, [queryParams]);
 
   const handleAdd = () => {
     setEditTire(null);
     setOpen(true);
   };
 
-  const fetchTires = async (
-    query: string = "",
-    key: string = "",
-    sortOrder: SortOrder = "asc",
-  ) => {
-    try {
-      const { page, pageSize } = pagination;
-      const resp = await apiCall({
-        endPoint: `${API_ROUTES.ADMIN.TIRE}?page=${page}&pageSize=${pageSize}&search=${query}&sortKey=${key}&sortOrder=${sortOrder}`,
-        method: "GET",
-      });
-
-      if (resp) {
-        if (resp.success) {
-          setTires(resp.data);
-          setPagination(resp.meta);
-        } else {
-          toast.error(resp.message);
-        }
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    }
-  };
-
   const handleAddTire = (values: TireFormVal) => {
     handleApi(
       { endPoint: API_ROUTES.ADMIN.TIRE, method: "POST", body: values },
       "Tire added successfully",
-      () => refetchCurrentPage()
+      fetchTires
     );
   };
 
   const handleEdit = (values: TireFormVal) => {
+    if (!editTire) return;
+
     handleApi(
       {
-        endPoint: `${API_ROUTES.ADMIN.TIRE}/${editTire?._id}`,
+        endPoint: `${API_ROUTES.ADMIN.TIRE}/${editTire._id}`,
         method: "PUT",
         body: values,
       },
-      "Tire have been edited successfully",
-      () => refetchCurrentPage()
+      "Tire updated successfully",
+      fetchTires
     );
   };
 
   const handleDeleteTire = (id: string) => {
     handleApi(
       { endPoint: `${API_ROUTES.ADMIN.TIRE}/${id}`, method: "DELETE" },
-      "Tire have been deleted successfully",
-      () => refetchCurrentPage()
+      "Tire deleted successfully",
+      fetchTires
     );
   };
 
   const handleSubmit = (values: any) => {
-    if (editTire) {
-      handleEdit(values);
-    } else {
-      handleAddTire(values);
-    }
+    editTire ? handleEdit(values) : handleAddTire(values);
   };
 
   const handleEditTire = (tire: Tire) => {
@@ -116,12 +119,30 @@ function TireService() {
     setOpen(true);
   };
 
+  const handlePageChange = (page: number) => {
+    setQueryParams((prev) => ({ ...prev, page }));
+  };
+
+  const handlePageSizeChange = (pageSize: number) => {
+    setQueryParams((prev) => ({
+      ...prev,
+      pageSize,
+      page: 1,
+    }));
+  };
+
   const handleSearchSort = (
     searchTerm: string,
     key: string,
     order: SortOrder
   ) => {
-    fetchTires(searchTerm, key, order);
+    setQueryParams((prev) => ({
+      ...prev,
+      search: searchTerm,
+      sortKey: key,
+      sortOrder: order,
+      page: 1,
+    }));
   };
 
   return (
@@ -131,21 +152,12 @@ function TireService() {
           data={tires}
           title="Service Tire"
           onClickCreateButton={handleAdd}
-          totalPages={pagination.totalPages}
+          totalPages={totalPages}
           searchPlaceholder="Search tire by name, description"
-          currentPage={pagination.page}
-          handlePageChange={(page) => {
-            setPagination({
-              ...pagination,
-              page: page
-            })
-          }}
-          onPageSizeChange={(pageSize) => {
-            setPagination({
-              ...pagination,
-              pageSize: pageSize
-            })
-          }}
+          currentPage={queryParams.page}
+          pageSize={queryParams.pageSize}
+          handlePageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
           onSearchSort={handleSearchSort}
           columns={[
             { key: "name", label: "Name", sortable: true },
