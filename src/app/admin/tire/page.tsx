@@ -4,29 +4,20 @@ import React, { useEffect, useState } from "react";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import { tireFields, TireFormVal } from "@/config/tire.config";
 import { DynamicTable } from "@/components/common/DynamicTables";
-import { IDropdownOption, SortOrder, Tire } from "@/utils/interface";
+import { SortOrder, Tire } from "@/utils/interface";
 import { API_ROUTES, DEFAULT_PAGINATION } from "@/utils/constant";
 import { Edit, Trash } from "lucide-react";
 import { Button } from "@/components/common/ui/Button";
 import { toast } from "react-toastify";
 import { apiCall } from "@/utils/apiCall";
 
-const PAGE_SIZE = 10;
-
-interface EditTire {
-  _id: string;
-  name: string;
-  categories: string[];
-}
-
 function TireService() {
   const [open, setOpen] = useState(false);
   const [tires, setTires] = useState<Tire[]>([]);
-  const [editTire, setEditTire] = useState<EditTire | null>(null);
+  const [editTire, setEditTire] = useState<Tire | null>(null);
   const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
-  const [categories, setCategories] = useState<IDropdownOption[]>([]);
 
-  const refetchCurrentPage = () => fetchTires(pagination.page);
+  const refetchCurrentPage = () => fetchTires();
 
   const handleApi = async (
     config: any,
@@ -51,15 +42,7 @@ function TireService() {
   };
 
   useEffect(() => {
-    fetchTires(1);
-    handleApi(
-      {
-        endPoint: API_ROUTES.ADMIN.GIG_CATEGORY + "/dropdown",
-        method: "GET",
-      },
-      "",
-      (data) => setCategories(data)
-    );
+    fetchTires();
   }, []);
 
   const handleAdd = () => {
@@ -68,14 +51,14 @@ function TireService() {
   };
 
   const fetchTires = async (
-    page: number,
     query: string = "",
     key: string = "",
-    sortOrder: SortOrder = "asc"
+    sortOrder: SortOrder = "asc",
   ) => {
     try {
+      const { page, pageSize } = pagination;
       const resp = await apiCall({
-        endPoint: `${API_ROUTES.ADMIN.TIRE}?page=${page}&pageSize=${PAGE_SIZE}&search=${query}&sortKey=${key}&sortOrder=${sortOrder}`,
+        endPoint: `${API_ROUTES.ADMIN.TIRE}?page=${page}&pageSize=${pageSize}&search=${query}&sortKey=${key}&sortOrder=${sortOrder}`,
         method: "GET",
       });
 
@@ -129,26 +112,16 @@ function TireService() {
   };
 
   const handleEditTire = (tire: Tire) => {
-    const editRow = {
-      ...tire,
-      categories: tire.categories.map((row) => row._id),
-    };
-    setEditTire(editRow);
+    setEditTire(tire);
     setOpen(true);
   };
 
   const handleSearchSort = (
     searchTerm: string,
     key: string,
-    order: SortOrder,
-    page: number
+    order: SortOrder
   ) => {
-    page = page === 0 ? page + 1 : page;
-    fetchTires(page, searchTerm, key, order);
-  };
-
-  const handleChip = (row: Tire): string[] => {
-    return row.categories.map((val) => val.name);
+    fetchTires(searchTerm, key, order);
   };
 
   return (
@@ -161,15 +134,25 @@ function TireService() {
           totalPages={pagination.totalPages}
           searchPlaceholder="Search tire by name, description"
           currentPage={pagination.page}
-          handlePageChange={(page) => fetchTires(page)}
+          handlePageChange={(page) => {
+            setPagination({
+              ...pagination,
+              page: page
+            })
+          }}
+          onPageSizeChange={(pageSize) => {
+            setPagination({
+              ...pagination,
+              pageSize: pageSize
+            })
+          }}
           onSearchSort={handleSearchSort}
           columns={[
             { key: "name", label: "Name", sortable: true },
             {
-              key: "categories",
-              label: "Gig category",
-              render: (_, row) => handleChip(row).join(", "),
-              sortable: true
+              key: "description",
+              label: "Description",
+              sortable: true,
             },
           ]}
           actions={(row) => (
@@ -193,7 +176,7 @@ function TireService() {
         open={open}
         setOpen={setOpen}
         title={editTire ? "Edit Tire" : "Add Tire"}
-        fields={tireFields(categories)}
+        fields={tireFields}
         initialValues={editTire || undefined}
         onSubmit={handleSubmit}
         submitLabel={editTire ? "Update Tire" : "Save Tire"}

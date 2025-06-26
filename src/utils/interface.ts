@@ -77,7 +77,7 @@ export interface IDropdownOption {
 export interface Tire {
   _id: string;
   name: string;
-  categories: { _id: string, name: string}[];
+  description: string;
 }
 
 export interface GigCategory {
