@@ -1,4 +1,4 @@
-import { CommonFormField } from "@/components/common/CommonFormModal";
+import { CommonFormField } from "@/components/common/form/CommonFormModal";
 import { IDropdownOption } from "@/utils/interface";
 
 export const tireFields = (categories: IDropdownOption[]) => {

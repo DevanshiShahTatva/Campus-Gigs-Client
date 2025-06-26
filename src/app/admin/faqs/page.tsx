@@ -80,27 +80,7 @@ const AdminFAQs = () => {
     fetchFaqs();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this FAQ?")) return;
-    setDeletingId(id);
-    try {
-      const res = await apiCall({
-        endPoint: `${API_ROUTES.ADMIN.FAQS}/${id}`,
-        method: "DELETE",
-        withToken: true,
-      });
-      if (res && res.success) {
-        toast.success("FAQ deleted successfully");
-        fetchFaqs();
-      } else {
-        toast.error(MESSAGES.ERROR);
-      }
-    } catch (err) {
-      toast.error(MESSAGES.ERROR);
-    } finally {
-      setDeletingId(null);
-    }
-  };
+
 
   const handleEdit = (id: string) => {
     const selectedFaq = faqs.find((faq) => faq._id === id);
@@ -182,6 +162,11 @@ const AdminFAQs = () => {
       label: "Answer",
       sortable: false,
       textAlign: "left",
+      render: (value) => (
+        <div className="max-w-[300px] truncate" title={String(value)}>
+          {String(value) || "---"}
+        </div>
+      ),
     },
   ];
 

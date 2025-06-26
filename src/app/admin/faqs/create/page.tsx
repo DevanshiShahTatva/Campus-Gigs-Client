@@ -1,7 +1,7 @@
 "use client";
 import AdminTitle from "@/components/common/AdminTitle";
 import { Formik, Form, FieldArray, FormikHelpers } from "formik";
-import React from "react";
+import React, { useState } from "react";
 import { FaqsValidationSchema, InitialFaqsValues } from "./helper";
 import { IFAQFormValues } from "../types";
 import { apiCall } from "@/utils/apiCall";
@@ -10,11 +10,17 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { Trash2Icon } from "lucide-react";
 import FormikTextField from "@/components/common/FormikTextField";
-import Button from "@/components/common/Button";
+// import { AIButton } from "@/components/common/Button";
 import Loader from "@/components/common/Loader";
+import { AIButton } from "@/components/common/AiButton";
+import Button from "@/components/common/Button";
 
 const FaqCreate = () => {
   const router = useRouter();
+
+  const [isGeneratingAns, setIsGeneratingAns] = useState<boolean>(false);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+
   const handleSubmit = async (
     values: IFAQFormValues,
     actions: FormikHelpers<IFAQFormValues>
@@ -28,15 +34,45 @@ const FaqCreate = () => {
         withToken: true,
       });
       if (result && result.success) {
-          actions.resetForm();
-          router.push(ROUTES.ADMIN.FAQS);
-          toast.success(MESSAGES.FAQ_CREATE_SUCCESS);
+        actions.resetForm();
+        router.push(ROUTES.ADMIN.FAQS);
+        toast.success(MESSAGES.FAQ_CREATE_SUCCESS);
       }
     } catch (error) {
       console.error(error);
       toast.error(MESSAGES.FAQ_CREATE_ERROR);
     } finally {
       actions.setSubmitting(false);
+    }
+  };
+
+  const handleGenerateAiAnswer = async (
+    question: string,
+    setFieldValue: (field: string, value: string) => void,
+    index: number
+  ) => {
+    try {
+      setCurrentIndex(index);
+      setIsGeneratingAns(true);
+      const res = await apiCall({
+        method: "POST",
+        endPoint: API_ROUTES.ADMIN.AI_GENERATE_FAQ_ANSWER,
+        body: {
+          question: question,
+        },
+      });
+
+      if (res.success) {
+        const markdown = res.data.answer.replace(/\\n/g, "\n");
+
+        setFieldValue(`faqs[${index}].answer`, markdown);
+        setIsGeneratingAns(false);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong!");
+      setCurrentIndex(0);
+      setIsGeneratingAns(false);
     }
   };
 
@@ -48,7 +84,7 @@ const FaqCreate = () => {
         validationSchema={FaqsValidationSchema}
         onSubmit={handleSubmit}
       >
-        {({ values, isSubmitting }) => (
+        {({ values, isSubmitting, setFieldValue }) => (
           <>
             {isSubmitting && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -80,7 +116,8 @@ const FaqCreate = () => {
                               onClick={() => remove(index)}
                               className="cursor-pointer"
                             >
-                              <Trash2Icon className="h-5 w-5 text-gray-800" /> {""}
+                              <Trash2Icon className="h-5 w-5 text-gray-800" />{" "}
+                              {""}
                             </button>
                           )}
                         </div>
@@ -99,7 +136,19 @@ const FaqCreate = () => {
                               type="textarea"
                               rows={5}
                             />
-                            
+                            <AIButton
+                              disabled={!faq.question}
+                              loading={currentIndex === index && isGeneratingAns}
+                              onClick={() =>
+                                handleGenerateAiAnswer(
+                                  faq.question,
+                                  setFieldValue,
+                                  index
+                                )
+                              }
+                            >
+                              Generate with AI ✨
+                            </AIButton>
                           </div>
                         </div>
                       </div>

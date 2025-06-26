@@ -44,8 +44,13 @@ export const API_ROUTES = {
   CONTACT_US: "/contact-us",
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
+    AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",
+    PRIVACY_POLICY: "/privacy-policy",
+    AI_GENERATE_PRIVACY_POLICY: "/privacy-policy/generate",
     FAQS: "/faqs",
     BULK_FAQS: "/faqs/bulk",
+    AI_GENERATE_FAQ_ANSWER: "/faqs/generate-answer",
+    AI_GENERATE_MAIL: "/contact-us/generate-response",
     CONTACT_US_BULK: "/contact-us/bulk-delete",
     TIRE: "/tire",
     GIG_CATEGORY: "/gig-category",

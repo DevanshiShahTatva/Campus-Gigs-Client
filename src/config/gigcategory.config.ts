@@ -1,4 +1,4 @@
-import { CommonFormField } from "@/components/common/CommonFormModal";
+import { CommonFormField } from "@/components/common/form/CommonFormModal";
 import { ColumnConfig } from "@/utils/interface";
 
 export const gigCategoryFields: CommonFormField[] = [
