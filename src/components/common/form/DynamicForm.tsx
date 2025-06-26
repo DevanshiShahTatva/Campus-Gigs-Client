@@ -244,7 +244,7 @@ const InnerForm = ({
               onValueChange={(val) => setFieldValue(field.name, val)}
               disabled={isDisabled}
             >
-              <SelectTrigger className={error ? "border-destructive w-full" : "w-full"}>
+              <SelectTrigger className={error ? "border-destructive" : ""}>
                 <SelectValue placeholder={field.placeholder} />
               </SelectTrigger>
               <SelectContent>
