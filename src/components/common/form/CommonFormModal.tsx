@@ -10,9 +10,9 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/common/ui/Button";
-import FormikTextField from "./FormikTextField";
-import RadioCard from "./RadioCard";
-import CheckboxCard from "./CheckboxCard";
+import FormikTextField from "../FormikTextField";
+import RadioCard from "../RadioCard";
+import CheckboxCard from "../CheckboxCard";
 import {
   Select,
   SelectTrigger,
@@ -20,7 +20,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { MultiSelectDropdown } from "./ui/MultiSelectDropdown";
+import { MultiSelectDropdown } from "../ui/MultiSelectDropdown";
 
 export type FieldOption = { id: string | number; label: string };
 type FieldType =
