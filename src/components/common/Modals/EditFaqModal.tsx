@@ -8,6 +8,10 @@ import ModalLayout from "./CommonModalLayout";
 import FormikTextField from "../FormikTextField";
 import { IEditFaqsModalProps, IFAQItem } from "@/app/admin/faqs/types";
 import { FaqsEditValidationSchema } from "@/app/admin/faqs/create/helper";
+import { AIButton } from "../AiButton";
+import { apiCall } from "@/utils/apiCall";
+import { API_ROUTES } from "@/utils/constant";
+import { toast } from "react-toastify";
 
 // Custom Components
 
@@ -21,6 +25,8 @@ const EditFaqModal: React.FC<IEditFaqsModalProps> = ({
   saveChanges,
   faqsValues,
 }) => {
+  const [isGeneratingAns, setIsGeneratingAns] = useState<boolean>(false);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (
@@ -31,13 +37,39 @@ const EditFaqModal: React.FC<IEditFaqsModalProps> = ({
     actions.resetForm();
   };
 
+  const handleGenerateAiAnswer = async (
+    question: string,
+    setFieldValue: (field: string, value: string) => void
+  ) => {
+    try {
+      setIsGeneratingAns(true);
+      const res = await apiCall({
+        method: "POST",
+        endPoint: API_ROUTES.ADMIN.AI_GENERATE_FAQ_ANSWER,
+        body: {
+          question: question,
+        },
+      });
+
+      if (res.success) {
+        const markdown = res.data.answer.replace(/\\n/g, "\n");
+        setFieldValue("answer", markdown);
+        setIsGeneratingAns(false);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong!");
+      setIsGeneratingAns(false);
+    }
+  };
+
   return (
     <Formik
       initialValues={faqsValues}
       validationSchema={FaqsEditValidationSchema}
       onSubmit={handleSubmit}
     >
-      {() => (
+      {({ values, setFieldValue }) => (
         <Form className="flex gap-8 items-start md:flex-row flex-col">
           <ModalLayout
             onClose={onClose}
@@ -68,6 +100,18 @@ const EditFaqModal: React.FC<IEditFaqsModalProps> = ({
                     rows={5}
                     placeholder="Enter answer here"
                   />
+                  <AIButton
+                    disabled={!values.question}
+                    loading={isGeneratingAns}
+                    onClick={() =>
+                      handleGenerateAiAnswer(
+                        values.question,
+                        setFieldValue
+                      )
+                    }
+                  >
+                    Generate with AI ✨
+                  </AIButton>
                 </div>
               </div>
               {/* Content UI End*/}

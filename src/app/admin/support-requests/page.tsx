@@ -5,7 +5,7 @@ import { DynamicTable } from "@/components/common/DynamicTables";
 import { ColumnConfig } from "@/utils/interface";
 import ModalLayout from "@/components/common/Modals/CommonModalLayout";
 import { FiEye } from "react-icons/fi";
-import { Mail, CheckCircle } from "lucide-react";
+import { Mail, CheckCircle, Sparkles } from "lucide-react";
 import Loader from "@/components/common/Loader";
 import { toast } from "react-toastify";
 import { API_ROUTES } from "@/utils/constant";
@@ -24,6 +24,7 @@ const SupportRequestsPage = () => {
   const [sortKey, setSortKey] = useState<keyof ISupportRequest | string>("name");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>("asc");
   const [searchQuery, setSearchQuery] = useState("");
+  const [aiMailLoadingId, setAiMailLoadingId] = useState<string | null>(null);
 
   const fetchRequests = async (
     searchTerm = "",
@@ -126,7 +127,7 @@ const SupportRequestsPage = () => {
       render: (_v, row) => (
         <div className="flex gap-1 items-center justify-center">
           <a
-            href={`mailto:${row.email}`}
+            href={`mailto:${row.email}?subject=${encodeURIComponent(row.subject)}&body=${encodeURIComponent(row.message)}`}
             target="_blank"
             rel="noopener noreferrer"
             title="Send Email"
@@ -134,6 +135,40 @@ const SupportRequestsPage = () => {
           >
             <Mail size={18} />
           </a>
+          <button
+            onClick={async () => {
+              setAiMailLoadingId(row.id);
+              try {
+                const response = await apiCall({
+                  endPoint: API_ROUTES.ADMIN.AI_GENERATE_MAIL,
+                  method: "POST",
+                  body: { subject: row.subject, message: row.message },
+                  withToken: true,
+                });
+                if (response && response.success) {
+                  const aiSubject = response.data.responseSubject;
+                  const aiBody = response.data.responseMessage;
+                  const mailto = `mailto:${row.email}?subject=${encodeURIComponent(aiSubject)}&body=${encodeURIComponent(aiBody)}`;
+                  window.location.href = mailto;
+                } else {
+                  toast.error("Failed to generate AI mail reply");
+                }
+              } catch (err) {
+                toast.error("Failed to generate AI mail reply");
+              } finally {
+                setAiMailLoadingId(null);
+              }
+            }}
+            title="AI Mail Reply"
+            className="p-2 rounded hover:bg-[var(--base)]/10 text-[var(--base)]"
+            disabled={aiMailLoadingId === row.id}
+          >
+            {aiMailLoadingId === row.id ? (
+              <span className="animate-spin"><Sparkles size={18} /></span>
+            ) : (
+              <Sparkles size={18} />
+            )}
+          </button>
           <button
             onClick={() => {
               setModalRequest(row);

@@ -2,18 +2,23 @@
 import Button from "@/components/common/Button";
 import QuillEditor from "@/components/common/QuilEditor";
 import React, { useCallback, useEffect, useState } from "react";
-import { Trash2 } from "lucide-react";
+import {marked} from 'marked';
+import { Trash2, Sparkles } from "lucide-react";
 import { apiCall } from "@/utils/apiCall";
 import { API_ROUTES, MESSAGES } from "@/utils/constant";
 import { toast } from "react-toastify";
 import Loader from "@/components/common/Loader";
 import { ITCResponse } from "./types";
+import TagsModal from "@/components/common/Modals/TagsModal";
+// import TermsTagModal from "@/components/common/Modals/TermsTagModal";
 
 const TermsAndConditions = () => {
   const [loader, setLoader] = useState(false);
   const [content, setContent] = useState("");
   const [error, setError] = useState(false);
   const [tcId, setTcId] = useState("");
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
 
   const handleChange = (value: string) => {
     if (value.length !== 11) {
@@ -61,6 +66,35 @@ const TermsAndConditions = () => {
     }
   };
 
+  const handleGenerateAiTerms = async (keywords: string[]) => {
+    setIsGeneratingAi(true);
+    try {
+      const response = await apiCall({
+        endPoint: API_ROUTES.ADMIN.AI_GENERATE_TERMS_CONDITIONS,
+        method: "POST",
+        body: {
+          keywords: keywords,
+        },
+        withToken: true,
+      });
+
+      if (response && response.success) {
+        const contentText = typeof response.data.content === "string" ? response.data.content : "";
+        const cleanText = contentText.replace(/```/g, "");
+        const html = await marked(cleanText);
+        setContent(html);
+        setIsAiModalOpen(false);
+        toast.success("Terms & Conditions generated successfully!");
+      } else {
+        toast.error("Failed to generate Terms & Conditions");
+      }
+    } catch (err) {
+      console.error("Error generating terms", err);
+      toast.error("Failed to generate Terms & Conditions");
+    } finally {
+      setIsGeneratingAi(false);
+    }
+  };
 
   const getTermsContent = useCallback(async () => {
     setLoader(true);
@@ -98,14 +132,24 @@ const TermsAndConditions = () => {
         <p className="text-2xl font-bold text-[var(--base)]">
           Terms & Conditions
         </p>
-        <Button
-          onClick={() => updateTermsContent(true)}
-          variant="delete"
-          startIcon={<Trash2 className="w-5 h-5 font-bold" />}
-          className="disabled:bg-red-300 disabled:cursor-not-allowed md:flex gap-2 items-center cursor-pointer"
-        >
-          <p className="hidden md:block">Reset</p>
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setIsAiModalOpen(true)}
+            variant="primary"
+            startIcon={<Sparkles className="w-5 h-5 font-bold" />}
+            className="disabled:bg-blue-300 disabled:cursor-not-allowed md:flex gap-2 items-center cursor-pointer"
+          >
+            <p className="hidden md:block">Generate with AI</p>
+          </Button>
+          <Button
+            onClick={() => updateTermsContent(true)}
+            variant="delete"
+            startIcon={<Trash2 className="w-5 h-5 font-bold" />}
+            className="disabled:bg-red-300 disabled:cursor-not-allowed md:flex gap-2 items-center cursor-pointer"
+          >
+            <p className="hidden md:block">Reset</p>
+          </Button>
+        </div>
       </div>
       <QuillEditor
         name="tc"
@@ -132,6 +176,16 @@ const TermsAndConditions = () => {
           </div>
         </button>
       </div>
+
+      <TagsModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        onSave={handleGenerateAiTerms}
+        loading={isGeneratingAi}
+        maxTags={15}
+        placeholder="Add keywords for AI generation"
+        modalTitle="Generate Terms & Conditions with AI"
+      />
     </div>
   );
 };
