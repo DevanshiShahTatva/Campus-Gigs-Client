@@ -9,7 +9,11 @@ export const SignupFormSchema = yup.object().shape({
 
   email: yup.string()
     .required("Email is required")
-    .email("Invalid email format"),
+    .test('email-format', 'Please enter a valid email address', (value) => {
+      if (!value) return true;
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      return emailRegex.test(value);
+    }),
 
   password: yup.string()
     .required("Password is required")
@@ -52,7 +56,7 @@ export const selectStyles = {
   }),
   menuList: (base: any) => ({
     ...base,
-    maxHeight: '170px',
+    maxHeight: '156px',
     overflowY: 'auto',
     borderRadius: '8px',
   }),

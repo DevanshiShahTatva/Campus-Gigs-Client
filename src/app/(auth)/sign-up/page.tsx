@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import Select from "react-select";
 import { toast } from "react-toastify";
@@ -49,6 +48,39 @@ const SignUpPage: React.FC = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [acceptedTerms, setAcceptedTerms] = useState<boolean>(false);
   const [emailErr, setEmailErr] = useState("");
+
+  const renderStepIndicator = (values: ISignupFormValues, errors: any) => (
+    <div className="flex items-center justify-center mb-8 mt-10">
+      {steps.map((step: Step, index: number) => {
+        const isClickable = index === currentStep || index < currentStep || (index > currentStep && isStepValid(currentStep, values, errors));
+        return (
+          <div key={step.id} className="flex items-center">
+            <button
+              type="button"
+              onClick={() => isClickable && setCurrentStep(index)}
+              disabled={!isClickable}
+              className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 ${index < currentStep
+                ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg'
+                : index === currentStep
+                  ? 'bg-[var(--base)] border-[var(--base)] text-white shadow-lg'
+                  : 'bg-white border-gray-300 text-gray-400'
+                } ${isClickable ? 'cursor-pointer' : 'cursor-not-allowed'
+                }`}
+            >
+              {index < currentStep ? (
+                <Check className="w-5 h-5" />
+              ) : (
+                step.icon
+              )}
+            </button>
+            {index < steps.length - 1 && (
+              <div className={`w-12 h-0.5 mx-3 transition-all duration-300 ${index < currentStep ? 'bg-emerald-500' : 'bg-gray-200'}`} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 
   const handleSignupSubmit = async (values: ISignupFormValues, actions: FormikHelpers<ISignupFormValues>) => {
     if (!acceptedTerms) {
@@ -158,31 +190,6 @@ const SignUpPage: React.FC = () => {
       setCurrentStep(currentStep - 1);
     }
   };
-
-  const renderStepIndicator = () => (
-    <div className="flex items-center justify-center mb-8">
-      {steps.map((step: Step, index: number) => (
-        <div key={step.id} className="flex items-center">
-          <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 ${index < currentStep
-            ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg'
-            : index === currentStep
-              ? 'bg-[var(--base)] border-[var(--base)] text-white shadow-lg'
-              : 'bg-white border-gray-300 text-gray-400'
-            }`}>
-            {index < currentStep ? (
-              <Check className="w-5 h-5" />
-            ) : (
-              step.icon
-            )}
-          </div>
-          {index < steps.length - 1 && (
-            <div className={`w-12 h-0.5 mx-3 transition-all duration-300 ${index < currentStep ? 'bg-emerald-500' : 'bg-gray-200'
-              }`} />
-          )}
-        </div>
-      ))}
-    </div>
-  );
 
   const renderStep1 = () => {
     return (
@@ -479,88 +486,88 @@ const SignUpPage: React.FC = () => {
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-8">
       <div className="w-full max-w-6xl bg-white shadow-2xl rounded-2xl grid lg:grid-cols-2 overflow-hidden">
         <div className="p-8 lg:p-12 lg:pt-6 flex flex-col justify-between h-full">
-          <div>
-            <div className="mb-10">
+          <div className="w-fit">
+            <Link href="/" className="mb-10">
               <img src="/logo.svg" alt="" height={40} width={266} />
-            </div>
-            {renderStepIndicator()}
-            <div>
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                  {steps[currentStep].title}
-                </h3>
-                <p className="text-gray-500 text-sm">
-                  {steps[currentStep].subtitle}
-                </p>
-              </div>
-              <Formik<ISignupFormValues>
-                initialValues={{
-                  name: "",
-                  email: "",
-                  password: "",
-                  profilePicture: null,
-                  professionalInterests: "",
-                  extracurriculars: "",
-                  certifications: "",
-                  skills: [],
-                  educationLevel: "",
-                  customEducation: ""
-                }}
-                onSubmit={handleSignupSubmit}
-                validationSchema={SignupFormSchema}
-              >
-                {({ values, errors, isSubmitting, setFieldValue }) => (
-                  <Form className="space-y-6">
-                    {renderStepContent(values, setFieldValue)}
-                    <div className="flex justify-between items-center pt-2">
-                      <button
-                        type="button"
-                        onClick={prevStep}
-                        disabled={currentStep === 0}
-                        className={`flex items-center text-[13px] lg:text-[15px] px-2 lg:px-5 py-3 rounded-lg lg:font-medium transition-all duration-200 bg-gray-100 ${currentStep === 0
-                          ? 'text-gray-400 cursor-not-allowed'
-                          : 'text-gray-600 hover:text-gray-800 cursor-pointer'
-                          }`}
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                        <span>Previous</span>
-                      </button>
-                      {currentStep === steps.length - 1 ? (
-                        <Button
-                          type="submit"
-                          variant="green"
-                          disabled={isSubmitting || !isStepValid(currentStep, values, errors) || !acceptedTerms}
-                          className="flex items-center space-x-2 text-[13px] lg:text-[15px] lg:font-medium px-3 lg:px-5 py-3 rounded-lg transition-all duration-200 disabled:opacity-50"
-                        >
-                          {isSubmitting ? "Creating Account..." : "Create Account"}
-                          <Check className="w-4 h-4 ml-2" />
-                        </Button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={nextStep}
-                          disabled={!isStepValid(currentStep, values, errors)}
-                          className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${isStepValid(currentStep, values, errors)
-                            ? 'bg-[var(--base)] hover:bg-[var(--base-hover)] text-white shadow-lg hover:shadow-xl cursor-pointer'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            }`}
-                        >
-                          <span>Next</span>
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                    <p className="text-center text-sm text-gray-500 mt-6">
-                      Already have an account?{" "}
-                      <Link href="/login" className="text-[var(--base)] font-medium hover:underline">
-                        Log In
-                      </Link>
-                    </p>
-                  </Form>
-                )}
-              </Formik>
-            </div>
+            </Link>
           </div>
+          <Formik<ISignupFormValues>
+            initialValues={{
+              name: "",
+              email: "",
+              password: "",
+              profilePicture: null,
+              professionalInterests: "",
+              extracurriculars: "",
+              certifications: "",
+              skills: [],
+              educationLevel: "",
+              customEducation: ""
+            }}
+            onSubmit={handleSignupSubmit}
+            validationSchema={SignupFormSchema}
+          >
+            {({ values, errors, isSubmitting, setFieldValue }: any) => (
+              <Form className="space-y-6">
+                {renderStepIndicator(values, errors)}
+                <div>
+                  <div className="text-center mb-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                      {steps[currentStep].title}
+                    </h3>
+                    <p className="text-gray-500 text-sm">
+                      {steps[currentStep].subtitle}
+                    </p>
+                  </div>
+                </div>
+                {renderStepContent(values, setFieldValue)}
+                <div className="flex justify-between items-center pt-2">
+                  <button
+                    type="button"
+                    onClick={prevStep}
+                    disabled={currentStep === 0}
+                    className={`flex items-center text-[13px] lg:text-[15px] px-2 lg:px-5 py-3 rounded-lg lg:font-medium transition-all duration-200 bg-gray-100 ${currentStep === 0
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-gray-600 hover:text-gray-800 cursor-pointer'
+                      }`}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Previous</span>
+                  </button>
+                  {currentStep === steps.length - 1 ? (
+                    <Button
+                      type="submit"
+                      variant="green"
+                      disabled={isSubmitting || !isStepValid(currentStep, values, errors) || !acceptedTerms}
+                      className="flex items-center space-x-2 text-[13px] lg:text-[15px] lg:font-medium px-3 lg:px-5 py-3 rounded-lg transition-all duration-200 disabled:opacity-50"
+                    >
+                      {isSubmitting ? "Creating Account..." : "Create Account"}
+                      <Check className="w-4 h-4 ml-2" />
+                    </Button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={nextStep}
+                      disabled={!isStepValid(currentStep, values, errors)}
+                      className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${isStepValid(currentStep, values, errors)
+                        ? 'bg-[var(--base)] hover:bg-[var(--base-hover)] text-white shadow-lg hover:shadow-xl cursor-pointer'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                    >
+                      <span>Next</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <p className="text-center text-sm text-gray-500 mt-6">
+                  Already have an account?{" "}
+                  <Link href="/login" className="text-[var(--base)] font-medium hover:underline">
+                    Log In
+                  </Link>
+                </p>
+              </Form>
+            )}
+          </Formik>
         </div>
         <div className="relative w-full h-full bg-[#fff] text-white hidden lg:block">
           <img src="/illustration.svg" alt="" />

@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import * as yup from "yup";
 import { toast } from "react-toastify";
@@ -42,7 +41,11 @@ interface ITermsResponse {
 const logInFormSchema = yup.object().shape({
   email: yup.string()
     .required("Email is required")
-    .email("Invalid email format"),
+    .test('email-format', 'Please enter a valid email address', (value) => {
+      if (!value) return true;
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      return emailRegex.test(value);
+    }),
   password: yup.string()
     .required("Password is required")
     .min(8, "Password must be at least 8 characters")
@@ -317,9 +320,9 @@ const LogInPage = () => {
       <section className="min-h-screen flex items-center justify-center bg-[#f9fafb] px-4 py-8">
         <div className="w-full max-w-6xl bg-white shadow-lg rounded-xl grid lg:grid-cols-2 overflow-hidden">
           <div className="p-8 lg:p-16 pt-3 lg:pt-6 flex flex-col justify-between h-full">
-            <div className="mb-10">
+            <Link href="/" className="mb-10 w-fit">
               <img src="/logo.svg" alt="" height={40} width={266} />
-            </div>
+            </Link>
             <div>
               <div className="mb-5">
                 <p className="text-sm text-gray-500">Enter your email and password to access your account.</p>
