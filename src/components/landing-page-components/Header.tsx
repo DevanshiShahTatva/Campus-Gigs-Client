@@ -48,7 +48,7 @@ const Header = () => {
         <div className="flex items-center">
           <span
             className="text-xl sm:text-2xl font-bold text-[color:var(--base)] hover:text-[color:var(--base-hover)] transition-colors duration-300 cursor-pointer"
-            onClick={() => scrollToSection("hero")}
+            onClick={() => router.push('/')}
           >
             {/* CampusGig */}
             <img src="/light-logo.svg" alt="CampusGig Logo" className="h-6 w-auto sm:h-8 md:h-10 object-contain min-w-[32px] sm:min-w-[40px] mr-2 transition-all duration-300" />
