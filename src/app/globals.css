@@ -327,3 +327,38 @@ button{
 .react-datepicker-wrapper .react-datepicker__input-container {
   width: 100%;
 }
+
+.shine-btn {
+  position: relative;
+  overflow: hidden;
+}
+.shine-effect {
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(120deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.15) 100%);
+  filter: blur(1px);
+  transform: skewX(-20deg);
+  pointer-events: none;
+  animation: shine-move 2.5s infinite;
+  transition: background 0.2s, filter 0.2s;
+}
+.shine-btn:hover .shine-effect {
+  width: 80%;
+  left: -100%;
+  filter: blur(2px);
+  background: linear-gradient(120deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.05) 100%);
+  animation: shine-glass-hover 0.7s;
+}
+@keyframes shine-move {
+  0% { left: -75%; }
+  100% { left: 125%; }
+}
+@keyframes shine-glass-hover {
+  0% { left: -100%; opacity: 0.2; }
+  10% { opacity: 0.7; }
+  50% { left: 60%; opacity: 1; }
+  100% { left: 125%; opacity: 0; }
+}

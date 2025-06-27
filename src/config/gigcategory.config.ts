@@ -1,5 +1,5 @@
 import { CommonFormField } from "@/components/common/form/CommonFormModal";
-import { ColumnConfig, IDropdownOption } from "@/utils/interface";
+import { IDropdownOption } from "@/utils/interface";
 
 export const gigCategoryFields = (services: IDropdownOption[]) => {
   return [
