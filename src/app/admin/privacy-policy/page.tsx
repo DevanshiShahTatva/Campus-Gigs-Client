@@ -10,6 +10,7 @@ import { IPrivacyPolicyResponse } from "./types";
 import { API_ROUTES } from "@/utils/constant";
 import TagsModal from "@/components/common/Modals/TagsModal";
 import { marked } from "marked";
+import ModalLayout from "@/components/common/Modals/CommonModalLayout";
 
 const AdminPrivacyPolicy = () => {
   const [loader, setLoader] = useState(false);
@@ -18,6 +19,7 @@ const AdminPrivacyPolicy = () => {
   const [policyId, setPolicyId] = useState("");
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const handleChange = (value: string) => {
     if (value.length !== 11) {
@@ -124,6 +126,31 @@ const AdminPrivacyPolicy = () => {
           <Loader size={48} colorClass="text-[var(--base)]" />
         </div>
       )}
+      {showResetConfirm && (
+        <ModalLayout
+          onClose={() => setShowResetConfirm(false)}
+          modalTitle="Reset Privacy Policy?"
+          footerActions={[
+            {
+              label: "Cancel",
+              variant: "outlined",
+              onClick: () => setShowResetConfirm(false),
+            },
+            {
+              label: "Reset",
+              variant: "delete",
+              onClick: () => {
+                setShowResetConfirm(false);
+                updatePrivacyPolicy(true);
+              },
+            },
+          ]}
+        >
+          <div className="py-6 text-center text-[var(--text-dark)]">
+            Are you sure you want to reset the Privacy Policy? This action cannot be undone.
+          </div>
+        </ModalLayout>
+      )}
       <div className="mb-2 flex w-full justify-between">
         <p className="text-2xl font-bold text-[var(--base)]">Privacy Policy</p>
         <div className="flex gap-2">
@@ -136,7 +163,7 @@ const AdminPrivacyPolicy = () => {
             <p className="hidden md:block">Generate with AI</p>
           </Button>
           <Button
-            onClick={() => updatePrivacyPolicy(true)}
+            onClick={() => setShowResetConfirm(true)}
             variant="delete"
             startIcon={<Trash2 className="w-5 h-5 font-bold" />}
             className="disabled:bg-red-300 disabled:cursor-not-allowed md:flex gap-2 items-center cursor-pointer"

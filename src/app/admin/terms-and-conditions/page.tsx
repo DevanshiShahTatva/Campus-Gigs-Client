@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import Loader from "@/components/common/Loader";
 import { ITCResponse } from "./types";
 import TagsModal from "@/components/common/Modals/TagsModal";
+import ModalLayout from "@/components/common/Modals/CommonModalLayout";
 // import TermsTagModal from "@/components/common/Modals/TermsTagModal";
 
 const TermsAndConditions = () => {
@@ -19,6 +20,7 @@ const TermsAndConditions = () => {
   const [tcId, setTcId] = useState("");
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const handleChange = (value: string) => {
     if (value.length !== 11) {
@@ -128,6 +130,31 @@ const TermsAndConditions = () => {
           <Loader size={48} colorClass="text-[var(--base)]" />
         </div>
       )}
+      {showResetConfirm && (
+        <ModalLayout
+          onClose={() => setShowResetConfirm(false)}
+          modalTitle="Reset Terms & Conditions?"
+          footerActions={[
+            {
+              label: "Cancel",
+              variant: "outlined",
+              onClick: () => setShowResetConfirm(false),
+            },
+            {
+              label: "Reset",
+              variant: "delete",
+              onClick: () => {
+                setShowResetConfirm(false);
+                updateTermsContent(true);
+              },
+            },
+          ]}
+        >
+          <div className="py-6 text-center text-[var(--text-dark)]">
+            Are you sure you want to reset the Terms & Conditions? This action cannot be undone.
+          </div>
+        </ModalLayout>
+      )}
       <div className="mb-2 flex w-full justify-between">
         <p className="text-2xl font-bold text-[var(--base)]">
           Terms & Conditions
@@ -142,7 +169,7 @@ const TermsAndConditions = () => {
             <p className="hidden md:block">Generate with AI</p>
           </Button>
           <Button
-            onClick={() => updateTermsContent(true)}
+            onClick={() => setShowResetConfirm(true)}
             variant="delete"
             startIcon={<Trash2 className="w-5 h-5 font-bold" />}
             className="disabled:bg-red-300 disabled:cursor-not-allowed md:flex gap-2 items-center cursor-pointer"

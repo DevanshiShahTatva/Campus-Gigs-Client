@@ -229,7 +229,7 @@ export default function Home() {
                       type="text"
                       value={isUserTyping ? userInput : ""}
                       placeholder={isUserTyping ? "" : searchText}
-                      className="w-full px-6 py-4 rounded-full bg-primary/50 border border-[var(--text-light)] text-[color:var(--text-light)] placeholder-[color:var(--text-light)]/70 focus:outline-none"
+                      className="w-full px-6 py-4 rounded-full  border border-[var(--text-light)] text-[color:var(--text-light)] placeholder-[color:var(--text-light)]/70 focus:outline-none"
                       onChange={handleInputChange}
                       onFocus={handleInputFocus}
                       onBlur={handleInputBlur}
