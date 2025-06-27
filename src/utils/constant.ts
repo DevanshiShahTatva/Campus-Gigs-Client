@@ -77,15 +77,15 @@ export const USER_SIDEBAR_ITEMS = [
   },
   {
     id: 3,
-    title: "Gig Category",
-    route: ROUTES.ADMIN.GIGCATEGORY,
-    icon: "/assets/gigcategory.svg",
-  },
-  {
-    id: 4,
     title: "Service Tire",
     route: ROUTES.ADMIN.TIRE,
     icon: "/assets/services.svg",
+  },
+  {
+    id: 4,
+    title: "Gig Category",
+    route: ROUTES.ADMIN.GIGCATEGORY,
+    icon: "/assets/gigcategory.svg",
   },
   {
     id: 5,

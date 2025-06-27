@@ -3,12 +3,11 @@
 import React, { useEffect, useState } from "react";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import {
-  GigCategoryTableColumns,
   gigCategoryFields,
   GigCategoryFormVal,
 } from "@/config/gigcategory.config";
 import { DynamicTable } from "@/components/common/DynamicTables";
-import { GigCategory, SortOrder } from "@/utils/interface";
+import { GigCategory, IDropdownOption, SortOrder } from "@/utils/interface";
 import { API_ROUTES, DEFAULT_PAGINATION } from "@/utils/constant";
 import { Edit, Trash } from "lucide-react";
 import { Button } from "@/components/common/ui/Button";
@@ -23,32 +22,45 @@ function GigsCategory() {
   const [editGigCategory, setEditGigCategory] = useState<GigCategory | null>(
     null
   );
+  const [servicesDropdown, setServicesDropdown] = useState<IDropdownOption[]>(
+    []
+  );
   const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
 
   const refetchCurrentPage = () => fetchGigCategory(pagination.page);
 
   const handleApi = async (
     config: any,
-    successMsg: string,
-    callback?: () => void
+    successMsg?: string,
+    callback?: (data: any) => void,
+    closeOnError: boolean = false
   ) => {
     try {
       const resp = await apiCall(config);
       if (resp?.success) {
-        toast.success(successMsg);
-        callback?.();
+        successMsg && toast.success(successMsg);
+        callback?.(resp.data);
+        setOpen(false);
       } else {
         toast.error(resp?.message || "Something went wrong");
+        closeOnError && setOpen(false);
       }
     } catch {
       toast.error("Something went wrong");
-    } finally {
-      setOpen(false);
+      closeOnError && setOpen(false);
     }
   };
 
   useEffect(() => {
     fetchGigCategory(1);
+  }, []);
+
+  useEffect(() => {
+    handleApi(
+      { endPoint: API_ROUTES.ADMIN.TIRE + "/dropdown", method: "GET" },
+      "",
+      (data) => setServicesDropdown(data)
+    );
   }, []);
 
   const handleAdd = () => {
@@ -144,7 +156,15 @@ function GigsCategory() {
           currentPage={pagination.page}
           handlePageChange={(page) => fetchGigCategory(page)}
           onSearchSort={handleSearchSort}
-          columns={GigCategoryTableColumns}
+          columns={[
+            { key: "name", label: "Name", sortable: true },
+            {
+              key: "tire",
+              label: "Tire",
+              render: (_, data: GigCategory) => data.tire.name,
+              sortable: true,
+            },
+          ]}
           actions={(row) => (
             <div className="flex items-center justify-center gap-x-3">
               <Button size={"icon"} onClick={() => handleEditGigCategory(row)}>
@@ -166,7 +186,7 @@ function GigsCategory() {
         open={open}
         setOpen={setOpen}
         title={editGigCategory ? "Edit gig category" : "Add gig category"}
-        fields={gigCategoryFields}
+        fields={gigCategoryFields(servicesDropdown)}
         initialValues={editGigCategory || undefined}
         onSubmit={handleSubmit}
         submitLabel={

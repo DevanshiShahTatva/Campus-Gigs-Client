@@ -1,28 +1,22 @@
 import { CommonFormField } from "@/components/common/form/CommonFormModal";
-import { IDropdownOption } from "@/utils/interface";
 
-export const tireFields = (categories: IDropdownOption[]) => {
-  return [
-    {
-      name: "name",
-      label: "Name",
-      type: "text",
-      placeholder: "Please enter tire name",
-      required: true,
-    },
-    {
-      name: "categories",
-      label: "Gig Category",
-      type: "multiselect",
-      options: categories ? categories : [],
-      placeholder: "Please select category",
-      required: true,
-    },
-  ] as CommonFormField[];
-};
+export const tireFields: CommonFormField[] = [
+  {
+    name: "name",
+    label: "Name",
+    type: "text",
+    placeholder: "Please enter tire name",
+    required: true,
+  },
+  {
+    name: "description",
+    label: "Description",
+    type: "textarea",
+    placeholder: "Write description here...",
+  },
+];
 
 export interface TireFormVal {
   name: string;
   description: string;
 }
- 

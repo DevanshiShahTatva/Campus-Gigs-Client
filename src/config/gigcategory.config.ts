@@ -1,28 +1,27 @@
 import { CommonFormField } from "@/components/common/form/CommonFormModal";
-import { ColumnConfig } from "@/utils/interface";
+import { IDropdownOption } from "@/utils/interface";
 
-export const gigCategoryFields: CommonFormField[] = [
-  {
-    name: "name",
-    label: "Name",
-    type: "text",
-    placeholder: "Please enter gig category name",
-    required: true,
-  },
-  {
-    name: "description",
-    label: "Description",
-    type: "textarea",
-    placeholder: "Describe the gig category...",
-  },
-];
-
-export const GigCategoryTableColumns: ColumnConfig<any>[] = [
-  { key: "name", label: "Name", sortable: true },
-  { key: "description", label: "Description", sortable: true },
-];
+export const gigCategoryFields = (services: IDropdownOption[]) => {
+  return [
+    {
+      name: "name",
+      label: "Name",
+      type: "text",
+      placeholder: "Please enter gig category name",
+      required: true,
+    },
+    {
+      name: "tire",
+      label: "Tire Service",
+      type: "select",
+      options: services ? services : [],
+      placeholder: "Please select tire service",
+      required: true
+    },
+  ] as CommonFormField[];
+};
 
 export interface GigCategoryFormVal {
-  name: string,
-  description: string
+  name: string;
+  tire: string;
 }
