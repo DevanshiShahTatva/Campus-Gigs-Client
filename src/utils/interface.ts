@@ -77,12 +77,11 @@ export interface IDropdownOption {
 export interface Tire {
   _id: string;
   name: string;
-  categories: { _id: string, name: string}[];
+  description: string;
 }
 
 export interface GigCategory {
   _id: string;
   name: string;
-  description: string;
-  isUsed: boolean;
+  tire: { _id: string, name: string };
 }
