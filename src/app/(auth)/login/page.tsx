@@ -76,7 +76,6 @@ const TermsModal = ({
   onAccept: () => void;
   onDecline: () => void;
 }) => {
-  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const [termsData, setTermsData] = useState<ITermsResponse['data'] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -134,13 +133,6 @@ const TermsModal = ({
     }
   };
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollTop + clientHeight >= scrollHeight - 10) {
-      setHasScrolledToBottom(true);
-    }
-  };
-
   const handleRetry = () => {
     fetchTermsAndConditions();
   };
@@ -169,7 +161,7 @@ const TermsModal = ({
             Please read and accept our terms to continue
           </p>
         </div>
-        <div className="p-6 max-h-96 overflow-y-auto" onScroll={handleScroll}>
+        <div className="p-6 max-h-96 overflow-y-auto">
           {isLoading && <LoadingSpinner />}
           {!isLoading && error && (
             <div className="text-center py-8">
@@ -216,12 +208,6 @@ const TermsModal = ({
           )}
         </div>
         <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
-          {!hasScrolledToBottom && !isLoading && !error && termsData && (
-            <p className="text-xs text-amber-600 mb-3 flex items-center gap-2">
-              <FiAlertCircle className="h-4 w-4" />
-              Please scroll down to read all terms before accepting
-            </p>
-          )}
           <div className="flex gap-3 justify-end">
             <button
               onClick={onDecline}
@@ -231,7 +217,7 @@ const TermsModal = ({
             </button>
             <button
               onClick={() => acceptTermAndCondition()}
-              disabled={!hasScrolledToBottom || isLoading || !!error || !termsData}
+              disabled={isLoading || !!error || !termsData}
               className="px-6 py-2 bg-[#218189] text-white rounded-lg hover:bg-[#1a6b72] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               <FiCheck className="h-4 w-4" />
