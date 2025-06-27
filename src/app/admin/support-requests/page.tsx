@@ -3,13 +3,13 @@ import { useEffect, useState, useMemo } from "react";
 import { apiCall } from "@/utils/apiCall";
 import { DynamicTable } from "@/components/common/DynamicTables";
 import { ColumnConfig } from "@/utils/interface";
-import ModalLayout from "@/components/common/Modals/CommonModalLayout";
 import { FiEye } from "react-icons/fi";
 import { Mail, CheckCircle, Sparkles } from "lucide-react";
 import Loader from "@/components/common/Loader";
 import { toast } from "react-toastify";
 import { API_ROUTES } from "@/utils/constant";
 import { ISupportRequest, ISupportRequestApiResponse } from "./types";
+import ModalLayout from "@/components/common/Modals/CommonModalLayout";
 
 const SupportRequestsPage = () => {
   const [requests, setRequests] = useState<ISupportRequest[]>([]);
@@ -17,12 +17,21 @@ const SupportRequestsPage = () => {
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalRequest, setModalRequest] = useState<ISupportRequest | null>(null);
+  const [modalRequest, setModalRequest] = useState<ISupportRequest | null>(
+    null
+  );
   const [statusLoading, setStatusLoading] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [pagination, setPagination] = useState({ page: 1, pageSize: 10, total: 1, totalPages: 1 });
-  const [sortKey, setSortKey] = useState<keyof ISupportRequest | string>("name");
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>("asc");
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: 10,
+    total: 1,
+    totalPages: 1,
+  });
+  const [sortKey, setSortKey] = useState<keyof ISupportRequest | string>(
+    "name"
+  );
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [searchQuery, setSearchQuery] = useState("");
   const [aiMailLoadingId, setAiMailLoadingId] = useState<string | null>(null);
 
@@ -49,7 +58,13 @@ const SupportRequestsPage = () => {
         withToken: true,
       });
       if (res && res.status === 200) {
-        setRequests(res.data.map((r: any) => ({ ...r, id: r._id, responded: r.status === 'responded' })));
+        setRequests(
+          res.data.map((r: any) => ({
+            ...r,
+            id: r._id,
+            responded: r.status === "responded",
+          }))
+        );
         setPagination(res.meta);
       } else {
         setError(res?.message || "Failed to fetch support requests.");
@@ -67,14 +82,23 @@ const SupportRequestsPage = () => {
 
   // Selection logic
   const allVisibleIds = useMemo(() => requests.map((r) => r.id), [requests]);
-  const allSelected = useMemo(() => allVisibleIds.length > 0 && allVisibleIds.every((id) => selected.includes(id)), [selected, allVisibleIds]);
+  const allSelected = useMemo(
+    () =>
+      allVisibleIds.length > 0 &&
+      allVisibleIds.every((id) => selected.includes(id)),
+    [selected, allVisibleIds]
+  );
   const isSelected = (id: string) => selected.includes(id);
   const toggleSelect = (id: string) => {
-    setSelected((prev) => prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]);
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
+    );
   };
   const toggleSelectAll = () => {
-    if (allSelected) setSelected((prev) => prev.filter((id) => !allVisibleIds.includes(id)));
-    else setSelected((prev) => Array.from(new Set([...prev, ...allVisibleIds])));
+    if (allSelected)
+      setSelected((prev) => prev.filter((id) => !allVisibleIds.includes(id)));
+    else
+      setSelected((prev) => Array.from(new Set([...prev, ...allVisibleIds])));
   };
 
   // Table columns
@@ -108,15 +132,41 @@ const SupportRequestsPage = () => {
       textAlign: "center",
     },
     { key: "name", label: "Name", sortable: true },
-    { key: "email", label: "Email", sortable: true },
-    { key: "subject", label: "Subject", sortable: true },
+    {
+      key: "email",
+      label: "Email",
+      sortable: true,
+      render: (value) => (
+        <div className="max-w-[200px] truncate" title={String(value)}>
+          {String(value) || "---"}
+        </div>
+      ),
+    },
+    {
+      key: "subject",
+      label: "Subject",
+      sortable: true,
+      render: (value) => (
+        <div className="max-w-[250px] truncate" title={String(value)}>
+          {String(value) || "---"}
+        </div>
+      ),
+    },
     {
       key: "status",
       label: "Status",
       render: (_v, row) => (
-        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${row.responded ? "bg-green-100 text-green" : "bg-yellow-100 text-yellow-700"}`}>
-          {row.responded ? "Responded" : "Pending"}
-        </span>
+        <div className="flex justify-center">
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+              row.responded
+                ? "bg-green-100 text-green"
+                : "bg-yellow-100 text-yellow-700"
+            }`}
+          >
+            {row.responded ? "Responded" : "Pending"}
+          </span>
+        </div>
       ),
       textAlign: "center",
       sortable: true,
@@ -127,7 +177,9 @@ const SupportRequestsPage = () => {
       render: (_v, row) => (
         <div className="flex gap-1 items-center justify-center">
           <a
-            href={`mailto:${row.email}?subject=${encodeURIComponent(row.subject)}&body=${encodeURIComponent(row.message)}`}
+            href={`mailto:${row.email}?subject=${encodeURIComponent(
+              row.subject
+            )}&body=${encodeURIComponent(row.message)}`}
             target="_blank"
             rel="noopener noreferrer"
             title="Send Email"
@@ -148,7 +200,11 @@ const SupportRequestsPage = () => {
                 if (response && response.success) {
                   const aiSubject = response.data.responseSubject;
                   const aiBody = response.data.responseMessage;
-                  const mailto = `mailto:${row.email}?subject=${encodeURIComponent(aiSubject)}&body=${encodeURIComponent(aiBody)}`;
+                  const mailto = `mailto:${
+                    row.email
+                  }?subject=${encodeURIComponent(
+                    aiSubject
+                  )}&body=${encodeURIComponent(aiBody)}`;
                   window.location.href = mailto;
                 } else {
                   toast.error("Failed to generate AI mail reply");
@@ -164,7 +220,9 @@ const SupportRequestsPage = () => {
             disabled={aiMailLoadingId === row.id}
           >
             {aiMailLoadingId === row.id ? (
-              <span className="animate-spin"><Sparkles size={18} /></span>
+              <span className="animate-spin">
+                <Sparkles size={18} />
+              </span>
             ) : (
               <Sparkles size={18} />
             )}
@@ -186,12 +244,16 @@ const SupportRequestsPage = () => {
                 try {
                   const response = await apiCall({
                     endPoint: `${API_ROUTES.CONTACT_US}/${row.id}/status`,
-                    method: "PATCH",
+                    method: "PUT",
                     body: { status: "responded" },
                     withToken: true,
                   });
                   if (response && response.success) {
-                    setRequests((prev) => prev.map((r) => r.id === row.id ? { ...r, responded: true } : r));
+                    setRequests((prev) =>
+                      prev.map((r) =>
+                        r.id === row.id ? { ...r, responded: true } : r
+                      )
+                    );
                     toast.success("Support request marked as responded");
                   } else {
                     toast.error(response?.message || "Failed to update status");
@@ -207,13 +269,19 @@ const SupportRequestsPage = () => {
             }}
             disabled={row.responded || statusLoading === row.id}
             title={row.responded ? "Already Responded" : "Mark as Responded"}
-            className={`p-2 rounded ${row.responded ? "text-[var(--base)] !cursor-not-allowed" : "hover:bg-[var(--base)]/10 text-[var(--text-semi-dark)]/90"}`}
+            className={`p-2 rounded ${
+              row.responded
+                ? "text-[var(--base)] !cursor-not-allowed"
+                : "hover:bg-[var(--base)]/10 text-[var(--text-semi-dark)]/90"
+            }`}
           >
-            {statusLoading === row.id ? (
-              <Loader size={18} colorClass="text-[var(--base)]" />
-            ) : (
-              <CheckCircle size={18} />
-            )}
+            <div className="flex items-center justify-center w-6 h-6">
+              {statusLoading === row.id ? (
+                <Loader size={18} colorClass="text-[var(--base)]" />
+              ) : (
+                <CheckCircle size={18} />
+              )}
+            </div>
           </button>
         </div>
       ),
@@ -252,7 +320,7 @@ const SupportRequestsPage = () => {
   const handleSearchSort = (
     search: string,
     sortKeyParam: keyof ISupportRequest,
-    sortOrderParam: 'asc' | 'desc',
+    sortOrderParam: "asc" | "desc",
     page: number
   ) => {
     setSearchQuery(search);
@@ -264,20 +332,19 @@ const SupportRequestsPage = () => {
   return (
     <section className="">
       <div className="max-w-7xl mx-auto">
-        {loading && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <Loader size={48} colorClass="text-[var(--base)]" />
-          </div>
-        )}
         {error ? (
-          <div className="text-center text-red-600 font-medium py-8">{error}</div>
+          <div className="text-center text-red-600 font-medium py-8">
+            {error}
+          </div>
         ) : (
           <DynamicTable<ISupportRequest>
             data={requests}
             columns={columns}
             actions={undefined}
             totalPages={pagination.totalPages}
-            handlePageChange={(page) => fetchRequests(searchQuery, sortKey, sortOrder, page)}
+            handlePageChange={(page) =>
+              fetchRequests(searchQuery, sortKey, sortOrder, page)
+            }
             currentPage={pagination.page}
             title="Support Requests"
             onClickCreateButton={handleBulkDelete}
@@ -290,6 +357,7 @@ const SupportRequestsPage = () => {
               setPagination((prev) => ({ ...prev, pageSize: size, page: 1 }));
               fetchRequests(searchQuery, sortKey, sortOrder, 1, size);
             }}
+            loading={loading}
           />
         )}
       </div>
@@ -297,24 +365,44 @@ const SupportRequestsPage = () => {
         <ModalLayout
           onClose={() => setModalOpen(false)}
           modalTitle="Support Request Details"
+          maxWidth="max-w-2xl"
         >
-          <div className="py-6 space-y-4">
-            <div>
-              <span className="font-semibold text-[var(--text-dark)]">Name: </span>
-              <span>{modalRequest.name}</span>
+          <div className="sm:px-1 px-1 sm:pb-8 pb-6 sm:pt-2 pt-2 space-y-6">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <span className="font-semibold text-[var(--base)] w-24 shrink-0">
+                Name:
+              </span>
+              <span className="text-[var(--text-dark)] text-base flex-1 min-w-0 break-words whitespace-pre-line">
+                {modalRequest.name}
+              </span>
             </div>
-            <div>
-              <span className="font-semibold text-[var(--text-dark)]">Email: </span>
-              <span>{modalRequest.email}</span>
+            <div className="flex flex-col sm:flex-row gap-2 ">
+              <span className="font-semibold text-[var(--base)] w-24 shrink-0">
+                Email:
+              </span>
+              <span className="text-[var(--text-dark)] text-base flex-1 min-w-0 break-words whitespace-pre-line">
+                {modalRequest.email}
+              </span>
             </div>
-            <div>
-              <span className="font-semibold text-[var(--text-dark)]">Subject: </span>
-              <span>{modalRequest.subject}</span>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <span className="font-semibold text-[var(--base)] w-24 shrink-0">
+                Subject:
+              </span>
+              <span className="text-[var(--text-dark)] text-base flex-1 min-w-0 break-words whitespace-pre-line">
+                {modalRequest.subject}
+              </span>
             </div>
-            <div>
-              <span className="font-semibold text-[var(--text-dark)]">Message: </span>
-              <span className="block whitespace-pre-line break-words mt-1 text-[var(--text-semi-dark)]">{modalRequest.message}</span>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <span className="font-semibold text-[var(--base)] w-24 shrink-0">
+                Message:
+              </span>
+              <span className="flex-1 min-w-0 break-words whitespace-pre-line text-[var(--text-dark)] text-base">
+                {modalRequest.message}
+              </span>
             </div>
+            <button className="mt-4 w-full py-2 rounded bg-[var(--base)] text-white font-semibold hover:bg-[var(--base-hover)] transition" onClick={() => setModalOpen(false)}>
+              Close
+            </button>
           </div>
         </ModalLayout>
       )}
@@ -327,4 +415,4 @@ const SupportRequestsPage = () => {
   );
 };
 
-export default SupportRequestsPage; 
+export default SupportRequestsPage;

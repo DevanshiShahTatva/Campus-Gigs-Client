@@ -17,6 +17,7 @@ import { DynamicTableProps, SortOrder } from "@/utils/interface";
 import Button from "./Button";
 import useDebounce from "@/hooks/useDebounce";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import Loader from "@/components/common/Loader";
 
 export function DynamicTable<T extends { _id: string }>({
   data,
@@ -36,9 +37,10 @@ export function DynamicTable<T extends { _id: string }>({
   hasDeleteButton,
   pageSize = 10,
   onPageSizeChange,
-}: DynamicTableProps<T> & { pageSize?: number; onPageSizeChange?: (size: number) => void }) {
+  loading = false,
+}: DynamicTableProps<T> & { pageSize?: number; onPageSizeChange?: (size: number) => void; loading?: boolean }) {
   const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearch = useDebounce(searchTerm, 500);
+  const debouncedSearch = useDebounce(searchTerm, 700);
 
   const [sortKey, setSortKey] = useState<keyof T | string>("");
   const [sortOrder, setSortOrder] = useState<SortOrder>(defaultSortOrder);
@@ -105,7 +107,7 @@ export function DynamicTable<T extends { _id: string }>({
         </Button>
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-4">
+      <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-4 relative">
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-100">
@@ -125,8 +127,16 @@ export function DynamicTable<T extends { _id: string }>({
             </TableRow>
           </TableHeader>
 
-          <TableBody>
-            {data.length === 0 ? (
+          <TableBody className="relative">
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length + (actions ? 1 : 0)} className="py-12">
+                  <div className="flex items-center justify-center">
+                    <Loader size={40} />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : data.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={columns.length + (actions ? 1 : 0)} className="py-6 text-center text-gray-500">
                   No data available

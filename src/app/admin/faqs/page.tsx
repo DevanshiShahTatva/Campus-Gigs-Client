@@ -17,7 +17,7 @@ const AdminFAQs = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [pagination, setPagination] = useState<IFaqsPagination>({ page: 1, pageSize: 10, total: 1, totalPages: 1 });
   const [faqs, setFaqs] = useState<IFAQItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [faqInfo, setFaqInfo] = useState<IFAQItem | null>(null);
@@ -43,10 +43,10 @@ const AdminFAQs = () => {
   const fetchFaqs = async (
     searchTerm = "",
     sortKey = "question",
-    sortOrder = "asc",
+    sortOrder = "desc",
     page = 1,
     pageSizeOverride?: number
-  ) => {
+  ) => {    
     setLoading(true);
     const pageSize = pageSizeOverride ?? pagination.pageSize;
     const params = new URLSearchParams({
@@ -76,9 +76,6 @@ const AdminFAQs = () => {
     }
   };
 
-  useEffect(() => {
-    fetchFaqs();
-  }, []);
 
 
 
@@ -156,6 +153,11 @@ const AdminFAQs = () => {
       label: "Question",
       sortable: true,
       textAlign: "left",
+      render: (value) => (
+        <div className="max-w-[300px] truncate" title={String(value)}>
+          {String(value) || "---"}
+        </div>
+      ),
     },
     {
       key: "answer",
@@ -174,16 +176,11 @@ const AdminFAQs = () => {
 
   return (
     <div className="relative">
-      {(loading || deletingId) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <Loader size={48} colorClass="text-[var(--base)]" />
-        </div>
-      )}
       <DynamicTable
         data={faqsWithId}
         columns={columns}
         actions={(row) => (
-          <div className="flex gap-2 justify-end">
+          <div className="flex gap-2 justify-center">
             <button
               title="edit"
               className="text-[var(--base)] hover:text-[var(--base-hover)]"
@@ -212,6 +209,7 @@ const AdminFAQs = () => {
           setPagination((prev) => ({ ...prev, pageSize: size, page: 1 }));
           fetchFaqs(searchQuery, sortKey, sortOrder, 1, size);
         }}
+        loading={loading}
       />
       <EditFaqModal
         isOpen={isEditModalOpen}
