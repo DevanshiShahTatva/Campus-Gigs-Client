@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import * as yup from "yup";
 import { toast } from "react-toastify";
@@ -42,7 +41,11 @@ interface ITermsResponse {
 const logInFormSchema = yup.object().shape({
   email: yup.string()
     .required("Email is required")
-    .email("Invalid email format"),
+    .test('email-format', 'Please enter a valid email address', (value) => {
+      if (!value) return true;
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      return emailRegex.test(value);
+    }),
   password: yup.string()
     .required("Password is required")
     .min(8, "Password must be at least 8 characters")
@@ -73,7 +76,6 @@ const TermsModal = ({
   onAccept: () => void;
   onDecline: () => void;
 }) => {
-  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const [termsData, setTermsData] = useState<ITermsResponse['data'] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -131,13 +133,6 @@ const TermsModal = ({
     }
   };
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollTop + clientHeight >= scrollHeight - 10) {
-      setHasScrolledToBottom(true);
-    }
-  };
-
   const handleRetry = () => {
     fetchTermsAndConditions();
   };
@@ -166,7 +161,7 @@ const TermsModal = ({
             Please read and accept our terms to continue
           </p>
         </div>
-        <div className="p-6 max-h-96 overflow-y-auto" onScroll={handleScroll}>
+        <div className="p-6 max-h-96 overflow-y-auto">
           {isLoading && <LoadingSpinner />}
           {!isLoading && error && (
             <div className="text-center py-8">
@@ -213,12 +208,6 @@ const TermsModal = ({
           )}
         </div>
         <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
-          {!hasScrolledToBottom && !isLoading && !error && termsData && (
-            <p className="text-xs text-amber-600 mb-3 flex items-center gap-2">
-              <FiAlertCircle className="h-4 w-4" />
-              Please scroll down to read all terms before accepting
-            </p>
-          )}
           <div className="flex gap-3 justify-end">
             <button
               onClick={onDecline}
@@ -228,7 +217,7 @@ const TermsModal = ({
             </button>
             <button
               onClick={() => acceptTermAndCondition()}
-              disabled={!hasScrolledToBottom || isLoading || !!error || !termsData}
+              disabled={isLoading || !!error || !termsData}
               className="px-6 py-2 bg-[#218189] text-white rounded-lg hover:bg-[#1a6b72] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               <FiCheck className="h-4 w-4" />
@@ -317,9 +306,9 @@ const LogInPage = () => {
       <section className="min-h-screen flex items-center justify-center bg-[#f9fafb] px-4 py-8">
         <div className="w-full max-w-6xl bg-white shadow-lg rounded-xl grid lg:grid-cols-2 overflow-hidden">
           <div className="p-8 lg:p-16 pt-3 lg:pt-6 flex flex-col justify-between h-full">
-            <div className="mb-10">
+            <Link href="/" className="mb-10 w-fit">
               <img src="/logo.svg" alt="" height={40} width={266} />
-            </div>
+            </Link>
             <div>
               <div className="mb-5">
                 <p className="text-sm text-gray-500">Enter your email and password to access your account.</p>

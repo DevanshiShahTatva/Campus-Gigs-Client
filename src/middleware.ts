@@ -11,6 +11,7 @@ const publicRoutes = [
   ROUTES.SIGN_UP,
   ROUTES.FORGOT_PASSWORD,
   ROUTES.RESET_PASSWORD,
+  ROUTES.GIGS,
 ];
 
 const adminRoutes = [

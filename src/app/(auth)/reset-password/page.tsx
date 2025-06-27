@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import * as yup from "yup";
 import { toast } from "react-toastify";
@@ -89,11 +88,11 @@ const ResetPasswordPage = () => {
     <section className="min-h-screen flex items-center justify-center bg-[#f9fafb] px-4 py-8">
       <div className="w-full max-w-6xl bg-white shadow-lg rounded-xl grid lg:grid-cols-2 overflow-hidden">
         <div className="p-8 lg:p-16 pt-3 lg:pt-6 flex flex-col justify-between h-full">
-          <div className="mb-10">
+          <Link href="/" className="w-fit">
             <img src="/logo.svg" alt="" height={40} width={266} />
-          </div>
+          </Link>
           <div>
-            <div className="mb-8">
+            <div className="mb-8 mt-10 ">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
                 Reset Your Password
               </h2>

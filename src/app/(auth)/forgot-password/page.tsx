@@ -52,10 +52,12 @@ function ForgotPasswordPage() {
       <div className="w-full max-w-6xl bg-white shadow-lg rounded-xl grid lg:grid-cols-2 overflow-hidden">
         <div className="p-8 lg:p-16 pt-3 lg:pt-6 flex flex-col justify-between h-full">
           <div>
-            <div className="mb-10">
-              <img src="/logo.svg" alt="" height={40} width={266} />
+            <div className="w-fit">
+              <Link href="/">
+                <img src="/logo.svg" alt="" height={40} width={266} />
+              </Link>
             </div>
-            <div className="mb-8">
+            <div className="mb-8 mt-10">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
                 Forgot Password
               </h2>
