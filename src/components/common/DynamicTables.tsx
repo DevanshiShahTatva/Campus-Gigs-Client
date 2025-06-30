@@ -19,7 +19,7 @@ import useDebounce from "@/hooks/useDebounce";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import Loader from "@/components/common/Loader";
 
-export function DynamicTable<T extends { _id: string }>({
+export function DynamicTable<T extends { id: number }>({
   data,
   columns,
   actions,
@@ -89,12 +89,12 @@ export function DynamicTable<T extends { _id: string }>({
         </div>
         {children}
         <Button
-          variant={hasDeleteButton ? "delete" :"green"}
-          className={` ${isCreateButtonDisabled?  'opacity-40 !cursor-not-allowed' : ''}  flex items-center h-[46px] disabled:opacity-50`}
+          variant={hasDeleteButton ? "delete" : "green"}
+          className={` ${isCreateButtonDisabled ? "opacity-40 !cursor-not-allowed" : ""}  flex items-center h-[46px] disabled:opacity-50`}
           onClick={onClickCreateButton}
           disabled={isCreateButtonDisabled}
         >
-         {hasDeleteButton ? (
+          {hasDeleteButton ? (
             <>
               <Trash2Icon /> <span className="ml-1">Delete</span>{" "}
             </>
@@ -144,7 +144,7 @@ export function DynamicTable<T extends { _id: string }>({
               </TableRow>
             ) : (
               data.map((row, rowIndex) => (
-                <TableRow key={row._id}>
+                <TableRow key={row.id}>
                   {columns.map((col) => (
                     <TableCell key={String(col.key)} className="whitespace-nowrap">
                       {col.render ? col.render(row[col.key], row, rowIndex) : String(row[col.key]) || "---"}
@@ -160,10 +160,12 @@ export function DynamicTable<T extends { _id: string }>({
         {data.length > 0 && (
           <div className="relative flex items-center justify-center mt-4 w-full">
             <div className="absolute right-0 flex items-center gap-2 whitespace-nowrap">
-              <label htmlFor="per-page-select" className="text-sm text-gray-700 whitespace-nowrap">Per page:</label>
+              <label htmlFor="per-page-select" className="text-sm text-gray-700 whitespace-nowrap">
+                Per page:
+              </label>
               <Select
                 value={String(pageSize)}
-                onValueChange={val => onPageSizeChange?.(parseInt(val, 10))}
+                onValueChange={(val) => onPageSizeChange?.(parseInt(val, 10))}
                 showCheckIcon={false}
                 optionWidth={60}
                 // optionHoverBg="#fde047"
@@ -172,7 +174,7 @@ export function DynamicTable<T extends { _id: string }>({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent align="end">
-                  {[5, 10, 20, 50].map(size => (
+                  {[5, 10, 20, 50].map((size) => (
                     <SelectItem key={size} value={String(size)}>
                       {size}
                     </SelectItem>
@@ -184,7 +186,7 @@ export function DynamicTable<T extends { _id: string }>({
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationPrevious  href="#" onClick={() => handlePageChange(Math.max(currentPage - 1, 1))} size="sm" />
+                    <PaginationPrevious href="#" onClick={() => handlePageChange(Math.max(currentPage - 1, 1))} size="sm" />
                   </PaginationItem>
 
                   {visiblePages.map((page, index) =>

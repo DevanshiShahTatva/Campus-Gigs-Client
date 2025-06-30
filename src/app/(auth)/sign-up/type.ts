@@ -5,13 +5,12 @@ export interface ISignupFormValues {
 
   educationLevel: string;
   customEducation: string;
-  profilePicture: File | null;
+  profile: File | null;
 
-  professionalInterests: string;
+  professional_interests: string;
   extracurriculars: string;
   certifications: string;
   skills: string[];
-
 }
 
 export interface Step {

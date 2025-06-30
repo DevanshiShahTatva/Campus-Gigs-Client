@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import {
   gigCategoryFields,
@@ -14,8 +14,6 @@ import { Button } from "@/components/common/ui/Button";
 import { toast } from "react-toastify";
 import { apiCall } from "@/utils/apiCall";
 
-const PAGE_SIZE = 10;
-
 function GigsCategory() {
   const [open, setOpen] = useState(false);
   const [gigCategories, setGigCategories] = useState<GigCategory[]>([]);
@@ -25,9 +23,18 @@ function GigsCategory() {
   const [servicesDropdown, setServicesDropdown] = useState<IDropdownOption[]>(
     []
   );
-  const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
+  const [totalPages, setTotalPages] = useState(DEFAULT_PAGINATION.totalPages);
 
-  const refetchCurrentPage = () => fetchGigCategory(pagination.page);
+  const [queryParams, setQueryParams] = useState({
+    page: DEFAULT_PAGINATION.page,
+    pageSize: DEFAULT_PAGINATION.pageSize,
+    search: "",
+    sortKey: "name",
+    sortOrder: "asc" as SortOrder,
+  });
+
+  const queryParamsRef = useRef(queryParams);
+  queryParamsRef.current = queryParams;
 
   const handleApi = async (
     config: any,
@@ -51,16 +58,41 @@ function GigsCategory() {
     }
   };
 
-  useEffect(() => {
-    fetchGigCategory(1);
-  }, []);
+  const fetchGigCategories = async () => {
+    try {
+      const { page, pageSize, search, sortKey, sortOrder } =
+        queryParamsRef.current;
 
-  useEffect(() => {
+      const resp = await apiCall({
+        endPoint: `${API_ROUTES.ADMIN.GIG_CATEGORY}?page=${page}&pageSize=${pageSize}&search=${search}&sortKey=${sortKey}&sortOrder=${sortOrder}`,
+        method: "GET",
+      });
+
+      if (resp?.success) {
+        setGigCategories(resp.data);
+        setTotalPages(resp.meta.totalPages);
+      } else {
+        toast.error(resp?.message || "Error fetching categories");
+      }
+    } catch (error) {
+      toast.error("Failed to fetch categories");
+    }
+  };
+
+  const fetchServicesDropdown = async () => {
     handleApi(
       { endPoint: API_ROUTES.ADMIN.TIRE + "/dropdown", method: "GET" },
       "",
       (data) => setServicesDropdown(data)
     );
+  };
+
+  useEffect(() => {
+    fetchGigCategories();
+  }, [queryParams]);
+
+  useEffect(() => {
+    fetchServicesDropdown();
   }, []);
 
   const handleAdd = () => {
@@ -68,65 +100,38 @@ function GigsCategory() {
     setOpen(true);
   };
 
-  const fetchGigCategory = async (
-    page: number,
-    query: string = "",
-    key: string = "",
-    sortOrder: SortOrder = "asc"
-  ) => {
-    try {
-      const resp = await apiCall({
-        endPoint: `${API_ROUTES.ADMIN.GIG_CATEGORY}?page=${page}&pageSize=${PAGE_SIZE}&search=${query}&sortKey=${key}&sortOrder=${sortOrder}`,
-        method: "GET",
-      });
-
-      if (resp) {
-        if (resp.success) {
-          setGigCategories(resp.data);
-          setPagination(resp.meta);
-        } else {
-          toast.error(resp.message);
-        }
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    }
-  };
-
   const handleAddGigCategory = (values: GigCategoryFormVal) => {
     handleApi(
       { endPoint: API_ROUTES.ADMIN.GIG_CATEGORY, method: "POST", body: values },
       "Gig category added successfully",
-      () => refetchCurrentPage()
+      fetchGigCategories
     );
   };
 
   const handleEdit = (values: GigCategoryFormVal) => {
+    if (!editGigCategory) return;
+
     handleApi(
       {
-        endPoint: `${API_ROUTES.ADMIN.GIG_CATEGORY}/${editGigCategory?._id}`,
+        endPoint: `${API_ROUTES.ADMIN.GIG_CATEGORY}/${editGigCategory.id}`,
         method: "PUT",
         body: values,
       },
-      "Gig category have been edited successfully",
-      () => refetchCurrentPage()
+      "Gig category updated successfully",
+      fetchGigCategories
     );
   };
 
-  const handleDeleteGigCategory = (id: string) => {
+  const handleDeleteGigCategory = (id: number) => {
     handleApi(
       { endPoint: `${API_ROUTES.ADMIN.GIG_CATEGORY}/${id}`, method: "DELETE" },
-      "Gig category have been deleted successfully",
-      () => refetchCurrentPage()
+      "Gig category deleted successfully",
+      fetchGigCategories
     );
   };
 
   const handleSubmit = (values: any) => {
-    if (editGigCategory) {
-      handleEdit(values);
-    } else {
-      handleAddGigCategory(values);
-    }
+    editGigCategory ? handleEdit(values) : handleAddGigCategory(values);
   };
 
   const handleEditGigCategory = (gigcategory: GigCategory) => {
@@ -134,14 +139,30 @@ function GigsCategory() {
     setOpen(true);
   };
 
+  const handlePageChange = (page: number) => {
+    setQueryParams((prev) => ({ ...prev, page }));
+  };
+
+  const handlePageSizeChange = (pageSize: number) => {
+    setQueryParams((prev) => ({
+      ...prev,
+      pageSize,
+      page: 1,
+    }));
+  };
+
   const handleSearchSort = (
     searchTerm: string,
     key: string,
-    order: SortOrder,
-    page: number
+    order: SortOrder
   ) => {
-    page = page === 0 ? page + 1 : page;
-    fetchGigCategory(page, searchTerm, key, order);
+    setQueryParams((prev) => ({
+      ...prev,
+      search: searchTerm,
+      sortKey: key || "name",
+      sortOrder: order,
+      page: 1,
+    }));
   };
 
   return (
@@ -151,10 +172,12 @@ function GigsCategory() {
           data={gigCategories}
           title="Gig Category"
           onClickCreateButton={handleAdd}
-          totalPages={pagination.totalPages}
+          totalPages={totalPages}
           searchPlaceholder="Search gig category by name, description"
-          currentPage={pagination.page}
-          handlePageChange={(page) => fetchGigCategory(page)}
+          currentPage={queryParams.page}
+          pageSize={queryParams.pageSize}
+          handlePageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
           onSearchSort={handleSearchSort}
           columns={[
             { key: "name", label: "Name", sortable: true },
@@ -173,24 +196,24 @@ function GigsCategory() {
               <Button
                 className="bg-red-500 hover:bg-red-500"
                 size={"icon"}
-                onClick={() => handleDeleteGigCategory(row._id)}
+                onClick={() => handleDeleteGigCategory(row.id)}
               >
                 <Trash size={16} />
               </Button>
             </div>
           )}
-        ></DynamicTable>
+        />
       </div>
 
       <CommonFormModal
         open={open}
         setOpen={setOpen}
-        title={editGigCategory ? "Edit gig category" : "Add gig category"}
+        title={editGigCategory ? "Edit Gig Category" : "Add Gig Category"}
         fields={gigCategoryFields(servicesDropdown)}
         initialValues={editGigCategory || undefined}
         onSubmit={handleSubmit}
         submitLabel={
-          editGigCategory ? "Update gig category" : "Save gig category"
+          editGigCategory ? "Update Gig Category" : "Save Gig Category"
         }
         width="600px"
       />

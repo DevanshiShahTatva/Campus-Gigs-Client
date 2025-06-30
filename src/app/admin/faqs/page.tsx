@@ -2,11 +2,10 @@
 import { ROUTES } from "@/utils/constant";
 import { Edit, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { apiCall } from "@/utils/apiCall";
 import { API_ROUTES, MESSAGES } from "@/utils/constant";
 import { IFAQItem, IFaqsApiResponse, IFaqsPagination } from "./types";
-import Loader from "@/components/common/Loader";
 import { toast } from "react-toastify";
 import EditFaqModal from "@/components/common/Modals/EditFaqModal";
 import DeleteFaqModal from "@/components/common/Modals/DeleteFaqModal";
@@ -26,27 +25,16 @@ const AdminFAQs = () => {
 
   // State for search, sort, and page
   const [sortKey, setSortKey] = useState<keyof (IFAQItem & { id: string }) | string>("question");
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>("asc");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   // Combined search/sort handler for DynamicTable
-  const handleSearchSort = (
-    search: string,
-    sortKeyParam: keyof (IFAQItem & { id: string }),
-    sortOrderParam: 'asc' | 'desc',
-    page: number
-  ) => {
+  const handleSearchSort = (search: string, sortKeyParam: keyof (IFAQItem & { id: string }), sortOrderParam: "asc" | "desc", page: number) => {
     fetchFaqs(search, sortKeyParam, sortOrderParam, page);
   };
 
   const handleCloseEditModal = () => setIsEditModalOpen(false);
 
-  const fetchFaqs = async (
-    searchTerm = "",
-    sortKey = "question",
-    sortOrder = "desc",
-    page = 1,
-    pageSizeOverride?: number
-  ) => {    
+  const fetchFaqs = async (searchTerm = "", sortKey = "question", sortOrder = "desc", page = 1, pageSizeOverride?: number) => {
     setLoading(true);
     const pageSize = pageSizeOverride ?? pagination.pageSize;
     const params = new URLSearchParams({
@@ -76,11 +64,8 @@ const AdminFAQs = () => {
     }
   };
 
-
-
-
-  const handleEdit = (id: string) => {
-    const selectedFaq = faqs.find((faq) => faq._id === id);
+  const handleEdit = (id: number) => {
+    const selectedFaq = faqs.find((faq) => faq.id === id);
     if (selectedFaq) {
       setFaqInfo(selectedFaq);
       setIsEditModalOpen(true);
@@ -88,11 +73,11 @@ const AdminFAQs = () => {
   };
 
   const updateFAQs = async (values: IFAQItem) => {
-    if (!values._id) return;
+    if (!values.id) return;
     setLoading(true);
     try {
       const res = await apiCall({
-        endPoint: `${API_ROUTES.ADMIN.FAQS}/${values._id}`,
+        endPoint: `${API_ROUTES.ADMIN.FAQS}/${values.id}`,
         method: "PUT",
         body: { question: values.question, answer: values.answer },
         withToken: true,
@@ -119,11 +104,11 @@ const AdminFAQs = () => {
   const handleCloseDeleteModal = () => setIsDeleteModalOpen(false);
 
   const handleDeleteFaq = async (faq: IFAQItem) => {
-    if (!faq._id) return;
+    if (!faq.id) return;
     setLoading(true);
     try {
       const res = await apiCall({
-        endPoint: `${API_ROUTES.ADMIN.FAQS}/${faq._id}`,
+        endPoint: `${API_ROUTES.ADMIN.FAQS}/${faq.id}`,
         method: "DELETE",
         withToken: true,
       });
@@ -142,12 +127,10 @@ const AdminFAQs = () => {
   };
 
   // For DynamicTable: map _id to id for compatibility
-  const faqsWithId = faqs.map((faq) => ({ ...faq, id: faq._id || "" }));
+  const faqsWithId = faqs.map((faq) => ({ ...faq, id: faq.id }));
 
   // Columns for DynamicTable
-  const columns: import("@/utils/interface").ColumnConfig<
-    IFAQItem & { id: string }
-  >[] = [
+  const columns: import("@/utils/interface").ColumnConfig<IFAQItem & { id: number }>[] = [
     {
       key: "question",
       label: "Question",
@@ -172,7 +155,7 @@ const AdminFAQs = () => {
     },
   ];
 
-  const navigateToCreate = () => router.push(ROUTES.ADMIN.CREATE_FAQs)
+  const navigateToCreate = () => router.push(ROUTES.ADMIN.CREATE_FAQs);
 
   return (
     <div className="relative">
@@ -181,18 +164,10 @@ const AdminFAQs = () => {
         columns={columns}
         actions={(row) => (
           <div className="flex gap-2 justify-center">
-            <button
-              title="edit"
-              className="text-[var(--base)] hover:text-[var(--base-hover)]"
-              onClick={() => handleEdit(row._id as string)}
-            >
+            <button title="edit" className="text-[var(--base)] hover:text-[var(--base-hover)]" onClick={() => handleEdit(row.id)}>
               <Edit size={16} />
             </button>
-            <button
-              title="delete"
-              className="text-red-500 hover:text-red-700"
-              onClick={() => handleOpenDeleteModal(row)}
-            >
+            <button title="delete" className="text-red-500 hover:text-red-700" onClick={() => handleOpenDeleteModal(row)}>
               <Trash size={16} />
             </button>
           </div>
@@ -211,18 +186,8 @@ const AdminFAQs = () => {
         }}
         loading={loading}
       />
-      <EditFaqModal
-        isOpen={isEditModalOpen}
-        onClose={handleCloseEditModal}
-        saveChanges={updateFAQs}
-        faqsValues={faqInfo as IFAQItem}
-      />
-      <DeleteFaqModal
-        isOpen={isDeleteModalOpen}
-        onClose={handleCloseDeleteModal}
-        onDelete={handleDeleteFaq}
-        faqsValues={deleteFaqInfo as IFAQItem}
-      />
+      <EditFaqModal isOpen={isEditModalOpen} onClose={handleCloseEditModal} saveChanges={updateFAQs} faqsValues={faqInfo as IFAQItem} />
+      <DeleteFaqModal isOpen={isDeleteModalOpen} onClose={handleCloseDeleteModal} onDelete={handleDeleteFaq} faqsValues={deleteFaqInfo as IFAQItem} />
     </div>
   );
 };

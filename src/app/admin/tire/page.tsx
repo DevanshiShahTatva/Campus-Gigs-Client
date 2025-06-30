@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import { tireFields, TireFormVal } from "@/config/tire.config";
 import { DynamicTable } from "@/components/common/DynamicTables";
@@ -16,12 +16,13 @@ function TireService() {
   const [tires, setTires] = useState<Tire[]>([]);
   const [editTire, setEditTire] = useState<Tire | null>(null);
   const [totalPages, setTotalPages] = useState(DEFAULT_PAGINATION.totalPages);
+  const initialRender = useRef(true);
 
   const [queryParams, setQueryParams] = useState({
     page: DEFAULT_PAGINATION.page,
     pageSize: DEFAULT_PAGINATION.pageSize,
     search: "",
-    sortKey: "",
+    sortKey: "name",
     sortOrder: "asc" as SortOrder,
   });
 
@@ -50,7 +51,7 @@ function TireService() {
     }
   };
 
-  const fetchTires = async () => {
+  const fetchTires = useCallback(async () => {
     try {
       const { page, pageSize, search, sortKey, sortOrder } =
         queryParamsRef.current;
@@ -69,9 +70,13 @@ function TireService() {
     } catch (error) {
       toast.error("Failed to fetch tires");
     }
-  };
+  }, []);
 
   useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false;
+      return;
+    }
     fetchTires();
   }, [queryParams]);
 
@@ -93,7 +98,7 @@ function TireService() {
 
     handleApi(
       {
-        endPoint: `${API_ROUTES.ADMIN.TIRE}/${editTire._id}`,
+        endPoint: `${API_ROUTES.ADMIN.TIRE}/${editTire.id}`,
         method: "PUT",
         body: values,
       },
@@ -102,7 +107,7 @@ function TireService() {
     );
   };
 
-  const handleDeleteTire = (id: string) => {
+  const handleDeleteTire = (id: number) => {
     handleApi(
       { endPoint: `${API_ROUTES.ADMIN.TIRE}/${id}`, method: "DELETE" },
       "Tire deleted successfully",
@@ -139,7 +144,7 @@ function TireService() {
     setQueryParams((prev) => ({
       ...prev,
       search: searchTerm,
-      sortKey: key,
+      sortKey: key ? key : "name",
       sortOrder: order,
       page: 1,
     }));
@@ -175,7 +180,7 @@ function TireService() {
               <Button
                 className="bg-red-500 hover:bg-red-500"
                 size={"icon"}
-                onClick={() => handleDeleteTire(row._id)}
+                onClick={() => handleDeleteTire(row.id)}
               >
                 <Trash size={16} />
               </Button>

@@ -115,7 +115,7 @@ const TermsModal = ({
         endPoint: "/auth/agreed-terms-policy",
         method: "PUT",
         body: {
-          isAgreed: true,
+          is_agreed: true,
           userId: loginResponse?.data.user._id,
         }
       });
@@ -251,7 +251,7 @@ const LogInPage = () => {
     actions.setSubmitting(false);
 
     if (response.success) {
-      if (response.data?.user?.isAgreed || response.data?.user?.role === "admin") {
+      if (response.data?.user?.is_agreed || response.data?.user?.role === "admin") {
         handleAllowedLogin(response);
       } else {
         setLoginResponse(response);

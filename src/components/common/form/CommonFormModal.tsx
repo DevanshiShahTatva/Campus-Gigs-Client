@@ -234,7 +234,7 @@ const CommonFormModal: React.FC<CommonFormModalProps> = ({
                             {field.label}
                           </label>
                           <Select
-                            value={values[field.name]}
+                            value={String(values[field.name])}
                             onValueChange={(val) =>
                               setFieldValue(field.name, val)
                             }

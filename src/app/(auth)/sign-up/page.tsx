@@ -22,22 +22,22 @@ const steps: Step[] = [
     title: "Basic Information",
     subtitle: "Let's start with your essential details",
     icon: <User className="w-5 h-5" />,
-    fields: ["name", "email", "password"]
+    fields: ["name", "email", "password"],
   },
   {
     id: 1,
     title: "Profile & Education",
     subtitle: "Add your photo and educational background (both optional)",
     icon: <Camera className="w-5 h-5" />,
-    fields: ["profilePicture", "educationLevel"]
+    fields: ["profile", "educationLevel"],
   },
   {
     id: 2,
     title: "Biography",
     subtitle: "Tell us about your professional background (all optional)",
     icon: <FileText className="w-5 h-5" />,
-    fields: ["professionalInterests", "extracurriculars", "certifications", "skills"]
-  }
+    fields: ["professional_interests", "extracurriculars", "certifications", "skills"],
+  },
 ];
 
 const SignUpPage: React.FC = () => {
@@ -59,22 +59,18 @@ const SignUpPage: React.FC = () => {
               type="button"
               onClick={() => isClickable && setCurrentStep(index)}
               disabled={!isClickable}
-              className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 ${index < currentStep
-                ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg'
-                : index === currentStep
-                  ? 'bg-[var(--base)] border-[var(--base)] text-white shadow-lg'
-                  : 'bg-white border-gray-300 text-gray-400'
-                } ${isClickable ? 'cursor-pointer' : 'cursor-not-allowed'
-                }`}
+              className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 ${
+                index < currentStep
+                  ? "bg-emerald-500 border-emerald-500 text-white shadow-lg"
+                  : index === currentStep
+                  ? "bg-[var(--base)] border-[var(--base)] text-white shadow-lg"
+                  : "bg-white border-gray-300 text-gray-400"
+              } ${isClickable ? "cursor-pointer" : "cursor-not-allowed"}`}
             >
-              {index < currentStep ? (
-                <Check className="w-5 h-5" />
-              ) : (
-                step.icon
-              )}
+              {index < currentStep ? <Check className="w-5 h-5" /> : step.icon}
             </button>
             {index < steps.length - 1 && (
-              <div className={`w-12 h-0.5 mx-3 transition-all duration-300 ${index < currentStep ? 'bg-emerald-500' : 'bg-gray-200'}`} />
+              <div className={`w-12 h-0.5 mx-3 transition-all duration-300 ${index < currentStep ? "bg-emerald-500" : "bg-gray-200"}`} />
             )}
           </div>
         );
@@ -94,8 +90,8 @@ const SignUpPage: React.FC = () => {
     formData.append("name", values.name);
     formData.append("email", values.email);
     formData.append("password", values.password);
-    values.profilePicture && formData.append("file", values.profilePicture);
-    values.professionalInterests && formData.append("professional_interests", values.professionalInterests);
+    values.profile && formData.append("file", values.profile);
+    values.professional_interests && formData.append("professional_interests", values.professional_interests);
     values.extracurriculars && formData.append("extracurriculars", values.extracurriculars);
     values.certifications && formData.append("certifications", values.certifications);
     values.educationLevel && formData.append("education", values.educationLevel === "Other" ? values.customEducation : values.educationLevel);
@@ -104,14 +100,14 @@ const SignUpPage: React.FC = () => {
         formData.append("skills[]", skill);
       });
     }
-    formData.append("isAgreed", acceptedTerms ? "true" : "false");
+    formData.append("is_agreed", acceptedTerms ? "true" : "false");
 
     try {
       const response: ApiResponse = await apiCall({
         endPoint: "/auth/register",
         method: "POST",
         body: formData,
-        isFormData: true
+        isFormData: true,
       });
 
       actions.setSubmitting(false);
@@ -139,7 +135,7 @@ const SignUpPage: React.FC = () => {
       reader.onload = (e: ProgressEvent<FileReader>) => {
         if (e.target?.result) {
           setProfileImage(e.target.result as string);
-          setFieldValue('profilePicture', file);
+          setFieldValue("profile", file);
         }
       };
       reader.readAsDataURL(file);
@@ -148,34 +144,39 @@ const SignUpPage: React.FC = () => {
 
   const handleRemoveImage = (setFieldValue: (field: string, value: any) => void) => {
     setProfileImage(null);
-    setFieldValue('profilePicture', null);
+    setFieldValue("profilePicture", null);
   };
 
   const handleSkillsChange = (tags: string[], setFieldValue: (field: string, value: any) => void) => {
     if (tags.length <= 10) {
-      setFieldValue('skills', tags);
+      setFieldValue("skills", tags);
     } else {
       toast.warning("Maximum 10 skills allowed!");
     }
   };
 
   const handleEducationChange = (selectedOption: EducationOption | null, setFieldValue: (field: string, value: any) => void) => {
-    setFieldValue('educationLevel', selectedOption?.value || '');
-    if (selectedOption?.value !== 'Other') {
-      setFieldValue('customEducation', '');
+    setFieldValue("educationLevel", selectedOption?.value || "");
+    if (selectedOption?.value !== "Other") {
+      setFieldValue("customEducation", "");
     }
   };
 
   const isStepValid = (stepIndex: number, values: ISignupFormValues, errors: any) => {
     const step = steps[stepIndex];
     return step.fields.every((field: keyof ISignupFormValues) => {
-      if (field === 'profilePicture' || field === 'educationLevel' ||
-        field === 'professionalInterests' || field === 'extracurriculars' ||
-        field === 'certifications' || field === 'skills') {
+      if (
+        field === "profile" ||
+        field === "educationLevel" ||
+        field === "professional_interests" ||
+        field === "extracurriculars" ||
+        field === "certifications" ||
+        field === "skills"
+      ) {
         return true;
       }
       const value = values[field];
-      return value?.toString().trim() !== '' && !errors[field];
+      return value?.toString().trim() !== "" && !errors[field];
     });
   };
 
@@ -194,25 +195,10 @@ const SignUpPage: React.FC = () => {
   const renderStep1 = () => {
     return (
       <div className="space-y-6">
-        <FormikTextField
-          name="name"
-          type="text"
-          label="Full Name"
-          placeholder="Enter your full name"
-        />
+        <FormikTextField name="name" type="text" label="Full Name" placeholder="Enter your full name" />
         <div>
-          <FormikTextField
-            name="email"
-            type="email"
-            label="Email Address"
-            placeholder="Enter your email address"
-            onChange={() => setEmailErr("")}
-          />
-          {emailErr && (
-            <div className="text-red-500 text-sm mt-1">
-              {emailErr}
-            </div>
-          )}
+          <FormikTextField name="email" type="email" label="Email Address" placeholder="Enter your email address" onChange={() => setEmailErr("")} />
+          {emailErr && <div className="text-red-500 text-sm mt-1">{emailErr}</div>}
         </div>
         <FormikTextField
           name="password"
@@ -220,22 +206,14 @@ const SignUpPage: React.FC = () => {
           placeholder="Create a strong password"
           type={showPassword ? "text" : "password"}
           endIcon={
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              {showPassword ? (
-                <FiEyeOff className="h-5 w-5" />
-              ) : (
-                <FiEye className="h-5 w-5" />
-              )}
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-gray-500 hover:text-gray-700 transition-colors">
+              {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
             </button>
           }
         />
       </div>
     );
-  }
+  };
 
   const renderStep2 = (values: ISignupFormValues, setFieldValue: (field: string, value: any) => void) => {
     return (
@@ -296,9 +274,7 @@ const SignUpPage: React.FC = () => {
                   )}
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">
-                    We support PNGs, JPEGs and GIFs under 10MB
-                  </p>
+                  <p className="text-sm text-gray-500">We support PNGs, JPEGs and GIFs under 10MB</p>
                 </div>
               </div>
             </div>
@@ -319,24 +295,22 @@ const SignUpPage: React.FC = () => {
               options={educationOptions}
               className="text-black"
               placeholder="Search or select your education level"
-              value={educationOptions.find(option => option.value === values.educationLevel) || null}
+              value={educationOptions.find((option) => option.value === values.educationLevel) || null}
               onChange={(selectedOption) => handleEducationChange(selectedOption, setFieldValue)}
             />
           </div>
-          {values.educationLevel === 'Other' && (
+          {values.educationLevel === "Other" && (
             <div className="animate-in slide-in-from-top-4 duration-300 ease-out">
               <div className="mt-6">
                 <div className="flex items-center space-x-2 mb-3">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <div className="text-sm font-semibold text-gray-700">
-                    Please specify your education
-                  </div>
+                  <div className="text-sm font-semibold text-gray-700">Please specify your education</div>
                 </div>
                 <input
                   type="text"
                   name="customEducation"
-                  value={values.customEducation || ''}
-                  onChange={(e) => setFieldValue('customEducation', e.target.value)}
+                  value={values.customEducation || ""}
+                  onChange={(e) => setFieldValue("customEducation", e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[var(--base)] focus:border-[var(--base)] transition-all duration-200 text-black placeholder-gray-500 bg-white"
                   placeholder="e.g., Trade School, Bootcamp, Self-taught, Online Courses..."
                 />
@@ -346,62 +320,51 @@ const SignUpPage: React.FC = () => {
         </div>
       </div>
     );
-  }
+  };
 
   const renderStep3 = (values: ISignupFormValues, setFieldValue: (field: string, value: any) => void) => {
     return (
       <div className="space-y-6">
         <div>
-          <div className="block text-sm font-semibold text-gray-700 mb-2">
-            Professional Interests
-          </div>
+          <div className="block text-sm font-semibold text-gray-700 mb-2">Professional Interests</div>
           <textarea
             rows={3}
-            name="professionalInterests"
-            value={values.professionalInterests}
-            onChange={(e) => setFieldValue('professionalInterests', e.target.value)}
+            name="professional_interests"
+            value={values.professional_interests}
+            onChange={(e) => setFieldValue("professional_interests", e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[var(--base)] focus:border-[var(--base)] transition-colors resize-none text-black"
             placeholder="What are your professional interests and career goals? (Optional)"
           />
         </div>
         <div>
-          <div className="block text-sm font-semibold text-gray-700 mb-2">
-            Extracurricular Activities
-          </div>
+          <div className="block text-sm font-semibold text-gray-700 mb-2">Extracurricular Activities</div>
           <textarea
             rows={3}
             name="extracurriculars"
             value={values.extracurriculars}
-            onChange={(e) => setFieldValue('extracurriculars', e.target.value)}
+            onChange={(e) => setFieldValue("extracurriculars", e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[var(--base)] focus:border-[var(--base)] transition-colors resize-none text-black"
             placeholder="Sports, clubs, volunteer work, hobbies, community involvement... (Optional)"
           />
         </div>
         <div>
-          <div className="block text-sm font-semibold text-gray-700 mb-2">
-            Certifications
-          </div>
+          <div className="block text-sm font-semibold text-gray-700 mb-2">Certifications</div>
           <input
             type="text"
             name="certifications"
             value={values.certifications}
-            onChange={(e) => setFieldValue('certifications', e.target.value)}
+            onChange={(e) => setFieldValue("certifications", e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[var(--base)] focus:border-[var(--base)] transition-colors text-black"
             placeholder="List your certifications (e.g., PMP, AWS, Google Analytics...) (Optional)"
           />
         </div>
         <div>
           <div className="flex items-center space-x-2 mb-2">
-            <div className="block text-sm font-semibold text-gray-700">
-              Skills
-            </div>
+            <div className="block text-sm font-semibold text-gray-700">Skills</div>
             <Tag className="w-4 h-4 text-gray-600" />
           </div>
           <div className="skill-tags-container">
-            <TagsInput
-              tags={values.skills || []}
-              handleSkillsChange={(tags: any) => handleSkillsChange(tags, setFieldValue)}
-            />
+            <TagsInput tags={values.skills || []} handleSkillsChange={(tags: any) => handleSkillsChange(tags, setFieldValue)} />
           </div>
           <div className="mt-3 bg-[#2181890f] rounded-lg p-3">
             <div className="flex items-start space-x-2">
@@ -409,8 +372,12 @@ const SignUpPage: React.FC = () => {
               <div className="text-sm text-[var(--base)]">
                 <div className="font-medium mb-1">How to add skills:</div>
                 <ul className="space-y-1 text-xs">
-                  <li>• Press <kbd className="px-1 py-0.5 bg-[#014c4329] rounded text-xs">Enter</kbd> to add a tag</li>
-                  <li>• Maximum <strong>10 tags</strong> allowed ({Array.isArray(values.skills) ? values.skills.length : 0}/10)</li>
+                  <li>
+                    • Press <kbd className="px-1 py-0.5 bg-[#014c4329] rounded text-xs">Enter</kbd> to add a tag
+                  </li>
+                  <li>
+                    • Maximum <strong>10 tags</strong> allowed ({Array.isArray(values.skills) ? values.skills.length : 0}/10)
+                  </li>
                   <li>• Allowed characters: letters, numbers, space, dash (-), and underscore (_)</li>
                   <li>• Examples: JavaScript, React, Project-Management, UI_UX</li>
                 </ul>
@@ -447,8 +414,8 @@ const SignUpPage: React.FC = () => {
                         >
                           Terms of Service
                           <ExternalLink className="w-3 h-3 ml-1" />
-                        </Link>
-                        {" "}and{" "}
+                        </Link>{" "}
+                        and{" "}
                         <Link
                           href="/PrivacyPolicy"
                           target="_blank"
@@ -467,7 +434,7 @@ const SignUpPage: React.FC = () => {
         </div>
       </div>
     );
-  }
+  };
 
   const renderStepContent = (values: ISignupFormValues, setFieldValue: (field: string, value: any) => void) => {
     switch (currentStep) {
@@ -496,13 +463,13 @@ const SignUpPage: React.FC = () => {
               name: "",
               email: "",
               password: "",
-              profilePicture: null,
-              professionalInterests: "",
+              profile: null,
+              professional_interests: "",
               extracurriculars: "",
               certifications: "",
               skills: [],
               educationLevel: "",
-              customEducation: ""
+              customEducation: "",
             }}
             onSubmit={handleSignupSubmit}
             validationSchema={SignupFormSchema}
@@ -512,12 +479,8 @@ const SignUpPage: React.FC = () => {
                 {renderStepIndicator(values, errors)}
                 <div>
                   <div className="text-center mb-6">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                      {steps[currentStep].title}
-                    </h3>
-                    <p className="text-gray-500 text-sm">
-                      {steps[currentStep].subtitle}
-                    </p>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-1">{steps[currentStep].title}</h3>
+                    <p className="text-gray-500 text-sm">{steps[currentStep].subtitle}</p>
                   </div>
                 </div>
                 {renderStepContent(values, setFieldValue)}
@@ -526,10 +489,9 @@ const SignUpPage: React.FC = () => {
                     type="button"
                     onClick={prevStep}
                     disabled={currentStep === 0}
-                    className={`flex items-center text-[13px] lg:text-[15px] px-2 lg:px-5 py-3 rounded-lg lg:font-medium transition-all duration-200 bg-gray-100 ${currentStep === 0
-                      ? 'text-gray-400 cursor-not-allowed'
-                      : 'text-gray-600 hover:text-gray-800 cursor-pointer'
-                      }`}
+                    className={`flex items-center text-[13px] lg:text-[15px] px-2 lg:px-5 py-3 rounded-lg lg:font-medium transition-all duration-200 bg-gray-100 ${
+                      currentStep === 0 ? "text-gray-400 cursor-not-allowed" : "text-gray-600 hover:text-gray-800 cursor-pointer"
+                    }`}
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Previous</span>
@@ -549,10 +511,11 @@ const SignUpPage: React.FC = () => {
                       type="button"
                       onClick={nextStep}
                       disabled={!isStepValid(currentStep, values, errors)}
-                      className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${isStepValid(currentStep, values, errors)
-                        ? 'bg-[var(--base)] hover:bg-[var(--base-hover)] text-white shadow-lg hover:shadow-xl cursor-pointer'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        }`}
+                      className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+                        isStepValid(currentStep, values, errors)
+                          ? "bg-[var(--base)] hover:bg-[var(--base-hover)] text-white shadow-lg hover:shadow-xl cursor-pointer"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      }`}
                     >
                       <span>Next</span>
                       <ChevronRight className="w-4 h-4" />

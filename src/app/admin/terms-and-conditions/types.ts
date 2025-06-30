@@ -1,10 +1,10 @@
 export interface IApiResponse {
-    content: string;
-    createdAt: string;
-    updatedAt: string;
-    _id: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  id: number;
 }
 export interface ITCResponse {
-    success: boolean
-    data: IApiResponse[]
+  success: boolean;
+  data: IApiResponse[];
 }
