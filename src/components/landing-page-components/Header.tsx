@@ -18,6 +18,10 @@ const Header = () => {
     router.push("/login");
   };
 
+  const gotoProfile=()=>{
+    router.push("/profile");
+  }
+
   useEffect(() => {
     if (localStorage) {
       setIsToken(localStorage.getItem("token") as string);
@@ -44,10 +48,10 @@ const Header = () => {
         <div className="flex items-center">
           <span
             className="text-xl sm:text-2xl font-bold text-[color:var(--base)] hover:text-[color:var(--base-hover)] transition-colors duration-300 cursor-pointer"
-            onClick={() => scrollToSection("hero")}
+            onClick={() => router.push('/')}
           >
             {/* CampusGig */}
-            <img src="/light-logo.svg" alt="CampusGig Logo" className="h-8 w-auto sm:h-10 object-contain min-w-[40px] mr-2" />
+            <img src="/light-logo.svg" alt="CampusGig Logo" className="h-6 w-auto sm:h-8 md:h-10 object-contain min-w-[32px] sm:min-w-[40px] mr-2 transition-all duration-300" />
           </span>
         </div>
 
@@ -117,7 +121,7 @@ const Header = () => {
           {isToken ? (
             <button
               className="h-[41.80px] w-[41.80px] rounded-full bg-[color:var(--base)] text-white font-bold relative cursor-pointer"
-              onClick={() => onLogout()}
+              onClick={() => gotoProfile()}
             >
               {localStorage?.getItem("name")?.charAt(0)?.toUpperCase()}
             </button>

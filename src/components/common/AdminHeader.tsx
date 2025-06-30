@@ -34,7 +34,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ pageTitle = "Admin Panel", ad
         )}
         {/* <span className="text-xl font-bold text-[var(--base)] tracking-tight">{pageTitle}</span> */}
         <div className="h-10 flex items-center justify-center">
-          <img src="/light-logo.svg" alt="CampusGig Logo" className="w-full h-full object-contain" />
+          <img onClick={()=>router.push('/admin/dashboard')} src="/light-logo.svg" alt="CampusGig Logo" className="h-6 w-auto sm:h-8 md:h-10 min-w-[32px] sm:min-w-[40px] object-contain transition-all duration-300 cursor-pointer" />
         </div>
       </div>
       <div className="flex items-center gap-4">

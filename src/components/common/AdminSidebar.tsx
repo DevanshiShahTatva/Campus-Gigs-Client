@@ -70,7 +70,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 className={collapsed ? "" : "mr-2"}
               />
               {/* Only show title if not collapsed */}
-              {!collapsed && <span>{link.title}</span>}
+              <span
+                className={`transition-all duration-200 truncate ${collapsed ? 'opacity-0 w-0 p-0 m-0' : 'opacity-100 w-auto ml-2'}`}
+                style={{ maxWidth: collapsed ? 0 : '160px' }}
+              >
+                {link.title}
+              </span>
             </Link>
           );
         })}
@@ -85,7 +90,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           title="Logout"
         >
           <IconMap name="logout" />
-          {!collapsed && <span>Logout</span>}
+          <span
+            className={`transition-all duration-200 truncate ${collapsed ? 'opacity-0 w-0 p-0 m-0' : 'opacity-100 w-auto ml-2'}`}
+            style={{ maxWidth: collapsed ? 0 : '160px' }}
+          >
+            Logout
+          </span>
         </button>
       </div>
       {showLogoutModal && (
