@@ -11,7 +11,7 @@ export const gigCategoryFields = (services: IDropdownOption[]) => {
       required: true,
     },
     {
-      name: "tire",
+      name: "tire_id",
       label: "Tire Service",
       type: "select",
       options: services ? services : [],
@@ -23,5 +23,5 @@ export const gigCategoryFields = (services: IDropdownOption[]) => {
 
 export interface GigCategoryFormVal {
   name: string;
-  tire: string;
+  tire_id: number;
 }

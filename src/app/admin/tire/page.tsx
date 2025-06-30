@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import { tireFields, TireFormVal } from "@/config/tire.config";
 import { DynamicTable } from "@/components/common/DynamicTables";
@@ -16,6 +16,7 @@ function TireService() {
   const [tires, setTires] = useState<Tire[]>([]);
   const [editTire, setEditTire] = useState<Tire | null>(null);
   const [totalPages, setTotalPages] = useState(DEFAULT_PAGINATION.totalPages);
+  const initialRender = useRef(true);
 
   const [queryParams, setQueryParams] = useState({
     page: DEFAULT_PAGINATION.page,
@@ -50,7 +51,7 @@ function TireService() {
     }
   };
 
-  const fetchTires = async () => {
+  const fetchTires = useCallback(async () => {
     try {
       const { page, pageSize, search, sortKey, sortOrder } =
         queryParamsRef.current;
@@ -69,9 +70,13 @@ function TireService() {
     } catch (error) {
       toast.error("Failed to fetch tires");
     }
-  };
+  }, []);
 
   useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false;
+      return;
+    }
     fetchTires();
   }, [queryParams]);
 

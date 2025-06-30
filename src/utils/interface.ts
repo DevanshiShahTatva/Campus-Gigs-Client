@@ -72,7 +72,7 @@ export interface IPlanApiResponse {
 
 export interface IDropdownOption {
   label: string;
-  id: string;
+  id: number;
 }
 
 export interface Tire {
@@ -82,8 +82,7 @@ export interface Tire {
 }
 
 export interface GigCategory {
-  _id: string;
+  id: number;
   name: string;
-  description: string;
-  isUsed: boolean;
+  tire: { name: string }
 }
