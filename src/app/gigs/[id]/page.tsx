@@ -261,7 +261,7 @@ const GigDetail = () => {
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-start space-x-4">
-                        {!bid.provider.avatar ? (
+                        {bid.provider.avatar ? (
                           <img
                             alt="not found"
                             src={bid.provider.avatar}
@@ -274,16 +274,16 @@ const GigDetail = () => {
                         )}
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold text-lg">{bid.provider.name}</h4>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-2">{bid.provider.expertise}</p>
-                          <div className="flex items-center space-x-1 text-sm text-gray-500">
-                            <div className="flex items-center space-x-1">
-                              <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                              <span className="font-medium">{bid.provider.rating}</span>
-                              <span>({bid.provider.reviews} reviews)</span>
+                            <h4 className="font-semibold text-lg">{bid.provider.name} •</h4>
+                            <div className="flex items-center space-x-1 text-sm text-gray-500">
+                              <div className="flex items-center space-x-1">
+                                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                                <span className="font-medium">{bid.provider.rating}</span>
+                                <span>({bid.provider.reviews} reviews)</span>
+                              </div>
                             </div>
                           </div>
+                          <p className="text-sm text-gray-600 mb-2">{bid.provider.expertise}</p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -296,7 +296,7 @@ const GigDetail = () => {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500">Bid placed {bid.postedAgo}</span>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 ">
                         <Button
                           size="sm"
                           variant="outline"
@@ -306,14 +306,14 @@ const GigDetail = () => {
                         </Button>
                         <Button
                           size="sm"
-                          className="bg-red-600 hover:bg-red-700"
+                          className="bg-red-400 hover:bg-red-700"
                         >
                           Reject Bid
                         </Button>
                         <Button
                           size="sm"
                           onClick={() => handleAcceptBid(bid)}
-                          className="bg-green-600 hover:bg-green-700"
+                          className="bg-green-400 hover:bg-green-700"
                         >
                           Accept Bid
                         </Button>

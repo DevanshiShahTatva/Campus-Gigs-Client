@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import GigFilterModal from "./filterModel";
+import CommonFormModal from "@/components/common/form/CommonFormModal";
+import { gigBidFields } from "@/config/gigbid.config";
 
 const gigList = [
   {
@@ -140,7 +142,7 @@ const GigListing = () => {
   const [gigs, setGigs] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [appliedFilters, setAppliedFilters] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchGigs = async () => {
@@ -152,8 +154,11 @@ const GigListing = () => {
   }, []);
 
   const handleApplyFilters = (filters: any) => {
-    setAppliedFilters(filters);
     console.log('Applied filters:', filters);
+  }
+
+  const handleSubmitBid = (data: any) => {
+    console.log(data);
   };
 
   const projectCardUI = (gig: any) => {
@@ -215,7 +220,14 @@ const GigListing = () => {
               </div>
             </div>
           </div>
-          <Button className="px-6 py-4 rounded-md">
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsModalOpen(true);
+            }}
+            className="px-6 py-4 rounded-md"
+          >
             Place Bid
           </Button>
         </div>
@@ -224,7 +236,7 @@ const GigListing = () => {
   }
 
   return (
-    <div className="mt-[25px] min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="mt-[25px] min-h-screen bg-gray-50">
       <div className="container mx-auto px-6 py-16">
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -233,13 +245,13 @@ const GigListing = () => {
               <p className="text-gray-600">Discover amazing gigs and opportunities</p>
             </div>
           </div>
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
+          <div className="flex flex-col md:flex-row gap-4 bg-white">
+            <div className="relative flex-1 ">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by keywords, location, or category..."
-                className="pl-12 h-12 text-base bg-gray-50 border-gray-200"
+                className="pl-12 h-12 text-base bg-white border-gray-200"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -264,7 +276,7 @@ const GigListing = () => {
                   <img
                     src={gig.image}
                     alt={gig.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                   <div className="absolute bottom-4 left-4 right-4">
@@ -292,6 +304,15 @@ const GigListing = () => {
           isOpen={isFilterOpen}
           onClose={() => setIsFilterOpen(false)}
           onApplyFilters={handleApplyFilters}
+        />
+        <CommonFormModal
+          width="600px"
+          title="Bid Submission"
+          submitLabel="Submit Bid"
+          open={isModalOpen}
+          setOpen={setIsModalOpen}
+          fields={gigBidFields}
+          onSubmit={handleSubmitBid}
         />
       </div>
     </div>
