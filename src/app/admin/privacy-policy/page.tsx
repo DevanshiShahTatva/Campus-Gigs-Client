@@ -16,7 +16,7 @@ const AdminPrivacyPolicy = () => {
   const [loader, setLoader] = useState(false);
   const [content, setContent] = useState("");
   const [error, setError] = useState(false);
-  const [policyId, setPolicyId] = useState("");
+  const [policyId, setPolicyId] = useState(0);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -54,15 +54,11 @@ const AdminPrivacyPolicy = () => {
       });
       if (response && response.success) {
         await getPrivacyPolicy();
-        toast.success(
-          reset ? PRIVACY_POLICY_RESET_SUCCESS : PRIVACY_POLICY_SUCCESS
-        );
+        toast.success(reset ? PRIVACY_POLICY_RESET_SUCCESS : PRIVACY_POLICY_SUCCESS);
       }
     } catch (err) {
       console.error("Error updating privacy policy", err);
-      toast.error(
-        reset ? PRIVACY_POLICY_RESET_ERROR : PRIVACY_POLICY_ERROR
-      );
+      toast.error(reset ? PRIVACY_POLICY_RESET_ERROR : PRIVACY_POLICY_ERROR);
     } finally {
       setLoader(false);
     }
@@ -106,7 +102,7 @@ const AdminPrivacyPolicy = () => {
       if (response && response.success) {
         const receivedObject = response.data[0];
         setContent(receivedObject.content);
-        setPolicyId(receivedObject._id);
+        setPolicyId(receivedObject.id);
       }
     } catch (err) {
       console.error("Error fetching privacy policy", err);
@@ -182,18 +178,10 @@ const AdminPrivacyPolicy = () => {
         placeholder="Enter Privacy Policy"
       />
       <div className="flex justify-end">
-        <button
-          className="relative group cursor-pointer"
-          onClick={() => updatePrivacyPolicy()}
-          disabled={loader}
-        >
+        <button className="relative group cursor-pointer" onClick={() => updatePrivacyPolicy()} disabled={loader}>
           <div className="absolute -inset-0.5  rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
           <div className="relative bg-[var(--base)] text-[color:var(--text-light)] px-8 py-3 rounded-lg font-semibold hover:bg-[var(--base-hover)] transition-colors flex items-center justify-center min-h-[24px] min-w-[80px]">
-            {loader ? (
-              <Loader size={24} colorClass="text-[var(--text-light)]" />
-            ) : (
-              "Save"
-            )}
+            {loader ? <Loader size={24} colorClass="text-[var(--text-light)]" /> : "Save"}
           </div>
         </button>
       </div>
