@@ -2,7 +2,7 @@
 import Button from "@/components/common/Button";
 import QuillEditor from "@/components/common/QuilEditor";
 import React, { useCallback, useEffect, useState } from "react";
-import {marked} from 'marked';
+import { marked } from "marked";
 import { Trash2, Sparkles } from "lucide-react";
 import { apiCall } from "@/utils/apiCall";
 import { API_ROUTES, MESSAGES } from "@/utils/constant";
@@ -17,7 +17,7 @@ const TermsAndConditions = () => {
   const [loader, setLoader] = useState(false);
   const [content, setContent] = useState("");
   const [error, setError] = useState(false);
-  const [tcId, setTcId] = useState("");
+  const [tcId, setTcId] = useState(0);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -50,19 +50,11 @@ const TermsAndConditions = () => {
 
       if (response && response.success) {
         await getTermsContent();
-        toast.success(
-          reset
-            ? MESSAGES.TERMS_CONDITIONS_RESET_SUCCESS
-            : MESSAGES.TERMS_CONDITIONS_SUCCESS
-        );
+        toast.success(reset ? MESSAGES.TERMS_CONDITIONS_RESET_SUCCESS : MESSAGES.TERMS_CONDITIONS_SUCCESS);
       }
     } catch (err) {
       console.error("Error fetching chart data", err);
-      toast.error(
-        reset
-          ? MESSAGES.TERMS_CONDITIONS_RESET_ERROR
-          : MESSAGES.TERMS_CONDITIONS_ERROR
-      );
+      toast.error(reset ? MESSAGES.TERMS_CONDITIONS_RESET_ERROR : MESSAGES.TERMS_CONDITIONS_ERROR);
     } finally {
       setLoader(false);
     }
@@ -110,7 +102,7 @@ const TermsAndConditions = () => {
       if (response && response.success) {
         const receivedObject = response.data[0];
         setContent(receivedObject.content);
-        setTcId(response.data[0]._id);
+        setTcId(response.data[0].id);
       }
     } catch (err) {
       console.error("Error fetching chart data", err);
@@ -156,9 +148,7 @@ const TermsAndConditions = () => {
         </ModalLayout>
       )}
       <div className="mb-2 flex w-full justify-between">
-        <p className="text-2xl font-bold text-[var(--base)]">
-          Terms & Conditions
-        </p>
+        <p className="text-2xl font-bold text-[var(--base)]">Terms & Conditions</p>
         <div className="flex gap-2">
           <Button
             onClick={() => setIsAiModalOpen(true)}
@@ -188,18 +178,10 @@ const TermsAndConditions = () => {
         placeholder="Enter Terms & Conditions"
       />
       <div className="flex justify-end">
-        <button
-          className="relative group cursor-pointer"
-          onClick={() => updateTermsContent()}
-          disabled={loader}
-        >
+        <button className="relative group cursor-pointer" onClick={() => updateTermsContent()} disabled={loader}>
           <div className="absolute -inset-0.5  rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
           <div className="relative bg-[var(--base)] text-[color:var(--text-light)] px-8 py-3 rounded-lg font-semibold hover:bg-[var(--base-hover)] transition-colors flex items-center justify-center min-h-[24px] min-w-[80px]">
-            {loader ? (
-              <Loader size={24} colorClass="text-[var(--text-light)]" />
-            ) : (
-              "Save"
-            )}
+            {loader ? <Loader size={24} colorClass="text-[var(--text-light)]" /> : "Save"}
           </div>
         </button>
       </div>
