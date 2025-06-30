@@ -23,7 +23,7 @@ const SubscriptionPlan = () => {
     setIsLoading(true);
 
     const res: IPlanApiResponse = await apiCall({
-      endPoint: `/subscription/plans`,
+      endPoint: `/subscription/plan-all`,
       method: "GET",
     });
 
@@ -55,13 +55,13 @@ const SubscriptionPlan = () => {
                 <div
                   key={index}
                   className={`relative bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-500 transform hover:-translate-y-2 sm:hover:-translate-y-4 hover:shadow-2xl group ${
-                    plan.mostPopular ? "ring-2 ring-[var(--base)] lg:scale-105" : ""
+                    plan.most_popular ? "ring-2 ring-[var(--base)] lg:scale-105" : ""
                   } ${hoveredPlan === index ? "ring-2 ring-[var(--base)]/50" : ""}`}
                   onMouseEnter={() => setHoveredPlan(index)}
                   onMouseLeave={() => setHoveredPlan(null)}
                 >
                   {/* Popular Badge */}
-                  {plan.mostPopular && (
+                  {plan.most_popular && (
                     <div className="absolute top-0 right-0 bg-gradient-to-r from-[var(--base)] to-[var(--base-hover)] text-white px-4 sm:px-6 py-2 text-xs sm:text-sm font-semibold rounded-bl-2xl shadow-lg">
                       Most Popular
                     </div>
@@ -110,7 +110,7 @@ const SubscriptionPlan = () => {
                         className={`w-full py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 mt-auto text-sm sm:text-base bg-[var(--base)] text-white hover:bg-[var(--base-hover)] shadow-lg`}
                         onClick={() => setSelectedPlan(index)}
                       >
-                        {plan.buttonText}
+                        {plan.button_text}
                       </button>
                     </Link>
                   </div>
