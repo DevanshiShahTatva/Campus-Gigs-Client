@@ -18,14 +18,14 @@ type SubscriptionPlanFormValues = {
   description: string;
   price: number;
   icon: string;
-  isPro: boolean;
-  rolesAllowed: string[];
-  maxGigsPerMonth: string | null;
-  maxBidsPerMonth: string | null;
+  is_pro: boolean;
+  roles_allowed: string[];
+  max_gig_per_month: string | null;
+  max_bid_per_month: string | null;
   features: string[];
-  canGetBadges: boolean;
-  mostPopular: boolean;
-  buttonText: string;
+  can_get_badge: boolean;
+  most_popular: boolean;
+  button_text: string;
 };
 
 type RoleOption = {
@@ -60,14 +60,14 @@ const INITIAL_VALUES: SubscriptionPlanFormValues = {
   description: "",
   price: 0,
   icon: "⭐",
-  isPro: false,
-  rolesAllowed: [ROLE.USER],
-  maxGigsPerMonth: "",
-  maxBidsPerMonth: "",
+  is_pro: false,
+  roles_allowed: [ROLE.USER],
+  max_gig_per_month: "",
+  max_bid_per_month: "",
   features: [""],
-  canGetBadges: false,
-  mostPopular: false,
-  buttonText: "Get Started",
+  can_get_badge: false,
+  most_popular: false,
+  button_text: "Get Started",
 };
 
 // Validation Schema
@@ -76,10 +76,10 @@ const subscriptionPlanSchema = Yup.object().shape({
   description: Yup.string().required("Description is required").trim(),
   price: Yup.number().required("Price is required").min(0, "Price must be positive"),
   icon: Yup.string().required("Icon is required").trim(),
-  isPro: Yup.boolean().default(false),
-  rolesAllowed: Yup.array().of(Yup.string()).default([ROLE.USER]).min(1, "At least one role is required"),
-  maxGigsPerMonth: Yup.number().nullable(),
-  maxBidsPerMonth: Yup.number().nullable(),
+  is_pro: Yup.boolean().default(false),
+  roles_allowed: Yup.array().of(Yup.string()).default([ROLE.USER]).min(1, "At least one role is required"),
+  max_gig_per_month: Yup.number().nullable(),
+  max_bid_per_month: Yup.number().nullable(),
   features: Yup.array()
     .of(Yup.string().trim().required("Feature cannot be empty"))
     .min(1, "At least one feature is required")
@@ -88,9 +88,9 @@ const subscriptionPlanSchema = Yup.object().shape({
       const nonEmptyValues = values?.filter((v) => v?.trim() !== "");
       return new Set(nonEmptyValues).size === nonEmptyValues?.length;
     }),
-  canGetBadges: Yup.boolean().default(false),
-  mostPopular: Yup.boolean().default(false),
-  buttonText: Yup.string().default("Get Started").trim().required("Button text is required"),
+  can_get_badge: Yup.boolean().default(false),
+  most_popular: Yup.boolean().default(false),
+  button_text: Yup.string().default("Get Started").trim().required("Button text is required"),
 });
 
 // Helper functions
@@ -179,26 +179,26 @@ const CreateEditSubscriptionPlan = ({ params }: PageProps) => {
       description: values.description,
       features: values.features.filter((f) => f.trim() !== ""), // Remove empty features
       price: Number(values.price),
-      isPro: values.isPro,
-      canGetBadges: values.canGetBadges,
-      mostPopular: values.mostPopular,
+      is_pro: values.is_pro,
+      can_get_badge: values.can_get_badge,
+      most_popular: values.most_popular,
       icon: values.icon,
-      buttonText: values.buttonText,
-      ...(values.isPro
+      button_text: values.button_text,
+      ...(values.is_pro
         ? {
-            maxGigsPerMonth: null,
-            maxBidsPerMonth: null,
-            rolesAllowed: ROLE_OPTIONS.map((role) => role.value.toLowerCase()), // Ensure lowercase role names
+            max_gig_per_month: null,
+            max_bid_per_month: null,
+            roles_allowed: ROLE_OPTIONS.map((role) => role.value.toLowerCase()), // Ensure lowercase role names
           }
         : {
-            maxGigsPerMonth: Number(values.maxGigsPerMonth) || 0,
-            maxBidsPerMonth: Number(values.maxBidsPerMonth) || 0,
-            rolesAllowed: values.rolesAllowed.map((role) => role.toLowerCase()),
+            max_gig_per_month: Number(values.max_gig_per_month) || 0,
+            max_bid_per_month: Number(values.max_bid_per_month) || 0,
+            roles_allowed: values.roles_allowed.map((role) => role.toLowerCase()),
           }),
     };
 
     const method = isEditMode ? "PUT" : "POST";
-    const endpoint = isEditMode ? `/subscription-plan/${unwrappedParams.id}` : "/subscription-plan";
+    const endpoint = isEditMode ? `/subscription/plan/${unwrappedParams.id}` : "/subscription/plan";
 
     const response = await apiCall({
       endPoint: endpoint,
@@ -227,7 +227,7 @@ const CreateEditSubscriptionPlan = ({ params }: PageProps) => {
     if (isEditMode) {
       const fetchSubscriptionPlan = async () => {
         const response = await apiCall({
-          endPoint: `/subscription-plan/${unwrappedParams.id}`,
+          endPoint: `/subscription/plan/${unwrappedParams.id}`,
           method: "GET",
         });
 
@@ -238,14 +238,14 @@ const CreateEditSubscriptionPlan = ({ params }: PageProps) => {
             description: data.description,
             price: data.price,
             icon: data.icon,
-            isPro: data.isPro,
-            rolesAllowed: data.rolesAllowed,
-            maxGigsPerMonth: data.maxGigsPerMonth,
-            maxBidsPerMonth: data.maxBidsPerMonth,
+            is_pro: data.is_pro,
+            roles_allowed: data.roles_allowed,
+            max_gig_per_month: data.max_gig_per_month,
+            max_bid_per_month: data.max_bid_per_month,
             features: data.features,
-            canGetBadges: data.canGetBadges,
-            mostPopular: data.mostPopular,
-            buttonText: data.buttonText,
+            can_get_badge: data.can_get_badge,
+            most_popular: data.most_popular,
+            button_text: data.button_text,
           });
         } else {
           toast.error("Subscription plan not found");
@@ -363,28 +363,28 @@ const CreateEditSubscriptionPlan = ({ params }: PageProps) => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Plan Type</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <RadioCard
-                      name="isPro"
+                      name="is_pro"
                       value="pro"
                       label="Pro Plan"
                       description="Full access to all features"
-                      checked={values.isPro}
-                      onChange={() => setFieldValue("isPro", true)}
+                      checked={values.is_pro}
+                      onChange={() => setFieldValue("is_pro", true)}
                     />
                     <RadioCard
-                      name="isPro"
+                      name="is_pro"
                       value="free"
                       label="Free Plan"
                       description="Limited features"
-                      checked={!values.isPro}
-                      onChange={() => setFieldValue("isPro", false)}
+                      checked={!values.is_pro}
+                      onChange={() => setFieldValue("is_pro", false)}
                     />
                   </div>
                 </div>
 
-                {!values.isPro && (
+                {!values.is_pro && (
                   <>
                     <FormikTextField
-                      name="maxGigsPerMonth"
+                      name="max_gig_per_month"
                       placeholder="Enter plan icon"
                       label="Max Gigs Per Month"
                       type="number"
@@ -393,7 +393,7 @@ const CreateEditSubscriptionPlan = ({ params }: PageProps) => {
                     />
 
                     <FormikTextField
-                      name="maxBidsPerMonth"
+                      name="max_bid_per_month"
                       placeholder="Enter plan icon"
                       label="Max Bids Per Month"
                       type="number"
@@ -407,18 +407,18 @@ const CreateEditSubscriptionPlan = ({ params }: PageProps) => {
                         {ROLE_OPTIONS.map((role) => (
                           <CheckboxCard
                             key={role.value}
-                            name="rolesAllowed"
+                            name="roles_allowed"
                             value={role.value}
                             label={role.label}
-                            checked={values.rolesAllowed.includes(role.value)}
+                            checked={values.roles_allowed.includes(role.value)}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                               const value = e.target.value;
                               if (e.target.checked) {
-                                setFieldValue("rolesAllowed", [...values.rolesAllowed, value]);
+                                setFieldValue("roles_allowed", [...values.roles_allowed, value]);
                               } else {
                                 setFieldValue(
-                                  "rolesAllowed",
-                                  values.rolesAllowed.filter((r) => r !== value)
+                                  "roles_allowed",
+                                  values.roles_allowed.filter((r) => r !== value)
                                 );
                               }
                             }}
@@ -430,56 +430,56 @@ const CreateEditSubscriptionPlan = ({ params }: PageProps) => {
                 )}
 
                 <div>
-                  <label htmlFor="canGetBadges" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="can_get_badge" className="block text-sm font-medium text-gray-700 mb-1">
                     Can Get Badges
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <RadioCard
-                      name="canGetBadges"
+                      name="can_get_badge"
                       description="User can get badges"
                       value="true"
                       label="Yes"
-                      checked={values.canGetBadges}
-                      onChange={() => setFieldValue("canGetBadges", true)}
+                      checked={values.can_get_badge}
+                      onChange={() => setFieldValue("can_get_badge", true)}
                     />
                     <RadioCard
-                      name="canGetBadges"
+                      name="can_get_badge"
                       description="User can't get badges"
                       value="false"
                       label="No"
-                      checked={!values.canGetBadges}
-                      onChange={() => setFieldValue("canGetBadges", false)}
+                      checked={!values.can_get_badge}
+                      onChange={() => setFieldValue("can_get_badge", false)}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="mostPopular" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="most_popular" className="block text-sm font-medium text-gray-700 mb-1">
                     Most Popular
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <RadioCard
-                      name="mostPopular"
+                      name="most_popular"
                       description="Show label on the plan"
                       value="true"
                       label="Yes"
-                      checked={values.mostPopular}
-                      onChange={() => setFieldValue("mostPopular", true)}
+                      checked={values.most_popular}
+                      onChange={() => setFieldValue("most_popular", true)}
                     />
                     <RadioCard
-                      name="mostPopular"
+                      name="most_popular"
                       description="Hide label on the plan"
                       value="false"
                       label="No"
-                      checked={!values.mostPopular}
-                      onChange={() => setFieldValue("mostPopular", false)}
+                      checked={!values.most_popular}
+                      onChange={() => setFieldValue("most_popular", false)}
                     />
                   </div>
                 </div>
               </div>
 
               <FormikTextField
-                name="buttonText"
+                name="button_text"
                 placeholder="e.g., Get Started, Subscribe Now"
                 label="Call-to-Action Button Text"
                 type="text"

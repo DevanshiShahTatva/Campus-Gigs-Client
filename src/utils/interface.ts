@@ -8,7 +8,7 @@ export interface ColumnConfig<T> {
   textAlign?: "left" | "center" | "right";
 }
 
-export interface DynamicTableProps<T extends { _id: string }> {
+export interface DynamicTableProps<T extends { id: number }> {
   data: T[];
   columns: ColumnConfig<T>[];
   actions?: (row: T) => React.ReactNode;
@@ -33,20 +33,20 @@ export interface DynamicTableProps<T extends { _id: string }> {
   loading?: boolean;
 }
 export interface ISubscriptionPlan {
-  _id: string;
+  id: number;
   name: string;
   description: string;
   price: number;
-  isPro: boolean;
-  mostPopular: boolean;
-  buttonText: string;
+  is_pro: boolean;
+  most_popular: boolean;
+  button_text: string;
   icon: string;
-  rolesAllowed: string[];
-  maxGigsPerMonth: number;
-  maxBidsPerMonth: number;
+  roles_allowed: string[];
+  max_gig_per_month: number;
+  max_bid_per_month: number;
   features: string[];
-  createdAt: string;
-  canGetBadges: boolean;
+  created_at: string;
+  can_get_badge: boolean;
 }
 
 export interface ISubscriptionPlanApiResponse {
@@ -71,14 +71,14 @@ export interface IPlanApiResponse {
 }
 
 export interface IDropdownOption {
-  label: string,
-  id: string
+  label: string;
+  id: string;
 }
 
 export interface Tire {
   _id: string;
   name: string;
-  categories: { _id: string, name: string}[];
+  categories: { _id: string; name: string }[];
 }
 
 export interface GigCategory {

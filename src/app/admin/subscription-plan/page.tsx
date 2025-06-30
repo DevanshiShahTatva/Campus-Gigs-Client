@@ -36,7 +36,7 @@ const SubscriptionPlan = () => {
       });
 
       const res: ISubscriptionPlanApiResponse = await apiCall({
-        endPoint: `/subscription-plan?${params.toString()}`,
+        endPoint: `/subscription/plan?${params.toString()}`,
         method: "GET",
       });
 
@@ -88,13 +88,13 @@ const SubscriptionPlan = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-medium text-gray-800">{plan.name}</h3>
-                    {plan.mostPopular && (
+                    {plan.most_popular && (
                       <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full font-medium">Most Popular</span>
                     )}
-                    {plan.isPro && <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full font-medium">Pro</span>}
+                    {plan.is_pro && <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full font-medium">Pro</span>}
                   </div>
                   <p className="text-sm text-gray-700 mt-1">{plan.description}</p>
-                  <p className="text-xs text-gray-600 mt-1">Created: {plan.createdAt}</p>
+                  <p className="text-xs text-gray-600 mt-1">Created: {plan.created_at}</p>
                 </div>
               </div>
             ),
@@ -109,21 +109,21 @@ const SubscriptionPlan = () => {
                   ${plan.price}
                   <span className="text-sm font-normal text-gray-800">/month</span>
                 </div>
-                <div className="text-xs text-gray-800 mt-1">Button: "{plan.buttonText}"</div>
+                <div className="text-xs text-gray-800 mt-1">Button: "{plan.button_text}"</div>
               </div>
             ),
           },
           {
-            key: "maxGigsPerMonth",
+            key: "max_gig_per_month",
             label: "Gigs/Month",
             sortable: true,
-            render: (_, plan) => (plan.isPro ? "Unlimited" : plan.maxGigsPerMonth),
+            render: (_, plan) => (plan.is_pro ? "Unlimited" : plan.max_gig_per_month),
           },
           {
-            key: "maxBidsPerMonth",
+            key: "max_bid_per_month",
             label: "Bids/Month",
             sortable: true,
-            render: (_, plan) => (plan.isPro ? "Unlimited" : plan.maxBidsPerMonth),
+            render: (_, plan) => (plan.is_pro ? "Unlimited" : plan.max_bid_per_month),
           },
           {
             key: "features",
@@ -143,22 +143,22 @@ const SubscriptionPlan = () => {
             ),
           },
           {
-            key: "canGetBadges",
+            key: "can_get_badge",
             label: "Badges",
             sortable: true,
             textAlign: "center",
             render: (_, plan) => (
               <div className="flex items-center justify-center gap-1">
-                <span className={`text-xs ${plan.canGetBadges ? "text-green-600" : "text-gray-400"}`}>{plan.canGetBadges ? "✓" : "✗"}</span>
+                <span className={`text-xs ${plan.can_get_badge ? "text-green-600" : "text-gray-400"}`}>{plan.can_get_badge ? "✓" : "✗"}</span>
               </div>
             ),
           },
           {
-            key: "rolesAllowed",
+            key: "roles_allowed",
             label: "Roles",
             render: (_, plan) => (
               <div className="flex flex-wrap gap-1">
-                {plan.rolesAllowed.map((role) => (
+                {plan.roles_allowed.map((role) => (
                   <span key={role} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
                     {role}
                   </span>
@@ -169,7 +169,7 @@ const SubscriptionPlan = () => {
         ]}
         actions={(row) => (
           <div className="flex items-center justify-center gap-x-3">
-            <button className="text-blue-500 hover:text-blue-700" onClick={() => router.push(`/admin/subscription-plan/${row._id}`)}>
+            <button className="text-blue-500 hover:text-blue-700" onClick={() => router.push(`/admin/subscription-plan/${row.id}`)}>
               <Edit size={16} />
             </button>
             {/* <button className="text-red-500 hover:text-red-700" onClick={() => console.log("Delete", row.id)}>
