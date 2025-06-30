@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Calendar, Search } from "lucide-react";
+import { Users, Search, Clock, DollarSign, Star, CheckCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import GigFilterModal from "./filterModel";
 
 const gigList = [
   {
@@ -138,22 +139,89 @@ const gigList = [
 const GigListing = () => {
   const [gigs, setGigs] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState(null);
 
   useEffect(() => {
     const fetchGigs = async () => {
-      const response = await fetch("/api/gigs");
-      const data = await response.json();
-      setGigs(data);
+      // const response = await fetch("/api/gigs");
+      // const data = await response.json();
+      setGigs(gigList);
     }
     fetchGigs();
   }, []);
 
-  useEffect(() => {
-    const filteredGigs = gigs.filter((gig) =>
-      gig.title.toLowerCase().includes(searchQuery.toLowerCase())
+  const handleApplyFilters = (filters: any) => {
+    setAppliedFilters(filters);
+    console.log('Applied filters:', filters);
+  };
+
+  const projectCardUI = (gig: any) => {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-center space-x-3">
+            <div className="bg-teal-100 p-2 rounded-lg">
+              <DollarSign className="w-5 h-5 text-teal-600" />
+            </div>
+            <div>
+              <div className="font-semibold text-gray-900">$100-200</div>
+              <div className="text-sm text-gray-500">Fixed</div>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <div className="bg-purple-100 p-2 rounded-lg">
+              <Clock className="w-5 h-5 text-purple-600" />
+            </div>
+            <div>
+              <div className="font-semibold text-gray-900">1 week</div>
+              <div className="text-sm text-gray-500">Timeline</div>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <div className="bg-blue-100 p-2 rounded-lg">
+              <Users className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <div className="font-semibold text-gray-900">12 bids</div>
+              <div className="text-sm text-gray-500">Received</div>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {gig.tags.slice(0, 3).map((tag: string, i: number) => (
+            <span key={`${i + 1}`} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+              {tag}
+            </span>
+          ))}
+        </div>
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+          <div className="flex items-center space-x-3">
+            <img
+              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"
+              alt="Mike Chen"
+              className="w-10 h-10 rounded-full object-cover"
+            />
+            <div>
+              <div className="flex items-center space-x-1">
+                <span className="font-medium text-gray-900">Mike Chen</span>
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              </div>
+              <div className="flex items-center space-x-1 text-sm text-gray-500">
+                <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                <span>4.6</span>
+                <span>•</span>
+                <span>5 hours ago</span>
+              </div>
+            </div>
+          </div>
+          <Button className="px-6 py-4 rounded-md">
+            Place Bid
+          </Button>
+        </div>
+      </div>
     );
-    setGigs(filteredGigs);
-  }, [searchQuery]);
+  }
 
   return (
     <div className="mt-[25px] min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
@@ -175,7 +243,11 @@ const GigListing = () => {
               />
             </div>
             <div className="flex items-center gap-2">
-              <Button size="lg" className="px-6 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700">
+              <Button
+                size="lg"
+                onClick={() => setIsFilterOpen(true)}
+                className="px-6 h-12"
+              >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
                 </svg>
@@ -185,9 +257,9 @@ const GigListing = () => {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {gigList.map((gig) => (
+          {gigs.map((gig) => (
             <Link key={gig.id} href={`/gigs/${gig.id}`} className="group">
-              <Card className="gap-0 py-0 relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-3 bg-white border-0 shadow-lg h-full flex flex-col hover:shadow-purple-500/10">
+              <Card className="gap-0 py-0 relative overflow-hidden bg-white border-0 shadow-lg h-full flex flex-col hover:shadow-purple-500/10">
                 <div className="relative h-52 overflow-hidden">
                   <img
                     src={gig.image}
@@ -203,47 +275,24 @@ const GigListing = () => {
                 </div>
                 <CardContent className="p-6 flex-1 flex flex-col">
                   <div className="mb-4">
-                    <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">
+                    <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-[var(--base)] transition-colors line-clamp-2 leading-tight">
                       {gig.title}
                     </h3>
                     <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
                       {gig.description}
                     </p>
                   </div>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {gig.tags.slice(0, 3).map((tag, i) => (
-                      <Badge key={`${i + 1}`} variant="outline" className="text-xs px-3 py-1 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 transition-colors">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="space-y-3 mb-6 flex-1">
-                    <div className="flex items-center gap-3 text-sm text-gray-700  rounded-lg">
-                      <Calendar className="w-4 h-4 text-blue-600" />
-                      <span className="font-medium">{gig.date} • {gig.time}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-gray-700  rounded-lg">
-                      <Users className="w-4 h-4 text-red-600" />
-                      <span className="font-medium">{gig.attendees} Biders</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="text-right">
-                      <div className="flex items-center gap-2 mb-1">
-                        {gig.originalPrice && (
-                          <span className="text-sm text-gray-400 line-through">{gig.originalPrice}</span>
-                        )}
-                        <span className={`font-bold text-xl ${gig.price === 'Free' ? 'text-green-600' : 'text-gray-900'}`}>
-                          {gig.price}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  {projectCardUI(gig)}
                 </CardContent>
               </Card>
             </Link>
           ))}
         </div>
+        <GigFilterModal
+          isOpen={isFilterOpen}
+          onClose={() => setIsFilterOpen(false)}
+          onApplyFilters={handleApplyFilters}
+        />
       </div>
     </div>
   );

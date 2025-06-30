@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
@@ -189,9 +188,9 @@ const GigDetail = () => {
                   </div>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {gitDetails.skills.map((tag: string, i: number) => (
-                      <Badge key={`${i + 1}`} className="text-xs px-3 py-1 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 transition-colors">
+                      <span key={`${i + 1}`} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
                         {tag}
-                      </Badge>
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -221,8 +220,8 @@ const GigDetail = () => {
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`relative pb-3 px-2 text-sm md:text-base font-medium transition-all duration-200 cursor-pointer ${activeTab === tab
-                    ? "text-blue-600 after:content-[''] after:absolute after:-bottom-[1px] after:left-0 after:w-full after:h-[2px] after:bg-blue-600"
-                    : "text-gray-500 hover:text-blue-500"
+                    ? "text-[var(--base)] after:content-[''] after:absolute after:-bottom-[1px] after:left-0 after:w-full after:h-[2px] after:bg-[var(--base)]"
+                    : "text-gray-600 hover:text-[var(--base)]"
                     }`}
                 >
                   {tab}
