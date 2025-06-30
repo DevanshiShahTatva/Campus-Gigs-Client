@@ -84,5 +84,9 @@ export interface Tire {
 export interface GigCategory {
   id: number;
   name: string;
-  tire: { name: string }
+  tire_id: number;
+  tire: {
+    id: number;
+    name: string;
+  }
 }
