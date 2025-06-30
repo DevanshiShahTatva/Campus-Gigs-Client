@@ -21,7 +21,7 @@ function TireService() {
     page: DEFAULT_PAGINATION.page,
     pageSize: DEFAULT_PAGINATION.pageSize,
     search: "",
-    sortKey: "",
+    sortKey: "name",
     sortOrder: "asc" as SortOrder,
   });
 
@@ -93,7 +93,7 @@ function TireService() {
 
     handleApi(
       {
-        endPoint: `${API_ROUTES.ADMIN.TIRE}/${editTire._id}`,
+        endPoint: `${API_ROUTES.ADMIN.TIRE}/${editTire.id}`,
         method: "PUT",
         body: values,
       },
@@ -102,7 +102,7 @@ function TireService() {
     );
   };
 
-  const handleDeleteTire = (id: string) => {
+  const handleDeleteTire = (id: number) => {
     handleApi(
       { endPoint: `${API_ROUTES.ADMIN.TIRE}/${id}`, method: "DELETE" },
       "Tire deleted successfully",
@@ -139,7 +139,7 @@ function TireService() {
     setQueryParams((prev) => ({
       ...prev,
       search: searchTerm,
-      sortKey: key,
+      sortKey: key ? key : "name",
       sortOrder: order,
       page: 1,
     }));
@@ -175,7 +175,7 @@ function TireService() {
               <Button
                 className="bg-red-500 hover:bg-red-500"
                 size={"icon"}
-                onClick={() => handleDeleteTire(row._id)}
+                onClick={() => handleDeleteTire(row.id)}
               >
                 <Trash size={16} />
               </Button>
