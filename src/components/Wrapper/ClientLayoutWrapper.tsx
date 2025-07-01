@@ -10,18 +10,19 @@ export function ClientLayoutWrapper({
 }) {
   const pathname = usePathname();
 
-  const hideHeaderFooter =
-    pathname.startsWith("/admin") ||
-    pathname === "/login" ||
-    pathname === "/forgot-password" ||
-    pathname === "/reset-password" ||
-    pathname === "/sign-up";
+  const showHeaderFooter = [
+    '/',
+    '/ContactUs',
+    '/FAQs',
+    '/TermsConditions',
+    '/PrivacyPolicy',
+  ].includes(pathname);
 
   return (
     <>
-      {!hideHeaderFooter && <Header />}
+      {showHeaderFooter && <Header />}
       {children}
-      {!hideHeaderFooter && <Footer />}
+      {showHeaderFooter && <Footer />}
     </>
   );
 }

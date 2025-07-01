@@ -144,7 +144,7 @@ const GigDetail = () => {
   }
 
   return (
-    <div className="mt-[64px] min-h-screen bg-gray-50">
+    <div className=" bg-gray-50">
       <div className="bg-white shadow">
         <div className="mx-auto py-6 px-4 sm:px-6 lg:px-8 flex items-center">
           <button
@@ -158,7 +158,7 @@ const GigDetail = () => {
           </h1>
         </div>
       </div>
-      <main className="mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <main className="mx-auto py-6 ">
         <div className="lg:grid lg:grid-cols-3 lg:gap-8">
           <div className="lg:col-span-2">
             <div className="h-full bg-white shadow rounded-lg overflow-hidden">
