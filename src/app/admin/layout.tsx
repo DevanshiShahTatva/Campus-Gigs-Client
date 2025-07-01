@@ -1,4 +1,3 @@
-"use client";
 import React, { ReactNode } from 'react'
 import CommonUserLayout from '@/components/common/CommonUserLayout';
 import { ROLE } from '@/utils/constant';
