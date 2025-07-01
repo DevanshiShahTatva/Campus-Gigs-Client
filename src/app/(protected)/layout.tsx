@@ -1,18 +1,12 @@
 "use client";
-import React, { useState, createContext } from "react";
+import React from "react";
 import UserProviderHeader from "@/components/common/UserProviderHeader";
 import UserProviderSidebar from "@/components/common/UserProviderSidebar";
-
-// Create context for user role
-export const RoleContext = createContext<{
-  role: "user" | "provider";
-  setRole: (role: "user" | "provider") => void;
-}>({ role: "user", setRole: () => {} });
+import { RoleProvider } from "@/context/role-context";
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [role, setRole] = useState<"user" | "provider">("user");
   return (
-    <RoleContext.Provider value={{ role, setRole }}>
+    <RoleProvider>
       <div className="h-screen min-h-screen flex flex-col">
         <UserProviderHeader />
         <div className="flex flex-1 min-h-0">
@@ -22,7 +16,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </main>
         </div>
       </div>
-    </RoleContext.Provider>
+    </RoleProvider>
   );
 };
 

@@ -3,7 +3,7 @@ import React, { useState, useContext } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaBell, FaUserCircle, FaChevronDown, FaExchangeAlt, FaUser, FaCog, FaSignOutAlt, FaCheckCircle, FaInfoCircle } from "react-icons/fa";
-import { RoleContext } from '@/app/(protected)/layout';
+import { RoleContext } from '@/context/role-context';
 
 const UserProviderHeader = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);

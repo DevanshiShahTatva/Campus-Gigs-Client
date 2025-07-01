@@ -3,7 +3,7 @@ import React, { useState, useRef, useContext } from "react";
 import { FiUpload, FiCamera, FiTrash2 } from "react-icons/fi";
 import DynamicForm from "@/components/common/form/DynamicForm";
 import { apiCall } from "@/utils/apiCall";
-import { RoleContext } from '@/app/(protected)/layout';
+import { RoleContext } from '@/context/role-context';
 import { getInitials, profileFormConfig } from "./helper";
 import { USER_PROFILE } from "@/utils/constant";
 
