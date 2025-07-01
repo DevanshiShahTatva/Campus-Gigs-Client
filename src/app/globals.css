@@ -366,3 +366,7 @@ button{
   50% { left: 60%; opacity: 1; }
   100% { left: 125%; opacity: 0; }
 }
+
+.border-destructive {
+  border-color: red !important;
+}

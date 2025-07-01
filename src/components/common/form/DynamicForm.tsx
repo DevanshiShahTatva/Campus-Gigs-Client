@@ -83,7 +83,7 @@ const DynamicForm = ({
 
         switch (subfield.type) {
           case "number":
-            validator = Yup.number().typeError(`${label} must be a number`);
+            validator = Yup.number().typeError(`${label} must be a number`).min(1);
             break;
           case "checkbox":
             validator = Yup.boolean();
@@ -171,7 +171,19 @@ const DynamicForm = ({
     <Formik
       initialValues={initialValues}
       validationSchema={Yup.object().shape(validationSchema)}
-      onSubmit={onSubmit}
+      onSubmit={async (values, formikHelpers) => {
+        const errors = await formikHelpers.validateForm();
+        if (Object.keys(errors).length > 0) {
+          formikHelpers.setTouched(
+            Object.keys(errors).reduce(
+              (acc, key) => ({ ...acc, [key]: true }),
+              {}
+            )
+          );
+          return;
+        }
+        onSubmit(values);
+      }}
     >
       {(formik) => (
         <InnerForm
@@ -251,7 +263,13 @@ const InnerForm = ({
               onValueChange={(val) => setFieldValue(field.name, val)}
               disabled={isDisabled}
             >
-              <SelectTrigger className={error ? "border-destructive" : ""}>
+              <SelectTrigger
+                className={
+                  formik.submitCount > 0 && errors[field.name]
+                    ? "border-destructive"
+                    : ""
+                }
+              >
                 <SelectValue placeholder={field.placeholder} />
               </SelectTrigger>
               <SelectContent>
@@ -262,8 +280,10 @@ const InnerForm = ({
                 ))}
               </SelectContent>
             </Select>
-            {error && (
-              <div className="text-sm text-destructive">{String(error)}</div>
+            {formik.submitCount > 0 && errors[field.name] && (
+              <div className="text-sm text-destructive">
+                {String(errors[field.name])}
+              </div>
             )}
           </div>
         );
@@ -288,10 +308,10 @@ const InnerForm = ({
               onValueChange={(val) => setFieldValue(field.name, val)}
               placeholder={field.placeholder}
               disabled={isDisabled}
-              error={!!error}
+              error={!!(formik.submitCount > 0 && errors[field.name])}
             />
-            {error && (
-              <div className="text-sm text-destructive">{String(error)}</div>
+            {formik.submitCount > 0 && errors[field.name] && (
+              <div className="text-sm text-destructive">{String(errors[field.name])}</div>
             )}
           </div>
         );
@@ -459,8 +479,8 @@ const InnerForm = ({
               disabled={isDisabled}
               placeholder={field.placeholder}
             />
-            {error && (
-              <div className="text-sm text-destructive">{String(error)}</div>
+            {formik.submitCount > 0 && errors[field.name] && (
+              <div className="text-sm text-destructive">{String(errors[field.name])}</div>
             )}
           </div>
         );

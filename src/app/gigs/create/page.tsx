@@ -9,6 +9,7 @@ const CreateGig = () => {
   const [initialValues, setIntialValues] = useState({
     title: "",
     description: "",
+    price: 0
   });
 
   const formConfig: FormFieldConfig[] = [

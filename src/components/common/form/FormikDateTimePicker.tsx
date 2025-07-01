@@ -1,7 +1,7 @@
 import React from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { useField } from "formik";
+import { useField, useFormikContext } from "formik";
 import { CalendarIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
@@ -22,6 +22,9 @@ const FormikDateTimePicker: React.FC<Props> = ({
 }) => {
   const [field, meta, helpers] = useField(name);
   const { setValue } = helpers;
+  const { submitCount } = useFormikContext();
+
+  const showError = !!meta.error && (meta.touched || submitCount > 0);
 
   return (
     <div className="space-y-2">
@@ -45,12 +48,12 @@ const FormikDateTimePicker: React.FC<Props> = ({
           placeholderText={placeholder}
           disabled={disabled}
           className={`w-full pr-10 px-4 border text-black disabled:bg-gray-100 disabled:text-gray-500 border-gray-300 rounded-lg h-11 py-2 focus:outline-none focus:ring-1 focus:ring-[var(--base)] focus:border-[var(--base)] ${
-            meta.touched && meta.error ? "border-destructive" : ""
+            showError ? "border-destructive" : ""
           }`}
         />
         <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5 pointer-events-none" />
       </div>
-      {meta.touched && meta.error && (
+      {showError && (
         <div className="text-sm text-destructive">{meta.error}</div>
       )}
     </div>
