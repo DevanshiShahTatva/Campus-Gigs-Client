@@ -52,6 +52,8 @@ export type FormSubFieldConfig = {
   accept?: string;
   maxSize?: number;
   enableTimeSelect?: boolean;
+  minDate?: Date;
+  maxDate?: Date;
 };
 
 export type FormFieldConfig = {
@@ -494,6 +496,8 @@ const InnerForm = ({
             disabled={isDisabled}
             placeholder={field.placeholder}
             enableTimeSelect={field.enableTimeSelect}
+            minDate={field.minDate}
+            maxDate={field.maxDate}
           />
         );
 

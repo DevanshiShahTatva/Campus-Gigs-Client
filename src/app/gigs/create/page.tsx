@@ -9,7 +9,13 @@ const CreateGig = () => {
   const [initialValues, setIntialValues] = useState({
     title: "",
     description: "",
-    price: 0
+    price: 0,
+    payment_type: "hourly",
+    start_date_time: null,
+    end_date_time: null,
+    gig_category_id: "",
+    skills: [],
+    image: []
   });
 
   const formConfig: FormFieldConfig[] = [
@@ -71,6 +77,7 @@ const CreateGig = () => {
           required: true,
           enableTimeSelect: true,
           placeholder: "Choose date and time",
+          minDate: new Date()
         },
         {
           id: "end_date_time",
@@ -80,6 +87,7 @@ const CreateGig = () => {
           required: true,
           enableTimeSelect: true,
           placeholder: "Choose date and time",
+          minDate: new Date()
         },
       ],
     },

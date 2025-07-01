@@ -11,6 +11,8 @@ interface Props {
   disabled?: boolean;
   placeholder?: string;
   enableTimeSelect?: boolean;
+  minDate?: Date;
+  maxDate?: Date
 }
 
 const FormikDateTimePicker: React.FC<Props> = ({
@@ -19,6 +21,8 @@ const FormikDateTimePicker: React.FC<Props> = ({
   disabled,
   placeholder,
   enableTimeSelect = false,
+  minDate,
+  maxDate
 }) => {
   const [field, meta, helpers] = useField(name);
   const { setValue } = helpers;
@@ -40,6 +44,8 @@ const FormikDateTimePicker: React.FC<Props> = ({
           onChange={(date) => setValue(date)}
           showTimeSelect={enableTimeSelect}
           timeFormat="HH:mm"
+          minDate={minDate}
+          maxDate={maxDate}
           timeIntervals={15}
           timeCaption="Time"
           dateFormat={
