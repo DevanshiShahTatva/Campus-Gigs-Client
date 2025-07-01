@@ -5,14 +5,7 @@ import { ROLE, ROUTES } from "./utils/constant";
 const userDefaultRoute = ROUTES.HOME;
 const adminDefaultRoute = ROUTES.ADMIN.DASHBOARD;
 
-const publicRoutes = [
-  ROUTES.HOME,
-  ROUTES.LOGIN,
-  ROUTES.SIGN_UP,
-  ROUTES.FORGOT_PASSWORD,
-  ROUTES.RESET_PASSWORD,
-  ROUTES.GIGS,
-];
+const publicRoutes = [ROUTES.HOME, ROUTES.LOGIN, ROUTES.SIGN_UP, ROUTES.FORGOT_PASSWORD, ROUTES.RESET_PASSWORD, ROUTES.GIGS];
 
 const adminRoutes = [
   ROUTES.ADMIN.DASHBOARD,
@@ -26,9 +19,7 @@ const adminRoutes = [
   ROUTES.ADMIN.GIGCATEGORY,
 ];
 
-const userRoutes = [
-  ROUTES.USER.DASHBOARD
-];
+const userRoutes = [ROUTES.USER.DASHBOARD, ROUTES.USER.BUY_SUBSCRIPTION];
 
 export async function middleware(request: NextRequest) {
   const currentPath = request.nextUrl.pathname;
@@ -80,13 +71,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/",
-    "/login",
-    "/sign-up",
-    "/forgot-password",
-    "/reset-password",
-    "/admin/:path*",
-    "/user/:path*",
-  ],
+  matcher: ["/", "/login", "/sign-up", "/forgot-password", "/reset-password", "/admin/:path*", "/user/:path*"],
 };

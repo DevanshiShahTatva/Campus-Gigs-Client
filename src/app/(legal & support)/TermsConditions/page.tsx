@@ -37,12 +37,10 @@ export default function TermsConditions() {
   const decodedHTML = useMemo(() => he.decode(termsContent ?? ""), [termsContent]);
 
   return (
-    <section className="min-h-screen py-20 bg-[var(--bg-light)] w-full">
+    <section className="bg-[var(--bg-light)] w-full py-12">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center my-12">
-          <h1 className="text-3xl sm:text-4xl font-bold text-[var(--text-dark)] mb-4">
-            Terms & Conditions
-          </h1>
+        <div className="text-center mb-12">
+          <h1 className="text-3xl sm:text-4xl font-bold text-[var(--text-dark)] mb-4">Terms & Conditions</h1>
           <p className="text-[var(--text-semi-dark)] text-base sm:text-lg">
             Please read these terms and conditions carefully before using CampusGig.
           </p>
@@ -53,9 +51,7 @@ export default function TermsConditions() {
               <Loader size={48} colorClass="text-[var(--base)]" />
             </div>
           )}
-          {error && !loading && (
-            <div className="text-center text-red-600 font-medium py-8">{error}</div>
-          )}
+          {error && !loading && <div className="text-center text-red-600 font-medium py-8">{error}</div>}
           {!loading && !error && (
             <div className="terms-and-conditions prose prose-lg max-w-none text-[var(--text-dark)]">
               <div dangerouslySetInnerHTML={{ __html: decodedHTML }} />
