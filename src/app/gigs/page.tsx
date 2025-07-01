@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Slider from "react-slick";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Search, Clock, DollarSign, Star, CheckCircle } from "lucide-react";
@@ -9,7 +10,11 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import GigFilterModal from "./filterModel";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
+import GigListingSkeleton from "@/components/skeleton/gigListingSkeleton";
 import { gigBidFields } from "@/config/gigbid.config";
+
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const gigList = [
   {
@@ -19,7 +24,11 @@ const gigList = [
     category: "Technology",
     biderCount: 10,
     description: "Join industry leaders for insights into AI, blockchain, and the future of technology. Network with innovators and discover cutting-edge solutions.",
-    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=240&fit=crop&auto=format",
+    image: [
+      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=240&fit=crop&auto=format",
+      "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=240&fit=crop&auto=format",
+      "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=400&h=240&fit=crop&auto=format",
+    ],
     tags: ["AI", "Blockchain", "Networking"]
   },
   {
@@ -39,7 +48,10 @@ const gigList = [
     attendees: 85,
     capacity: 120,
     description: "Learn modern design techniques, color theory, and digital art fundamentals from professional designers and artists.",
-    image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=240&fit=crop&auto=format",
+    image: [
+      "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=240&fit=crop&auto=format",
+      "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=240&fit=crop&auto=format"
+    ],
     featured: false,
     tags: ["Design", "Digital Art", "Workshop"],
     duration: "4 hours"
@@ -62,7 +74,7 @@ const gigList = [
     attendees: 230,
     capacity: 300,
     description: "Watch innovative startups pitch their ideas to investors. Network with entrepreneurs and learn about the latest business trends.",
-    image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&h=240&fit=crop&auto=format",
+    image: ["https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&h=240&fit=crop&auto=format"],
     featured: true,
     tags: ["Startup", "Pitch", "Investment"],
     duration: "3 hours"
@@ -85,7 +97,7 @@ const gigList = [
     attendees: 65,
     capacity: 80,
     description: "Master portrait and landscape photography with professional techniques, lighting, and post-processing skills.",
-    image: "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=400&h=240&fit=crop&auto=format",
+    image: ["https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=400&h=240&fit=crop&auto=format"],
     featured: false,
     tags: ["Photography", "Portrait", "Landscape"],
     duration: "6 hours"
@@ -108,7 +120,7 @@ const gigList = [
     attendees: 120,
     capacity: 150,
     description: "Comprehensive training on SEO, social media marketing, Google Ads, and analytics to boost your digital presence.",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=240&fit=crop&auto=format",
+    image: ["https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=240&fit=crop&auto=format"],
     featured: false,
     tags: ["SEO", "Social Media", "Google Ads"],
     duration: "2 days"
@@ -131,7 +143,7 @@ const gigList = [
     attendees: 180,
     capacity: 200,
     description: "Learn from master chefs, taste exotic cuisines, and participate in cooking competitions with food enthusiasts.",
-    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=240&fit=crop&auto=format",
+    image: ["https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=240&fit=crop&auto=format"],
     featured: true,
     tags: ["Cooking", "Festival", "Competition"],
     duration: "5 hours"
@@ -160,6 +172,10 @@ const GigListing = () => {
   const handleSubmitBid = (data: any) => {
     console.log(data);
   };
+
+  if (!gigs.length) {
+    return <GigListingSkeleton />;
+  }
 
   const projectCardUI = (gig: any) => {
     return (
@@ -226,7 +242,7 @@ const GigListing = () => {
               e.stopPropagation();
               setIsModalOpen(true);
             }}
-            className="px-6 py-4 rounded-md"
+            className="px-4 py-4 rounded-sm"
           >
             Place Bid
           </Button>
@@ -272,14 +288,28 @@ const GigListing = () => {
           {gigs.map((gig) => (
             <Link key={gig.id} href={`/gigs/${gig.id}`} className="group">
               <Card className="gap-0 py-0 relative overflow-hidden bg-white border-0 shadow-lg h-full flex flex-col hover:shadow-purple-500/10">
-                <div className="relative h-52 overflow-hidden">
-                  <img
-                    src={gig.image}
-                    alt={gig.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-                  <div className="absolute bottom-4 left-4 right-4">
+                <div className="relative overflow-hidden">
+                  <div className="slider">
+                    <Slider
+                      slidesToShow={1}
+                      dots={gig.image.length > 1}
+                      infinite={gig.image.length > 1}
+                      customPaging={() => (
+                        <div className="w-[7px] h-[7px] bg-gray-400 rounded-full transition" />
+                      )}
+                    >
+                      {gig.image.map((image: string, i: number) => (
+                        <img
+                          key={`${i + 1}`}
+                          src={image}
+                          alt={gig.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ))}
+                    </Slider>
+                  </div>
+                  <CardContent className="content"></CardContent>
+                  <div className="w-fit absolute bottom-4 left-4 right-4">
                     <Badge className={`bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 shadow-lg font-medium`}>
                       {gig.category}
                     </Badge>

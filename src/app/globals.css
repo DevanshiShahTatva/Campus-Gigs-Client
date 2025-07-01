@@ -366,3 +366,21 @@ button{
   50% { left: 60%; opacity: 1; }
   100% { left: 125%; opacity: 0; }
 }
+
+.slider .slick-dots {
+  bottom: 20px;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+}
+
+.slider .slick-dots li {
+  width: 7px;
+  height: auto;
+}
+
+.slider li.slick-active div {
+  width: 10px !important;
+  height: 10px !important;
+  background: #fff !important;
+}

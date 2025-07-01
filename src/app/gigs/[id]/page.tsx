@@ -2,18 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Slider from "react-slick";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import { ArrowLeftIcon, CalendarIcon, CheckCircle, ClockIcon, MessageCircle, TagIcon, Star } from "lucide-react";
+import GigDetailSkeleton from "@/components/skeleton/gigDetailSkeleton";
 import { gigBidFields } from "@/config/gigbid.config";
+
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const mockGigRequest = {
   id: 1,
   title: "Need help with calculus homework - derivatives and integrals",
   images: [
-    "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500&h=300&fit=crop&crop=entropy&auto=format",
-    "https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=500&h=300&fit=crop&crop=entropy&auto=format"
+    "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=240&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=240&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=400&h=240&fit=crop&auto=format",
   ],
   budget: "$50-80",
   budgetType: "Fixed Price",
@@ -134,7 +140,7 @@ const GigDetail = () => {
   };
 
   if (!gitDetails) {
-    return <div className="fle justify-center items-center h-[500px]">Loading...</div>;
+    return <GigDetailSkeleton />;
   }
 
   return (
@@ -156,13 +162,32 @@ const GigDetail = () => {
         <div className="lg:grid lg:grid-cols-3 lg:gap-8">
           <div className="lg:col-span-2">
             <div className="h-full bg-white shadow rounded-lg overflow-hidden">
-              <div className='min-h-[380px]'>
-                {/* <ImageCarousel images={event.images} /> */}
+              <div className='min-h-[360px]'>
+                <div className="slider">
+                  <Slider
+                    speed={3000}
+                    autoplay={true}
+                    dots={gitDetails.images.length > 1}
+                    infinite={gitDetails.images.length > 1}
+                    customPaging={() => (
+                      <div className="w-[7px] h-[7px] bg-gray-400 rounded-full transition" />
+                    )}
+                  >
+                    {gitDetails.images.map((image: string, i: number) => (
+                      <img
+                        key={`${i + 1}`}
+                        src={image}
+                        alt={gitDetails.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ))}
+                  </Slider>
+                </div>
               </div>
             </div>
           </div>
-          <div className="lg:col-span-1 min-h-[380px]">
-            <div className="bg-white shadow rounded-lg p-6 h-full flex flex-col justify-between min-h-[380px]">
+          <div className="lg:col-span-1 min-h-[360px]">
+            <div className="bg-white shadow rounded-lg p-6 h-full flex flex-col justify-between">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   {gitDetails.title}
@@ -306,14 +331,14 @@ const GigDetail = () => {
                         </Button>
                         <Button
                           size="sm"
-                          className="bg-red-400 hover:bg-red-700"
+                          className="bg-red-600 hover:bg-red-700"
                         >
                           Reject Bid
                         </Button>
                         <Button
                           size="sm"
                           onClick={() => handleAcceptBid(bid)}
-                          className="bg-green-400 hover:bg-green-700"
+                          className="bg-green-600 hover:bg-green-700"
                         >
                           Accept Bid
                         </Button>
