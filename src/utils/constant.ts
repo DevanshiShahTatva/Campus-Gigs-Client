@@ -43,6 +43,7 @@ export const ROUTES = {
 export const API_ROUTES = {
   LOGIN: "/api/login",
   CONTACT_US: "/contact-us",
+  GIGS: "/gigs",
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
     AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",

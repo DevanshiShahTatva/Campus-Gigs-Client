@@ -1,12 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import DynamicForm, {
-  FormFieldConfig,
-} from "@/components/common/form/DynamicForm";
+import DynamicForm from "@/components/common/form/DynamicForm";
+import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "react-toastify";
+import { apiCall } from "@/utils/apiCall";
+import { API_ROUTES } from "@/utils/constant";
+import SuccessCard from "@/components/common/SuccessCard";
+import { gigsFields, GigsFormVal } from "@/config/gigs.config";
+import { FormikValues } from "formik";
 
 const CreateGig = () => {
-  const [initialValues, setIntialValues] = useState({
+  const [initialValues, setIntialValues] = useState<GigsFormVal>({
     title: "",
     description: "",
     price: 0,
@@ -14,131 +19,19 @@ const CreateGig = () => {
     start_date_time: null,
     end_date_time: null,
     gig_category_id: "",
+    certifications: [],
     skills: [],
-    image: [],
+    image: null,
+    profile_type: "user",
   });
-
-  const formConfig: FormFieldConfig[] = [
-    {
-      title: "Basic Information",
-      description: "Provide the essential details about your gig",
-      groupSize: 1,
-      section: true,
-      subfields: [
-        {
-          id: "title",
-          name: "title",
-          label: "Gig Title",
-          type: "text",
-          required: true,
-          placeholder: "I will create a professional website for your business",
-        },
-        {
-          id: "description",
-          name: "description",
-          label: "Description",
-          type: "textarea",
-          required: true,
-          placeholder: "Describe your service in detail...",
-        },
-      ],
-    },
-    {
-      title: "Budget & Timeline",
-      description: "Please provide the budget and time line details",
-      groupSize: 2,
-      section: true,
-      subfields: [
-        {
-          id: "payment_type",
-          name: "payment_type",
-          label: "Payment Type",
-          type: "select",
-          required: true,
-          placeholder: "Please select payment type",
-          options: [
-            { value: "hourly", label: "Hourly" },
-            { value: "fixed", label: "Fixed" },
-          ],
-        },
-        {
-          id: "price",
-          name: "price",
-          label: "Budget (USD)",
-          type: "number",
-          required: true,
-          placeholder: "Enter price",
-        },
-        {
-          id: "start_date_time",
-          name: "start_date_time",
-          label: "Start date",
-          type: "datetime",
-          required: true,
-          enableTimeSelect: true,
-          placeholder: "Choose date and time",
-          minDate: new Date(),
-        },
-        {
-          id: "end_date_time",
-          name: "end_date_time",
-          label: "End date",
-          type: "datetime",
-          required: true,
-          enableTimeSelect: true,
-          placeholder: "Choose date and time",
-          minDate: initialValues.start_date_time
-            ? new Date(initialValues.start_date_time)
-            : new Date(),
-        },
-      ],
-    },
-    {
-      title: "Skills & Attachments",
-      description: "Please provide details of required skills and attachments",
-      groupSize: 1,
-      section: true,
-      subfields: [
-        {
-          id: "gig_category_id",
-          name: "gig_category_id",
-          label: "Gig category",
-          type: "select",
-          required: true,
-          placeholder: "Please select gig category",
-          options: [
-            { value: "1", label: "Web development" },
-            { value: "2", label: "Food management" },
-            { value: "3", label: "Laundry management" },
-          ],
-        },
-        {
-          id: "skills",
-          name: "skills",
-          label: "Skills",
-          type: "multiselect",
-          required: true,
-          placeholder: "Please select skills",
-          options: [
-            { value: "1", label: "NextJS" },
-            { value: "2", label: "ReactJs" },
-            { value: "3", label: "NodeJs" },
-          ],
-        },
-        {
-          id: "image",
-          name: "image",
-          label: "Select image",
-          type: "fileupload",
-          required: true,
-          multiple: false,
-          accept: ".png, .svg, .jpg, .jpeg, image/*",
-          maxSize: 5,
-          placeholder: "Drop your documents here or click to browse",
-        },
-      ],
-    },
-  ];
+  const [gigCategoryDropdown, setGigCategoryDropdown] = useState([
+    { id: "2", label: "Laundry" },
+    { id: "7", label: "Delivery" },
+  ]);
+  const [skillsDropdown, setSkillsDropdown] = useState([
+    { id: "1", label: "NextJs" },
+    { id: "2", label: "ReactJs" },
+  ]);
 
   const handleFieldChange = (fieldName: string, value: any) => {
     if (fieldName === "gig_category_id" && value) {
@@ -150,40 +43,91 @@ const CreateGig = () => {
         ...initialValues,
         [fieldName]: value,
       });
-      console.log("DATA::", value);
     }
   };
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: FormikValues) => {
+    console.log("values::", values);
+    const formData = new FormData();
+
+    formData.append("title", values.title);
+    formData.append("description", values.description);
+    formData.append("price", values.price);
+    formData.append("payment_type", values.payment_type);
+    formData.append("start_date_time", values.start_date_time);
+    formData.append("end_date_time", values.end_date_time);
+    formData.append("gig_category_id", values.gig_category_id);
+    formData.append("profile_type", values.profile_type);
+    if (values.skills.length > 0) {
+      values.skills.forEach((skill: string) => {
+        formData.append("skills[]", skill);
+      });
+    }
+    if (values.certifications.length > 0) {
+      values.certifications.forEach((certification: string) => {
+        formData.append("certifications[]", certification);
+      });
+    }
+    values.image && formData.append("file", values.image);
     try {
-      console.log("Form submitted:", values);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      alert("Gig created successfully!");
+      const response = await apiCall({
+        endPoint: API_ROUTES.GIGS,
+        method: "POST",
+        body: formData,
+        headers: {
+          "Content-Type": "multipart/form-data" 
+        },
+        isFormData: true,
+      });
+      if (response.success) {
+        toast.success(response.message ?? "Gig created successfully!");
+      } else {
+        toast.error(
+          response.message ?? "Gig creation failed. Please try again."
+        );
+      }
     } catch (error) {
+      toast.error("An error occurred. Please try again.");
       console.error("Submission error:", error);
     }
   };
 
   return (
     <div className="w-full">
-      <div className="max-w-[980px] mx-auto pt-30 pb-15">
-        <div className="flex flex-col items-center justify-center gap-3 mb-6">
-          <h3 className="text-3xl font-bold text-[var(--base)]">
-            Post Your Gig Request
-          </h3>
-          <p>
-            Tell us what you need done and receive bids from skilled
-            professionals
-          </p>
-        </div>
-        <div>
-          <DynamicForm
-            formConfig={formConfig}
-            onSubmit={handleSubmit}
-            initialValues={initialValues}
-            onFieldChange={handleFieldChange}
+      <div className="max-w-[980px] mx-auto pt-24 pb-15">
+        {false ? (
+          <SuccessCard
+            successTitle="Gig created successfully"
+            onClickButton={() => console.log("Back")}
+            successPara="You can see your created gigs in profile under open gigs"
           />
-        </div>
+        ) : (
+          <>
+            <div className="flex flex-col items-center justify-center gap-3 mb-6">
+              <h3 className="text-3xl font-bold text-[var(--base)]">
+                Post Your Gig Request
+              </h3>
+              <p>
+                Tell us what you need done and receive bids from skilled
+                professionals
+              </p>
+            </div>
+            <Card>
+              <CardContent>
+                <DynamicForm
+                  formConfig={gigsFields(
+                    initialValues,
+                    gigCategoryDropdown,
+                    skillsDropdown
+                  )}
+                  onSubmit={handleSubmit}
+                  initialValues={initialValues}
+                  onFieldChange={handleFieldChange}
+                />
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
     </div>
   );

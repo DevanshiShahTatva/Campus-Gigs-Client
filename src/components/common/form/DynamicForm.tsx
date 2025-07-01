@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Formik, Form, useFormikContext, FormikValues } from "formik";
+import { Formik, Form, FormikValues } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,7 +44,7 @@ export type FormSubFieldConfig = {
     | "datetime";
   placeholder?: string;
   errorMessage?: string;
-  options?: { value: string; label: string }[];
+  options?: { id: string; label: string }[];
   minItems?: number;
   maxItems?: number;
   disabled?: boolean;
@@ -291,7 +291,7 @@ const InnerForm = ({
               </SelectTrigger>
               <SelectContent>
                 {field.options?.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem key={option.id} value={option.id}>
                     {option.label}
                   </SelectItem>
                 ))}
@@ -318,7 +318,7 @@ const InnerForm = ({
             )}
             <MultiSelectDropdown
               options={(field.options || []).map((opt) => ({
-                id: opt.value,
+                id: opt.id,
                 label: opt.label,
               }))}
               value={value || []}
