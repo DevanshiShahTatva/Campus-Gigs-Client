@@ -15,7 +15,7 @@ const CreateGig = () => {
     end_date_time: null,
     gig_category_id: "",
     skills: [],
-    image: []
+    image: [],
   });
 
   const formConfig: FormFieldConfig[] = [
@@ -77,7 +77,7 @@ const CreateGig = () => {
           required: true,
           enableTimeSelect: true,
           placeholder: "Choose date and time",
-          minDate: new Date()
+          minDate: new Date(),
         },
         {
           id: "end_date_time",
@@ -87,7 +87,9 @@ const CreateGig = () => {
           required: true,
           enableTimeSelect: true,
           placeholder: "Choose date and time",
-          minDate: new Date()
+          minDate: initialValues.start_date_time
+            ? new Date(initialValues.start_date_time)
+            : new Date(),
         },
       ],
     },
@@ -138,10 +140,23 @@ const CreateGig = () => {
     },
   ];
 
+  const handleFieldChange = (fieldName: string, value: any) => {
+    if (fieldName === "gig_category_id" && value) {
+      console.log("DATA::", value);
+    }
+
+    if (fieldName === "start_date_time") {
+      setIntialValues({
+        ...initialValues,
+        [fieldName]: value,
+      });
+      console.log("DATA::", value);
+    }
+  };
+
   const handleSubmit = async (values: any) => {
     try {
       console.log("Form submitted:", values);
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
       alert("Gig created successfully!");
     } catch (error) {
@@ -166,6 +181,7 @@ const CreateGig = () => {
             formConfig={formConfig}
             onSubmit={handleSubmit}
             initialValues={initialValues}
+            onFieldChange={handleFieldChange}
           />
         </div>
       </div>

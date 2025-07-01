@@ -69,6 +69,14 @@ interface DynamicFormProps {
   onSubmit: (values: any) => void;
   initialValues: FormikValues;
   isViewMode?: boolean;
+  onFieldChange?: (fieldName: string, value: any) => void;
+}
+
+interface InnerFormProps {
+  formik: any;
+  formConfig: FormFieldConfig[];
+  isViewMode?: boolean;
+  onFieldChange?: (fieldName: string, value: any) => void;
 }
 
 const DynamicForm = ({
@@ -76,6 +84,7 @@ const DynamicForm = ({
   onSubmit,
   initialValues,
   isViewMode,
+  onFieldChange,
 }: DynamicFormProps) => {
   const validationSchema = formConfig.reduce((acc: any, field) => {
     field.subfields.forEach((subfield) => {
@@ -85,7 +94,9 @@ const DynamicForm = ({
 
         switch (subfield.type) {
           case "number":
-            validator = Yup.number().typeError(`${label} must be a number`).min(1);
+            validator = Yup.number()
+              .typeError(`${label} must be a number`)
+              .min(1);
             break;
           case "checkbox":
             validator = Yup.boolean();
@@ -192,6 +203,7 @@ const DynamicForm = ({
           formik={formik}
           formConfig={formConfig}
           isViewMode={isViewMode}
+          onFieldChange={onFieldChange}
         />
       )}
     </Formik>
@@ -202,13 +214,17 @@ const InnerForm = ({
   formik,
   formConfig,
   isViewMode,
-}: {
-  formik: any;
-  formConfig: FormFieldConfig[];
-  isViewMode?: boolean;
-}) => {
+  onFieldChange,
+}: InnerFormProps) => {
   const [tagInputs, setTagInputs] = useState<Record<string, string>>({});
   const { values, errors, touched, setFieldValue, handleSubmit } = formik;
+
+  const wrappedSetFieldValue = (name: string, value: any) => {
+    formik.setFieldValue(name, value);
+    if (onFieldChange) {
+      onFieldChange(name, value);
+    }
+  };
 
   const handleAddTag = (fieldName: string) => {
     const inputValue = tagInputs[fieldName]?.trim() || "";
@@ -231,7 +247,6 @@ const InnerForm = ({
   const renderField = (field: FormSubFieldConfig) => {
     const isDisabled = field.disabled || isViewMode;
     const value = values[field.name];
-    const error = touched[field.name] && errors[field.name];
 
     switch (field.type) {
       case "text":
@@ -262,7 +277,7 @@ const InnerForm = ({
             )}
             <Select
               value={value}
-              onValueChange={(val) => setFieldValue(field.name, val)}
+              onValueChange={(val) => wrappedSetFieldValue(field.name, val)}
               disabled={isDisabled}
             >
               <SelectTrigger
@@ -307,13 +322,15 @@ const InnerForm = ({
                 label: opt.label,
               }))}
               value={value || []}
-              onValueChange={(val) => setFieldValue(field.name, val)}
+              onValueChange={(val) => wrappedSetFieldValue(field.name, val)}
               placeholder={field.placeholder}
               disabled={isDisabled}
               error={!!(formik.submitCount > 0 && errors[field.name])}
             />
             {formik.submitCount > 0 && errors[field.name] && (
-              <div className="text-sm text-destructive">{String(errors[field.name])}</div>
+              <div className="text-sm text-destructive">
+                {String(errors[field.name])}
+              </div>
             )}
           </div>
         );
@@ -482,7 +499,9 @@ const InnerForm = ({
               placeholder={field.placeholder}
             />
             {formik.submitCount > 0 && errors[field.name] && (
-              <div className="text-sm text-destructive">{String(errors[field.name])}</div>
+              <div className="text-sm text-destructive">
+                {String(errors[field.name])}
+              </div>
             )}
           </div>
         );
@@ -498,6 +517,12 @@ const InnerForm = ({
             enableTimeSelect={field.enableTimeSelect}
             minDate={field.minDate}
             maxDate={field.maxDate}
+            onChange={(value) => {
+              formik.setFieldValue(field.name, value);
+              if (onFieldChange) {
+                onFieldChange(field.name, value);
+              }
+            }}
           />
         );
 

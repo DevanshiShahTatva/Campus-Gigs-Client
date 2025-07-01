@@ -12,7 +12,8 @@ interface Props {
   placeholder?: string;
   enableTimeSelect?: boolean;
   minDate?: Date;
-  maxDate?: Date
+  maxDate?: Date;
+  onChange?: (date: Date | null) => void;
 }
 
 const FormikDateTimePicker: React.FC<Props> = ({
@@ -22,7 +23,8 @@ const FormikDateTimePicker: React.FC<Props> = ({
   placeholder,
   enableTimeSelect = false,
   minDate,
-  maxDate
+  maxDate,
+  onChange,
 }) => {
   const [field, meta, helpers] = useField(name);
   const { setValue } = helpers;
@@ -30,18 +32,27 @@ const FormikDateTimePicker: React.FC<Props> = ({
 
   const showError = !!meta.error && (meta.touched || submitCount > 0);
 
+  const handleChange = (date: Date | null) => {
+    setValue(date);
+    if (onChange) {
+      onChange(date);
+    }
+  };
+
   return (
     <div className="space-y-2">
       {label && (
         <Label>
           {label}
-          <span className="text-destructive ml-1">*</span>
+          {meta.error && showError && ( // Only show asterisk if required and has error
+            <span className="text-destructive ml-1">*</span>
+          )}
         </Label>
       )}
       <div className="relative">
         <DatePicker
           selected={field.value ? new Date(field.value) : null}
-          onChange={(date) => setValue(date)}
+          onChange={handleChange}
           showTimeSelect={enableTimeSelect}
           timeFormat="HH:mm"
           minDate={minDate}
