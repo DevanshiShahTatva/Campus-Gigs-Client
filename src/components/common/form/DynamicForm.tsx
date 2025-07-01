@@ -228,6 +228,7 @@ const InnerForm = ({
             key={field.id}
             name={field.name}
             label={field.label || ""}
+            isRequired={field.required}
             type={field.type}
             placeholder={field.placeholder}
             disabled={isDisabled}
@@ -487,7 +488,7 @@ const InnerForm = ({
         group.section ? (
           <Card key={`group-${index}`}>
             <CardHeader>
-              <CardTitle>{group.title}</CardTitle>
+              <CardTitle className="text-2xl">{group.title}</CardTitle>
               {group.description && (
                 <CardDescription>{group.description}</CardDescription>
               )}
