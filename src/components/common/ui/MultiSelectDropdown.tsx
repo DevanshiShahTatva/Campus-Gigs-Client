@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { X } from "lucide-react";
-import ReactDOM from "react-dom";
 
 import { Badge } from "@/components/ui/badge";
 
@@ -32,7 +31,9 @@ export function MultiSelectDropdown({
   error = false,
 }: MultiSelectProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
   const [open, setOpen] = React.useState(false);
   const [selected, setSelected] = React.useState<Framework[]>(() => {
     if (value) {
@@ -43,17 +44,42 @@ export function MultiSelectDropdown({
       : [];
   });
   const [inputValue, setInputValue] = React.useState("");
-  const [dropdownPosition, setDropdownPosition] = React.useState({
-    top: 0,
-    left: 0,
-    width: 0,
-  });
 
   React.useEffect(() => {
     if (value) {
       setSelected(options.filter((option) => value.includes(option.id)));
     }
   }, [value, options]);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [open]);
+
+  React.useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        inputRef.current?.blur();
+      }
+    };
+
+    if (open) {
+      document.addEventListener("keydown", handleEscape);
+      return () => document.removeEventListener("keydown", handleEscape);
+    }
+  }, [open]);
 
   const handleUnselect = React.useCallback(
     (framework: Framework) => {
@@ -70,6 +96,7 @@ export function MultiSelectDropdown({
       const newSelected = [...selected, framework];
       setSelected(newSelected);
       onValueChange?.(newSelected.map((s) => s.id));
+      inputRef.current?.focus();
     },
     [selected, onValueChange]
   );
@@ -82,29 +109,36 @@ export function MultiSelectDropdown({
     framework.label.toLowerCase().includes(inputValue.toLowerCase())
   );
 
-  React.useLayoutEffect(() => {
-    if (open && wrapperRef.current) {
-      const rect = wrapperRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY + 4,
-        left: rect.left + window.scrollX,
-        width: rect.width,
-      });
+  const handleInputFocus = () => {
+    if (!disabled) {
+      setOpen(true);
     }
-  }, [open]);
+  };
 
-  const dropdownContainer =
-    (typeof document !== "undefined" &&
-      wrapperRef.current?.closest(".dialog-content")) ||
-    (typeof window !== "undefined" && document.body);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    if (!open) {
+      setOpen(true);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && inputValue === "" && selected.length > 0) {
+      const lastSelected = selected[selected.length - 1];
+      handleUnselect(lastSelected);
+    }
+  };
 
   return (
-    <div className={className}>
-      <div
-        ref={wrapperRef}
-        className={`group rounded-lg border bg-background px-4 py-3 text-sm focus-within:outline-none focus-within:ring-1 focus-within:ring-[var(--base)] focus-within:border-[var(--base)] transition-all ${
-          error ? "border-red-500" : "border-gray-300"
-        } ${disabled ? "bg-gray-100" : ""}`}
+    <div className={`relative ${className}`} ref={containerRef}>
+      <button
+        className={`w-full group rounded-lg border bg-background px-4 py-3 text-sm focus-within:outline-none focus-within:ring-1 focus-within:ring-[var(--base)] focus-within:border-[var(--base)] transition-all ${error ? "border-red-500" : "border-gray-300"} ${disabled ? "bg-gray-100" : ""} ${open ? "ring-1 ring-[var(--base)] border-[var(--base)]" : ""}`}
+        onClick={() => {
+          if (!disabled) {
+            inputRef.current?.focus();
+            setOpen(true);
+          }
+        }}
       >
         <div className="flex flex-wrap items-center gap-1 min-h-[20px]">
           {selected.slice(0, maxCount).map((framework) => (
@@ -115,7 +149,8 @@ export function MultiSelectDropdown({
             >
               {framework.label}
               <button
-                className="ml-1 rounded-full outline-none focus:ring-2 focus:ring-[var(--base)] focus:ring-offset-1 hover:bg-gray-300 transition-colors"
+                type="button"
+                className="ml-1 p-[2px] rounded-full outline-none hover:bg-gray-300 transition-colors"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -127,7 +162,6 @@ export function MultiSelectDropdown({
               </button>
             </Badge>
           ))}
-
           {selected.length > maxCount && (
             <Badge
               variant="secondary"
@@ -135,7 +169,8 @@ export function MultiSelectDropdown({
             >
               +{selected.length - maxCount} more
               <button
-                className="ml-1 rounded-full outline-none focus:ring-2 focus:ring-[var(--base)] focus:ring-offset-1 hover:bg-gray-300 transition-colors"
+                type="button"
+                className="ml-1 rounded-full outline-none hover:bg-gray-300 transition-colors"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -149,54 +184,46 @@ export function MultiSelectDropdown({
               </button>
             </Badge>
           )}
-
           <div className="flex-1 min-w-[120px]">
             <input
               ref={inputRef}
+              type="text"
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onBlur={() => setOpen(false)}
-              onFocus={() => setOpen(true)}
+              onChange={handleInputChange}
+              onFocus={handleInputFocus}
+              onKeyDown={handleKeyDown}
               placeholder={selected.length === 0 ? placeholder : ""}
               disabled={disabled}
               className="w-full bg-transparent outline-none placeholder:text-gray-500 text-black border-none shadow-none focus:ring-0 px-0 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              autoComplete="off"
             />
           </div>
         </div>
-      </div>
-
-      {open && filteredSelectables.length > 0 && typeof window !== "undefined"
-        ? ReactDOM.createPortal(
-            <div
-              style={{
-                top: dropdownPosition.top,
-                left: dropdownPosition.left,
-                width: dropdownPosition.width,
-                position: "absolute",
-                zIndex: 9999,
-                pointerEvents: "auto",
-              }}
-              className="rounded-lg border border-gray-200 bg-white text-gray-900 shadow-lg"
-            >
-              <div className="max-h-[200px] overflow-y-auto">
-                {filteredSelectables.map((framework) => (
-                  <div
-                    key={framework.id}
-                    className="cursor-pointer hover:bg-gray-100 px-3 py-2 text-sm transition-colors"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                    onClick={() => handleSelect(framework)}
-                  >
-                    {framework.label}
-                  </div>
-                ))}
-              </div>
-            </div>,
-            dropdownContainer as Element
-          )
-        : null}
+      </button>
+      {open && !disabled && (
+        <div
+          ref={dropdownRef}
+          className="absolute top-full left-0 right-0 mt-1 z-50 rounded-lg border border-gray-200 bg-white shadow-lg"
+        >
+          {filteredSelectables.length > 0 ? (
+            <div className="max-h-[200px] overflow-y-auto py-1">
+              {filteredSelectables.map((framework) => (
+                <button
+                  key={framework.id}
+                  className="w-full flex justify-start cursor-pointer hover:bg-gray-100 px-3 py-2 text-sm transition-colors"
+                  onClick={() => handleSelect(framework)}
+                >
+                  {framework.label}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="px-3 py-3 text-sm text-gray-500">
+              {inputValue ? "No options found" : "No more options available"}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
