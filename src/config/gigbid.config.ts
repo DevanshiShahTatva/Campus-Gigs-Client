@@ -20,24 +20,16 @@ export const gigBidFields: CommonFormField[] = [
     required: true
   },
   {
-    name: "Delivery Timeline",
-    label: "Delivery Timeline",
-    type: "number",
-    placeholder: "Enter delivery timeline",
-    required: true
-  },
-  {
     name: "Cover letter",
     label: "Cover letter",
     type: "textarea",
     placeholder: "Explain why you're the perfect fit for this project...",
     required: true
-  },
+  }
 ];
 
 export interface GigBidFields {
   bidType: string;
   yourBidAmount: string;
-  deliveryTimeline: string;
   coverLetter: string;
 }

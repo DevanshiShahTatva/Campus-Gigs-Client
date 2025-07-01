@@ -8,16 +8,16 @@ import { Users, DollarSign, Star, GraduationCap, Award, Sliders } from 'lucide-r
 import { MultiSelectDropdown } from '@/components/common/ui/MultiSelectDropdown';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { categories, educationLevels, IFilter, tierOptions } from './helper';
+import { categories, educationLevels, IFilter, ratingList, tierOptions } from './helper';
 
-const GigFilterModal = ({ isOpen, onClose, onApplyFilters }: any) => {
+const GigFilterModal = ({ isOpen, onClose, onApplyFilters }: { isOpen: boolean; onClose: () => void; onApplyFilters: (filters: IFilter) => void }) => {
   const [filters, setFilters] = useState<IFilter>({
     tier: [],
     rating: 0,
-    minReviews: 0,
+    minReviews: '',
     priceRange: [0, 1000],
     educationLevel: [],
-    category: '',
+    category: [],
     duration: '',
     location: ''
   });
@@ -49,10 +49,10 @@ const GigFilterModal = ({ isOpen, onClose, onApplyFilters }: any) => {
     setFilters({
       tier: [],
       rating: 0,
-      minReviews: 0,
+      minReviews: '',
       priceRange: [0, 10000],
       educationLevel: [],
-      category: '',
+      category: [],
       duration: '',
       location: ''
     });
@@ -68,10 +68,10 @@ const GigFilterModal = ({ isOpen, onClose, onApplyFilters }: any) => {
     let count = 0;
     if (filters.tier.length > 0) count++;
     if (filters.rating > 0) count++;
-    if (filters.minReviews > 0) count++;
+    if (filters.minReviews) count++;
     if (filters.priceRange[0] > 0 || filters.priceRange[1] < 10000) count++;
     if (filters.educationLevel.length > 0) count++;
-    if (filters.category) count++;
+    if (filters.category.length > 0) count++;
     if (filters.duration) count++;
     if (filters.location) count++;
     return count;
@@ -191,20 +191,17 @@ const GigFilterModal = ({ isOpen, onClose, onApplyFilters }: any) => {
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 gap-2">
                       <div className="space-y-2">
-                        <div className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <label className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                           <GraduationCap className="w-5 h-5 text-indigo-600" />
                           Education Level
-                        </div>
+                        </label>
                         <MultiSelectDropdown
-                          options={(educationLevels || []).map((opt) => ({
-                            id: opt.id,
-                            label: opt.label,
-                          }))}
-                          value={filters.educationLevel || []}
-                          onValueChange={(val) => setFilters((prev) => ({ ...prev, educationLevel: val }))}
-                          placeholder="Select Education Level"
-                          disabled={false}
                           error={false}
+                          disabled={false}
+                          placeholder="Select Education Level"
+                          value={filters.educationLevel || []}
+                          options={(educationLevels || []).map((opt) => ({ id: opt.id, label: opt.label }))}
+                          onValueChange={(val) => setFilters((prev) => ({ ...prev, educationLevel: val }))}
                         />
                       </div>
                     </div>
@@ -214,65 +211,35 @@ const GigFilterModal = ({ isOpen, onClose, onApplyFilters }: any) => {
                       <Users className="w-5 h-5 text-red-600" />
                       Minimum Reviews
                     </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      {[0, 10, 50, 100, 500, 1000].map((count) => (
-                        <button
-                          key={count}
-                          onClick={() => setFilters(prev => ({ ...prev, minReviews: count }))}
-                          className={`p-3 rounded-lg border-2 text-center transition-all ${filters.minReviews === count
-                            ? 'border-red-500 bg-red-50 text-red-700'
-                            : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                            }`}
-                        >
-                          <div className="font-semibold">{count}+</div>
-                          <div className="text-xs text-gray-500">reviews</div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                      <Sliders className="w-5 h-5 text-cyan-600" />
-                      Category
-                    </div>
                     <Select
-                      value={filters.category}
-                      onValueChange={(val) => setFilters(prev => ({ ...prev, category: val }))}
+                      value={filters.minReviews}
+                      onValueChange={(val) => setFilters(prev => ({ ...prev, minReviews: val }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select Category" />
+                        <SelectValue placeholder="Select Minimum Reviews" />
                       </SelectTrigger>
                       <SelectContent>
-                        {categories.map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {option}
+                        {ratingList.map((option) => (
+                          <SelectItem key={option.id} value={option.label}>
+                            {option.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-4">
-                    <div className="text-lg font-semibold text-gray-900">Quick Filters</div>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge
-                        className="cursor-pointer px-4 py-2 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
-                        onClick={() => setFilters(prev => ({ ...prev, rating: 4, tier: ['gold', 'platinum'] }))}
-                      >
-                        ⭐ Top Rated
-                      </Badge>
-                      <Badge
-                        className="cursor-pointer px-4 py-2 bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
-                        onClick={() => setFilters(prev => ({ ...prev, priceRange: [0, 1000] }))}
-                      >
-                        💰 Budget Friendly
-                      </Badge>
-                      <Badge
-                        className="cursor-pointer px-4 py-2 bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100"
-                        onClick={() => setFilters(prev => ({ ...prev, tier: ['platinum'] }))}
-                      >
-                        💎 Premium Only
-                      </Badge>
-                    </div>
+                  <div className="space-y-4" data-slot="dialog-content">
+                    <label className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                      <Sliders className="w-5 h-5 text-cyan-600" />
+                      Category
+                    </label>
+                    <MultiSelectDropdown
+                      error={false}
+                      disabled={false}
+                      placeholder="Select Category"
+                      value={filters.category || []}
+                      options={(categories || []).map((opt) => ({ id: opt, label: opt }))}
+                      onValueChange={(val) => setFilters((prev) => ({ ...prev, category: val }))}
+                    />
                   </div>
                 </div>
               </div>
