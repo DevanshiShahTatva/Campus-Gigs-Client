@@ -144,7 +144,7 @@ const GigDetail = () => {
   }
 
   return (
-    <div className="mt-[64px] min-h-screen bg-gray-50">
+    <div className=" bg-gray-50">
       <div className="bg-white shadow">
         <div className="mx-auto py-4 px-3 sm:py-6 sm:px-4 lg:px-8 flex items-center">
           <button
