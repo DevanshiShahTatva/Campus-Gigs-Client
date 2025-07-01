@@ -86,10 +86,28 @@ const BuySubscription = () => {
     }
   };
 
+  const handleSkip = () => {
+    router.push("/user/dashboard");
+  };
+
   return (
     <div className="bg-[var(--bg-light)] py-14 min-h-screen">
-      <CentralLoader loading={isLoading} />
+      <CentralLoader loading={isCentralLoading} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header with Skip Button */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-[var(--text-dark)] mb-2">Choose Your Plan</h1>
+            <p className="text-[var(--text-semi-dark)] text-lg">Select the perfect plan for your needs</p>
+          </div>
+          <button
+            onClick={handleSkip}
+            className="px-6 py-2 text-[var(--text-semi-dark)] hover:text-[var(--text-dark)] border border-gray-300 hover:border-gray-400 rounded-lg transition-all duration-300 font-medium"
+          >
+            Skip for now
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {isLoading
             ? Array.from({ length: 3 }).map((_, index) => <SkeletonSubscriptionPlan key={index} />)

@@ -24,6 +24,14 @@ export interface Step {
 export interface ApiResponse {
   success: boolean;
   message?: string;
+  data?: {
+    token: string;
+    user: {
+      name: string;
+      profile: string;
+      id: string;
+    };
+  };
 }
 
 export interface EducationOption {

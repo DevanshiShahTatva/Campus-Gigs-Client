@@ -7,6 +7,7 @@ import Select from "react-select";
 import { toast } from "react-toastify";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { Formik, Form, FormikHelpers } from "formik";
+import Cookie from "js-cookie";
 import { ChevronLeft, ChevronRight, User, Camera, FileText, Check, Tag, Info, ExternalLink } from "lucide-react";
 
 import TagsInput from "./TagInput";
@@ -113,7 +114,20 @@ const SignUpPage: React.FC = () => {
       actions.setSubmitting(false);
 
       if (response.success) {
-        router.push("/login");
+        if (response.data?.token) {
+          Cookie.set("token", response.data.token);
+          if (typeof window !== "undefined") {
+            localStorage?.setItem("token", response.data.token);
+          }
+        }
+        if (response.data?.user) {
+          if (typeof window !== "undefined") {
+            localStorage?.setItem("name", response.data.user.name);
+            localStorage?.setItem("profile", response.data.user.profile);
+            localStorage?.setItem("user_id", response.data.user.id);
+          }
+        }
+        router.push("/user/buy-subscription");
         toast.success(response.message ?? "Account created successfully!");
       } else if (response.message === "Email already registered") {
         setEmailErr(response.message);
