@@ -83,8 +83,6 @@ const GigFilterModal = ({ isOpen, onClose, onApplyFilters }: { isOpen: boolean; 
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         style={{
-          width: "60vw",
-          maxWidth: "800px",
           minHeight: "auto",
           maxHeight: "90vh",
           padding: 0,

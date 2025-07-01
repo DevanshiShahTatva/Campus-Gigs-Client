@@ -162,7 +162,7 @@ const GigDetail = () => {
         <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-8 space-y-6 lg:space-y-0">
           <div className="lg:col-span-2 order-1">
             <div className="bg-white shadow rounded-lg overflow-hidden">
-              <div className="h-auto sm:h-64 lg:min-h-[360px]">
+              <div className="h-auto md:min-h-[360px]">
                 <div className="slider h-full">
                   <Slider
                     speed={3000}
@@ -187,7 +187,7 @@ const GigDetail = () => {
             </div>
           </div>
           <div className="lg:col-span-1 order-2">
-            <div className="bg-white shadow rounded-lg p-4 sm:p-6 flex flex-col justify-between">
+            <div className="h-full bg-white shadow rounded-lg p-4 sm:p-6 flex flex-col justify-between">
               <div>
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
                   {gitDetails.title}
