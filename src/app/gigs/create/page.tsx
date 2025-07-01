@@ -32,6 +32,7 @@ const CreateGig = () => {
     { id: "1", label: "NextJs" },
     { id: "2", label: "ReactJs" },
   ]);
+  const [isFormSubmitted, setFormSubmitted] = useState<Boolean>(false);
 
   const handleFieldChange = (fieldName: string, value: any) => {
     if (fieldName === "gig_category_id" && value) {
@@ -47,7 +48,6 @@ const CreateGig = () => {
   };
 
   const handleSubmit = async (values: FormikValues) => {
-    console.log("values::", values);
     const formData = new FormData();
 
     formData.append("title", values.title);
@@ -58,29 +58,47 @@ const CreateGig = () => {
     formData.append("end_date_time", values.end_date_time);
     formData.append("gig_category_id", values.gig_category_id);
     formData.append("profile_type", values.profile_type);
+
     if (values.skills.length > 0) {
       values.skills.forEach((skill: string) => {
         formData.append("skills[]", skill);
       });
     }
+
     if (values.certifications.length > 0) {
       values.certifications.forEach((certification: string) => {
         formData.append("certifications[]", certification);
       });
     }
+
     values.image && formData.append("file", values.image);
+
     try {
       const response = await apiCall({
         endPoint: API_ROUTES.GIGS,
         method: "POST",
         body: formData,
         headers: {
-          "Content-Type": "multipart/form-data" 
+          "Content-Type": "multipart/form-data",
         },
         isFormData: true,
       });
       if (response.success) {
         toast.success(response.message ?? "Gig created successfully!");
+        setFormSubmitted(true);
+        setIntialValues({
+          title: "",
+          description: "",
+          price: 0,
+          payment_type: "hourly",
+          start_date_time: null,
+          end_date_time: null,
+          gig_category_id: "",
+          certifications: [],
+          skills: [],
+          image: null,
+          profile_type: "user",
+        });
       } else {
         toast.error(
           response.message ?? "Gig creation failed. Please try again."
@@ -95,10 +113,10 @@ const CreateGig = () => {
   return (
     <div className="w-full">
       <div className="max-w-[980px] mx-auto pt-24 pb-15">
-        {false ? (
+        {isFormSubmitted ? (
           <SuccessCard
             successTitle="Gig created successfully"
-            onClickButton={() => console.log("Back")}
+            onClickButton={() => setFormSubmitted(false)}
             successPara="You can see your created gigs in profile under open gigs"
           />
         ) : (
