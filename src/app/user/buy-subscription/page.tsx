@@ -4,13 +4,15 @@ import { apiCall } from "@/utils/apiCall";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
-import { IPlanApiResponse, ISubscriptionMyPlanApiResponse, ISubscriptionPlan } from "@/utils/interface";
+import { IPlanApiResponse, ISubscriptionCurrentPlanApiResponse, ISubscriptionPlan } from "@/utils/interface";
 import IconMap from "@/components/common/IconMap";
 import SkeletonSubscriptionPlan from "@/components/landing-page-components/SkeletonSubscriptionPlan";
+import { CentralLoader } from "@/components/common/Loader";
 
 const BuySubscription = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isCentralLoading, setIsCentralLoading] = useState(false);
   const [hoveredPlan, setHoveredPlan] = useState<number | null>(null);
   const [selectedPlanId, setSelectedPlanId] = useState<ISubscriptionPlan | null>(null);
 
@@ -18,7 +20,7 @@ const BuySubscription = () => {
 
   useEffect(() => {
     fetchSubscriptionPlan();
-    getMyPlan();
+    getCurrentPlan();
   }, []);
 
   const fetchSubscriptionPlan = useCallback(async () => {
@@ -39,11 +41,11 @@ const BuySubscription = () => {
     setIsLoading(false);
   }, []);
 
-  const getMyPlan = useCallback(async () => {
+  const getCurrentPlan = useCallback(async () => {
     setIsLoading(true);
 
-    const res: ISubscriptionMyPlanApiResponse = await apiCall({
-      endPoint: `/subscription-plan/my-plan`,
+    const res: ISubscriptionCurrentPlanApiResponse = await apiCall({
+      endPoint: `/subscription-plan/current`,
       method: "GET",
     });
 
@@ -59,10 +61,10 @@ const BuySubscription = () => {
 
   const handleSelectPlan = async (plan: ISubscriptionPlan) => {
     if (plan.price == 0) {
-      setIsLoading(true);
+      setIsCentralLoading(true);
 
-      const res: ISubscriptionMyPlanApiResponse = await apiCall({
-        endPoint: `/subscription-plan/buy-plan`,
+      const res: ISubscriptionCurrentPlanApiResponse = await apiCall({
+        endPoint: `/subscription-plan/buy`,
         method: "POST",
         body: {
           subscription_plan_id: plan.id,
@@ -75,17 +77,18 @@ const BuySubscription = () => {
         toast.success("Subscription plan purchased successfully.");
         router.push("/user/dashboard");
       } else {
-        toast.error("Something went wrong, please try again later.");
+        toast.error(res?.message || "Something went wrong, please try again later.");
       }
 
-      setIsLoading(false);
+      setIsCentralLoading(false);
     } else {
-      router.push(`/user/buy-subscription/${plan.id}/payment-checkout`);
+      router.push(`/user/buy-subscription/${plan.id}/checkout`);
     }
   };
 
   return (
-    <div className="bg-[var(--bg-light)] py-14">
+    <div className="bg-[var(--bg-light)] py-14 min-h-screen">
+      <CentralLoader loading={isLoading} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {isLoading

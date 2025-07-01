@@ -91,7 +91,7 @@ export interface GigCategory {
   };
 }
 
-export interface ISubscriptionMyPlanApiResponse {
+export interface ISubscriptionCurrentPlanApiResponse {
   status: number;
   message: string;
   data: {
