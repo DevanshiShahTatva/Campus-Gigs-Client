@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { X, Loader2 } from "lucide-react"; // Import Loader2 for spinner
+
 import { Badge } from "@/components/ui/badge";
 
 type Framework = Record<"id" | "label", string>;
@@ -64,7 +65,8 @@ export function MultiSelectDropdown({
 
     if (open) {
       document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [open]);
 
@@ -130,10 +132,21 @@ export function MultiSelectDropdown({
     }
   };
 
+  const handleBadgeRemove = (framework: Framework, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleUnselect(framework);
+  };
+
   return (
     <div className={`relative ${className}`} ref={containerRef}>
-      <button
-        className={`w-full group rounded-lg border bg-background px-4 py-3 text-sm focus-within:outline-none focus-within:ring-1 focus-within:ring-[var(--base)] focus-within:border-[var(--base)] transition-all ${error ? "border-red-500" : "border-gray-300"} ${disabled ? "bg-gray-100" : ""} ${open ? "ring-1 ring-[var(--base)] border-[var(--base)]" : ""}`}
+      {/* Changed from button to div to avoid nested button issue */}
+      <div
+        className={`w-full group rounded-lg border bg-background px-4 py-3 text-sm focus-within:outline-none focus-within:ring-1 focus-within:ring-[var(--base)] focus-within:border-[var(--base)] transition-all cursor-text ${
+          error ? "border-red-500" : "border-gray-300"
+        } ${disabled ? "bg-gray-100 cursor-not-allowed" : ""} ${
+          open ? "ring-1 ring-[var(--base)] border-[var(--base)]" : ""
+        }`}
         onClick={() => {
           if (!disabled) {
             inputRef.current?.focus();
@@ -149,14 +162,11 @@ export function MultiSelectDropdown({
               className="bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
             >
               {framework.label}
+              {/* Now this button is not nested inside another button */}
               <button
                 type="button"
                 className="ml-1 p-[2px] rounded-full outline-none hover:bg-gray-300 transition-colors"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleUnselect(framework);
-                }}
+                onClick={(e) => handleBadgeRemove(framework, e)}
                 disabled={disabled}
               >
                 <X className="h-3 w-3 text-gray-500 hover:text-gray-700 transition-colors" />
@@ -205,7 +215,7 @@ export function MultiSelectDropdown({
             )}
           </div>
         </div>
-      </button>
+      </div>
       {open && !disabled && (
         <div
           ref={dropdownRef}
@@ -221,6 +231,7 @@ export function MultiSelectDropdown({
               {filteredSelectables.map((framework) => (
                 <button
                   key={framework.id}
+                  type="button"
                   className="w-full flex justify-start cursor-pointer hover:bg-gray-100 px-3 py-2 text-sm transition-colors"
                   onClick={() => handleSelect(framework)}
                 >
