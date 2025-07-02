@@ -117,12 +117,12 @@ export const gigsFields = (
           placeholder: "e.g., Software engineer, 3 BCA",
         },
         {
-          id: "image",
-          name: "image",
+          id: "images",
+          name: "images",
           label: "Select image",
           type: "fileupload",
           required: true,
-          multiple: false,
+          multiple: true,
           accept: ".png, .svg, .jpg, .jpeg, image/*",
           maxSize: 5,
           placeholder: "Drop your documents here or click to browse",
@@ -141,7 +141,7 @@ export interface GigsFormVal {
   end_date_time: null | Date;
   gig_category_id: string;
   skills: Array<string>;
-  image: File | null;
+  images: Array<File> | null;
   profile_type: PROFILE_TYPE;
   certifications: Array<string>
 }
