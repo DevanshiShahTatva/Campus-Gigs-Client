@@ -72,7 +72,7 @@ export interface IPlanApiResponse {
 
 export interface IDropdownOption {
   label: string;
-  id: number;
+  id: string;
 }
 
 export interface Tire {

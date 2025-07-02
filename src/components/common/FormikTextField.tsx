@@ -6,6 +6,7 @@ import { cn } from "@/utils/constant";
 interface FormikTextFieldProps {
   name: string;
   label?: string;
+  isRequired?: boolean;
   type?: string;
   placeholder?: string;
   maxLength?: number;
@@ -32,6 +33,7 @@ const FormikTextField: React.FC<FormikTextFieldProps> = ({
   min,
   step,
   className,
+  isRequired,
   onChange
 }) => {
   const [field, meta] = useField(name);
@@ -41,7 +43,7 @@ const FormikTextField: React.FC<FormikTextFieldProps> = ({
     <div className="w-full">
       {label && (
         <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
-          {label}
+          {label} {isRequired && <span className="text-destructive ml-1">*</span>}
         </label>
       )}
       <div className="relative">
