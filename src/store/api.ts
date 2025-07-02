@@ -18,8 +18,11 @@ export const api = createApi({
     getUserProfile: builder.query<any, void>({
       query: () => '/user/profile',
     }),
+    getProviderPublicProfile: builder.query<any, string>({
+      query: (id: string) => `/user/profile/public/${id}`,
+    }),
     // Add more endpoints here
   }),
 });
 
-export const { useGetUserProfileQuery } = api; 
+export const { useGetUserProfileQuery, useGetProviderPublicProfileQuery } = api; 
