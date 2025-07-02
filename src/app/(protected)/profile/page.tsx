@@ -7,6 +7,7 @@ import { RoleContext } from '@/context/role-context';
 import { getInitials, profileFormConfig } from "./helper";
 import { USER_PROFILE } from "@/utils/constant";
 import ProfileSkeleton from "@/components/skeleton/ProfileSkeleton";
+import { toast } from "react-toastify";
 
 // Custom Profile Photo Component
 const ProfilePhotoUpload = ({
@@ -191,6 +192,25 @@ const Profile = () => {
     };
     fetchProfile();
   }, []);
+
+  // Function to handle profile update API call
+  const handleProfileUpdate = async (values: any) => {
+    try {
+      const response = await apiCall({
+        endPoint: '/user/profile',
+        method: 'PUT',
+        body: values,
+        withToken: true,
+      });
+      setUserProfile(response.data || values);
+      toast.success("Profile updated successfully");
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
+    } catch (error) {
+      setSuccess(false);
+      toast.error("Failed to update profile");
+    }
+  };
 
   if (!userProfile) {
     return <ProfileSkeleton />;
@@ -412,10 +432,7 @@ const Profile = () => {
                 <DynamicForm
                   formConfig={profileFormConfig}
                   initialValues={formInitialValues}
-                  onSubmit={(values) => {
-                    setSuccess(true);
-                    setTimeout(() => setSuccess(false), 2000);
-                  }}
+                  onSubmit={handleProfileUpdate}
                 />
               )}
               {profileMode === 'provider' && activeTab === "gigs" && (

@@ -3,8 +3,8 @@ import { educationOptions as rawEducationOptions } from "@/app/(auth)/sign-up/he
 import { FiUpload, FiCamera, FiTrash2 } from "react-icons/fi";
 import React, { useState, useRef } from "react";
 
-// Map educationOptions to { value, label } for DynamicForm compatibility
-export const educationOptions = rawEducationOptions.map(opt => ({ value: opt.id, label: opt.label }));
+// Map educationOptions to { id, label } for DynamicForm compatibility
+export const educationOptions = rawEducationOptions.map(opt => ({ id: opt.id, label: opt.label }));
 
 export const CERTIFICATIONS = [
   { label: "Google Analytics", id: "google-analytics" },
@@ -60,8 +60,8 @@ export const profileFormConfig = [
     section: true,
     subfields: [
       { id: "name", name: "name", label: "Full Name", type: "text" as const, required: true, errorMessage: "Name is required", placeholder: "Enter your full name" },
-      { id: "phone", name: "phone", label: "Phone", type: "text" as const, required: true, errorMessage: "Phone number is required", placeholder: "Enter phone number" },
-      { id: "address", name: "address", label: "Address", type: "text" as const, required: true, errorMessage: "Address is required", placeholder: "Enter address" },
+      { id: "phone", name: "phone", label: "Phone", type: "text" as const, required: false, errorMessage: "Phone number is required", placeholder: "Enter phone number" },
+      { id: "address", name: "address", label: "Address", type: "text" as const, required: false, errorMessage: "Address is required", placeholder: "Enter address" },
     ],
   },
   {

@@ -4,20 +4,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaBell, FaUserCircle, FaChevronDown, FaExchangeAlt, FaUser, FaCog, FaSignOutAlt, FaCheckCircle, FaInfoCircle, FaBars, FaStar } from "react-icons/fa";
 import { RoleContext } from '@/context/role-context';
+import { useGetUserProfileQuery } from '@/store/api';
 
 const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean, setSidebarOpen: (open: boolean) => void }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const { role, setRole } = useContext(RoleContext);
   const router = useRouter();
-
-  // Placeholder user data
-  const user = {
-    name: 'John Doe',
-    avatar: '', // Set to a valid image URL to test avatar, or leave empty for initials
-  };
-  const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
-
+  const { data, isLoading } = useGetUserProfileQuery();
+  const user = data?.data;
+  const initials = user?.name ? user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : '';
+  
   // Placeholder notifications
   const notifications = [
     { id: 1, type: 'info', message: 'Your gig was approved!', read: false },
@@ -129,10 +126,12 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
               title="Profile menu"
               onClick={() => setDropdownOpen((open) => !open)}
             >
-              {user.avatar ? (
+              {isLoading ? (
+                <span className="w-9 h-9 rounded-full bg-gray-200 animate-pulse" />
+              ) : user?.avatar ? (
                 <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover border-2 border-[var(--base)] shadow-sm" />
               ) : (
-                <span className="w-9 h-9 rounded-full bg-[var(--base)] text-white flex items-center justify-center font-bold text-lg border-2 border-[var(--base)] shadow-sm">
+                <span className="w-9 h-9 rounded-full bg-[var(--base)] text-white flex items-center justify-center font-bold text-md border-2 border-[var(--base)] shadow-sm">
                   {initials}
                 </span>
               )}
@@ -144,7 +143,9 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
               onMouseLeave={() => setDropdownOpen(false)}
             >
               <div className="px-5 py-4 flex items-center gap-3 border-b border-gray-100 bg-[var(--base)]/5">
-                {user.avatar ? (
+                {isLoading ? (
+                  <span className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
+                ) : user?.avatar ? (
                   <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover border-2 border-[var(--base)]" />
                 ) : (
                   <span className="w-10 h-10 rounded-full bg-[var(--base)] text-white flex items-center justify-center font-bold text-xl border-2 border-[var(--base)]">
@@ -152,7 +153,8 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
                   </span>
                 )}
                 <div>
-                  <div className="font-semibold text-gray-900 text-base">{user.name}</div>
+                  {user?.name && <div className="font-semibold text-gray-900 text-base">{user.name}</div>}
+                  {user?.email && <div className="text-xs text-gray-500 truncate max-w-xs">{user.email}</div>}
                   <div className="text-xs text-gray-500">{role === 'user' ? 'User' : 'Provider'} Mode</div>
                 </div>
               </div>
