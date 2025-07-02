@@ -1,7 +1,10 @@
 // Profile page helpers and config
-import { educationOptions } from "@/app/(auth)/sign-up/helper";
+import { educationOptions as rawEducationOptions } from "@/app/(auth)/sign-up/helper";
 import { FiUpload, FiCamera, FiTrash2 } from "react-icons/fi";
 import React, { useState, useRef } from "react";
+
+// Map educationOptions to { value, label } for DynamicForm compatibility
+export const educationOptions = rawEducationOptions.map(opt => ({ value: opt.id, label: opt.label }));
 
 export const CERTIFICATIONS = [
   { label: "Google Analytics", id: "google-analytics" },
@@ -41,7 +44,7 @@ export const selectStyles = {
   }),
 };
 
-export const getInitials = (name: string) => {
+export const getInitials = (name: string = "User") => {
   return name
     .split(" ")
     .map((word) => word.charAt(0))
@@ -97,6 +100,7 @@ export const profileFormConfig = [
     groupSize: 1 as 1,
     section: true,
     subfields: [
+      { id: "headline", name: "headline", label: "Headline", type: "text" as const, required: true, errorMessage: "Headline is required", placeholder: "e.g. Web Developer, Marketing Enthusiast, etc." },
       { id: "bio", name: "bio", label: "Short Bio", type: "textarea" as const, required: true, errorMessage: "Short bio is required", placeholder: "Write a short bio (max 300 chars)" },
     ],
   },

@@ -6,6 +6,8 @@ export interface UserProfile {
   profilePicture: File | null;
   phone: string;
   address: string;
+  headline: string;
+  bio: string;
 }
 
 export interface ProfileFormValues {
@@ -20,4 +22,5 @@ export interface ProfileFormValues {
   bio: string;
   educationLevel: string;
   customEducation: string;
+  headline: string;
 } 
