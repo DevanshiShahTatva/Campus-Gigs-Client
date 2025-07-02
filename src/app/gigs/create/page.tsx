@@ -33,6 +33,7 @@ const CreateGig = () => {
     { id: "2", label: "ReactJs" },
   ]);
   const [isFormSubmitted, setFormSubmitted] = useState<Boolean>(false);
+  
 
   const handleFieldChange = (fieldName: string, value: any) => {
     if (fieldName === "gig_category_id" && value) {

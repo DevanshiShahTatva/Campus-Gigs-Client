@@ -185,6 +185,7 @@ const DynamicForm = ({
       initialValues={initialValues}
       validationSchema={Yup.object().shape(validationSchema)}
       onSubmit={async (values, formikHelpers) => {
+        formikHelpers.setSubmitting(true);
         const errors = await formikHelpers.validateForm();
         if (Object.keys(errors).length > 0) {
           formikHelpers.setTouched(
@@ -193,9 +194,12 @@ const DynamicForm = ({
               {}
             )
           );
+          formikHelpers.setSubmitting(false);
           return;
         }
-        onSubmit(values);
+
+        await onSubmit(values);
+        formikHelpers.setSubmitting(false);
       }}
     >
       {(formik) => (
@@ -574,6 +578,7 @@ const InnerForm = ({
 
       <div className="flex justify-end">
         <Button
+          size={"lg"}
           type="submit"
           disabled={formik.isSubmitting || isViewMode}
           className="mt-4"
