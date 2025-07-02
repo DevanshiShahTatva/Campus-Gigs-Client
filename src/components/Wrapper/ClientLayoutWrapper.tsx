@@ -6,7 +6,7 @@ import Footer from "../landing-page-components/Footer";
 export function ClientLayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  const showHeaderFooter = ["/", "/ContactUs", "/FAQs", "/TermsConditions", "/PrivacyPolicy"].includes(pathname);
+  const showHeaderFooter = ["/", "/contact-us", "/faqs", "/terms-conditions", "/privacy-policy"].includes(pathname);
 
   return (
     <>

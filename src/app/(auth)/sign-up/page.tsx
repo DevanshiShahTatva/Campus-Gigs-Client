@@ -60,12 +60,13 @@ const SignUpPage: React.FC = () => {
               type="button"
               onClick={() => isClickable && setCurrentStep(index)}
               disabled={!isClickable}
-              className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 ${index < currentStep
-                ? "bg-emerald-500 border-emerald-500 text-white shadow-lg"
-                : index === currentStep
+              className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 ${
+                index < currentStep
+                  ? "bg-emerald-500 border-emerald-500 text-white shadow-lg"
+                  : index === currentStep
                   ? "bg-[var(--base)] border-[var(--base)] text-white shadow-lg"
                   : "bg-white border-gray-300 text-gray-400"
-                } ${isClickable ? "cursor-pointer" : "cursor-not-allowed"}`}
+              } ${isClickable ? "cursor-pointer" : "cursor-not-allowed"}`}
             >
               {index < currentStep ? <Check className="w-5 h-5" /> : step.icon}
             </button>
@@ -298,10 +299,7 @@ const SignUpPage: React.FC = () => {
           <h4 className="text-lg font-semibold text-gray-900 mb-1 flex items-center space-x-2">
             <span>Education (Optional)</span>
           </h4>
-          <Select
-            value={values.educationLevel}
-            onValueChange={(val) => handleEducationChange(val, setFieldValue)}
-          >
+          <Select value={values.educationLevel} onValueChange={(val) => handleEducationChange(val, setFieldValue)}>
             <SelectTrigger className="h-9 sm:h-10 text-sm sm:text-base">
               <SelectValue placeholder="Search or select your education level" />
             </SelectTrigger>
@@ -422,7 +420,7 @@ const SignUpPage: React.FC = () => {
                       <div className="mt-[4px] text-sm text-gray-700">
                         I agree to the{" "}
                         <Link
-                          href="/TermsConditions"
+                          href="/terms-conditions"
                           target="_blank"
                           className="text-blue-600 hover:text-blue-800 font-medium underline inline-flex items-center"
                         >
@@ -431,7 +429,7 @@ const SignUpPage: React.FC = () => {
                         </Link>{" "}
                         and{" "}
                         <Link
-                          href="/PrivacyPolicy"
+                          href="/privacy-policy"
                           target="_blank"
                           className="text-blue-600 hover:text-blue-800 font-medium underline inline-flex items-center"
                         >
@@ -503,8 +501,9 @@ const SignUpPage: React.FC = () => {
                     type="button"
                     onClick={prevStep}
                     disabled={currentStep === 0}
-                    className={`flex items-center text-[13px] lg:text-[15px] px-2 lg:px-5 py-3 rounded-lg lg:font-medium transition-all duration-200 bg-gray-100 ${currentStep === 0 ? "text-gray-400 cursor-not-allowed" : "text-gray-600 hover:text-gray-800 cursor-pointer"
-                      }`}
+                    className={`flex items-center text-[13px] lg:text-[15px] px-2 lg:px-5 py-3 rounded-lg lg:font-medium transition-all duration-200 bg-gray-100 ${
+                      currentStep === 0 ? "text-gray-400 cursor-not-allowed" : "text-gray-600 hover:text-gray-800 cursor-pointer"
+                    }`}
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Previous</span>
@@ -524,10 +523,11 @@ const SignUpPage: React.FC = () => {
                       type="button"
                       onClick={nextStep}
                       disabled={!isStepValid(currentStep, values, errors)}
-                      className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${isStepValid(currentStep, values, errors)
-                        ? "bg-[var(--base)] hover:bg-[var(--base-hover)] text-white shadow-lg hover:shadow-xl cursor-pointer"
-                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        }`}
+                      className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+                        isStepValid(currentStep, values, errors)
+                          ? "bg-[var(--base)] hover:bg-[var(--base-hover)] text-white shadow-lg hover:shadow-xl cursor-pointer"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      }`}
                     >
                       <span>Next</span>
                       <ChevronRight className="w-4 h-4" />

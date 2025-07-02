@@ -70,7 +70,7 @@ const FAQs = () => {
                   <h3 className="text-lg md:text-xl font-semibold mb-4 md:mb-6 text-[var(--text-dark)]">Need More Help?</h3>
                   <p className="text-xs md:text-sm text-[var(--text-semi-dark)] mb-4">{FAQ_TEXT.HELP}</p>
                   <Link
-                    href={`/ContactUs`}
+                    href={`/contact-us`}
                     className="block mx-auto w-fit bg-[var(--base)] text-[var(--text-light)] px-4 py-2 md:px-6 md:py-3 rounded-lg font-semibold hover:bg-[var(--base-hover)] transition-colors duration-300 transform hover:scale-105 text-sm md:text-base"
                   >
                     Contact Support

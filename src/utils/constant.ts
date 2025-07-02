@@ -400,10 +400,10 @@ export const FOOTER_CONTACT_INFO = [
 ];
 
 export const FOOTER_BOTTOM_LINKS = [
-  { label: "Privacy Policy", href: "/PrivacyPolicy" },
-  { label: "Terms & Conditions", href: "/TermsConditions" },
-  { label: "Contact Us", href: "/ContactUs" },
-  { label: "FAQs", href: "/FAQs" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms & Conditions", href: "/terms-conditions" },
+  { label: "Contact Us", href: "/contact-us" },
+  { label: "FAQs", href: "/faqs" },
 ];
 
 export const FOOTER_COPYRIGHT = "© 2025 CampusGig. All rights reserved.";

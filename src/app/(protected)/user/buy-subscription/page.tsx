@@ -8,6 +8,7 @@ import { IPlanApiResponse, ISubscriptionCurrentPlanApiResponse, ISubscriptionPla
 import IconMap from "@/components/common/IconMap";
 import SkeletonSubscriptionPlan from "@/components/landing-page-components/SkeletonSubscriptionPlan";
 import { CentralLoader } from "@/components/common/Loader";
+import Layout from "../../layout";
 
 const BuySubscription = () => {
   const router = useRouter();
@@ -91,9 +92,9 @@ const BuySubscription = () => {
   };
 
   return (
-    <div className="bg-[var(--bg-light)] py-14 min-h-screen">
+    <>
       <CentralLoader loading={isCentralLoading} />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header with Skip Button */}
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -184,7 +185,7 @@ const BuySubscription = () => {
               ))}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
