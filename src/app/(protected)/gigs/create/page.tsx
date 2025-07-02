@@ -20,7 +20,7 @@ const initialFormState = {
   gig_category_id: "",
   certifications: [],
   skills: [],
-  image: null,
+  images: [],
   profile_type: PROFILE_TYPE.USER,
 };
 
@@ -79,7 +79,7 @@ const CreateGig = () => {
       // fetchSkillsBaseOnCategory(value);
     }
 
-    if (fieldName === "start_date_time") {
+    if (fieldName === "start_date_time" && value) {
       setFormValues((prev) => ({
         ...prev,
         [fieldName]: value,
@@ -111,7 +111,11 @@ const CreateGig = () => {
       });
     }
 
-    values.image && formData.append("file", values.image[0]);
+    if (values.images?.length > 0) {
+      values.images.forEach((file: File) => {
+        formData.append("files", file);
+      });
+    }
 
     try {
       const response = await apiCall({

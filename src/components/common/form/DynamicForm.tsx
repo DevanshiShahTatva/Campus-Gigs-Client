@@ -202,7 +202,6 @@ const DynamicForm = ({
         await onSubmit(values);
         formikHelpers.setSubmitting(false);
       }}
-      enableReinitialize
     >
       {(formik) => (
         <InnerForm
