@@ -172,6 +172,7 @@ const DynamicForm = ({
       initialValues={initialValues}
       validationSchema={Yup.object().shape(validationSchema)}
       onSubmit={onSubmit}
+      enableReinitialize
     >
       {(formik) => (
         <InnerForm
