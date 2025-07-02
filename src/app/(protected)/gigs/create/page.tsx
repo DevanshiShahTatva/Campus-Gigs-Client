@@ -42,37 +42,37 @@ const CreateGig = () => {
   }, []);
 
   const fetchGigCategories = async () => {
-  try {
-    const resp = await apiCall({
-      endPoint: `${API_ROUTES.ADMIN.GIG_CATEGORY}/dropdown`,
-      method: "GET",
-    });
+    try {
+      const resp = await apiCall({
+        endPoint: `${API_ROUTES.ADMIN.GIG_CATEGORY}/dropdown`,
+        method: "GET",
+      });
 
-    if (resp?.success) {
-      setGigCategoryDropdown(resp.data);
+      if (resp?.success) {
+        setGigCategoryDropdown(resp.data);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch categories");
     }
-  } catch (error) {
-    toast.error("Failed to fetch categories");
-  }
-};
+  };
 
-const fetchSkillsBaseOnCategory = async (id: string) => {
-  try {
-    setIsSkillsLoading(true);
-    const resp = await apiCall({
-      endPoint: `${API_ROUTES}/category/${id}`,
-      method: "GET",
-    });
+  const fetchSkillsBaseOnCategory = async (id: string) => {
+    try {
+      setIsSkillsLoading(true);
+      const resp = await apiCall({
+        endPoint: `${API_ROUTES}/category/${id}`,
+        method: "GET",
+      });
 
-    if (resp?.success) {
-      setSkillsDropdown(resp.data);
+      if (resp?.success) {
+        setSkillsDropdown(resp.data);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch skills");
+    } finally {
+      setIsSkillsLoading(false);
     }
-  } catch (error) {
-    toast.error("Failed to fetch skills");
-  } finally {
-    setIsSkillsLoading(false);
-  }
-};
+  };
 
   const handleFieldChange = useCallback((fieldName: string, value: any) => {
     if (fieldName === "gig_category_id" && value) {
@@ -138,8 +138,14 @@ const fetchSkillsBaseOnCategory = async (id: string) => {
     }
   }, []);
 
-  const memoizedGigCategoryDropdown = useMemo(() => gigCategoryDropdown, [gigCategoryDropdown]);
-  const memoizedSkillsDropdown = useMemo(() => skillsDropdown, [skillsDropdown]);
+  const memoizedGigCategoryDropdown = useMemo(
+    () => gigCategoryDropdown,
+    [gigCategoryDropdown]
+  );
+  const memoizedSkillsDropdown = useMemo(
+    () => skillsDropdown,
+    [skillsDropdown]
+  );
 
   return (
     <div className="w-full">
