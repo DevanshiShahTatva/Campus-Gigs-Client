@@ -3,17 +3,17 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Select from "react-select";
 import { toast } from "react-toastify";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { Formik, Form, FormikHelpers } from "formik";
 import { ChevronLeft, ChevronRight, User, Camera, FileText, Check, Tag, Info, ExternalLink } from "lucide-react";
 
+import { apiCall } from "@/utils/apiCall";
 import TagsInput from "./TagInput";
 import Button from "@/components/common/Button";
 import FormikTextField from "@/components/common/FormikTextField";
-import { apiCall } from "@/utils/apiCall";
-import { SignupFormSchema, selectStyles, educationOptions } from "./helper";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { SignupFormSchema, educationOptions } from "./helper";
 import { ISignupFormValues, Step, ApiResponse, EducationOption } from "./type";
 
 const steps: Step[] = [
@@ -59,13 +59,12 @@ const SignUpPage: React.FC = () => {
               type="button"
               onClick={() => isClickable && setCurrentStep(index)}
               disabled={!isClickable}
-              className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 ${
-                index < currentStep
-                  ? "bg-emerald-500 border-emerald-500 text-white shadow-lg"
-                  : index === currentStep
+              className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 ${index < currentStep
+                ? "bg-emerald-500 border-emerald-500 text-white shadow-lg"
+                : index === currentStep
                   ? "bg-[var(--base)] border-[var(--base)] text-white shadow-lg"
                   : "bg-white border-gray-300 text-gray-400"
-              } ${isClickable ? "cursor-pointer" : "cursor-not-allowed"}`}
+                } ${isClickable ? "cursor-pointer" : "cursor-not-allowed"}`}
             >
               {index < currentStep ? <Check className="w-5 h-5" /> : step.icon}
             </button>
@@ -155,9 +154,9 @@ const SignUpPage: React.FC = () => {
     }
   };
 
-  const handleEducationChange = (selectedOption: EducationOption | null, setFieldValue: (field: string, value: any) => void) => {
-    setFieldValue("educationLevel", selectedOption?.value || "");
-    if (selectedOption?.value !== "Other") {
+  const handleEducationChange = (value: string, setFieldValue: (field: string, value: any) => void) => {
+    setFieldValue("educationLevel", value);
+    if (value !== "Other") {
       setFieldValue("customEducation", "");
     }
   };
@@ -285,20 +284,21 @@ const SignUpPage: React.FC = () => {
           <h4 className="text-lg font-semibold text-gray-900 mb-1 flex items-center space-x-2">
             <span>Education (Optional)</span>
           </h4>
-
-          <div>
-            <Select
-              isClearable
-              isSearchable
-              classNamePrefix="react-select"
-              styles={selectStyles}
-              options={educationOptions}
-              className="text-black"
-              placeholder="Search or select your education level"
-              value={educationOptions.find((option) => option.value === values.educationLevel) || null}
-              onChange={(selectedOption) => handleEducationChange(selectedOption, setFieldValue)}
-            />
-          </div>
+          <Select
+            value={values.educationLevel}
+            onValueChange={(val) => handleEducationChange(val, setFieldValue)}
+          >
+            <SelectTrigger className="h-9 sm:h-10 text-sm sm:text-base">
+              <SelectValue placeholder="Search or select your education level" />
+            </SelectTrigger>
+            <SelectContent>
+              {educationOptions.map((option) => (
+                <SelectItem key={option.id} value={option.label} className="text-sm sm:text-base">
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {values.educationLevel === "Other" && (
             <div className="animate-in slide-in-from-top-4 duration-300 ease-out">
               <div className="mt-6">
@@ -489,9 +489,8 @@ const SignUpPage: React.FC = () => {
                     type="button"
                     onClick={prevStep}
                     disabled={currentStep === 0}
-                    className={`flex items-center text-[13px] lg:text-[15px] px-2 lg:px-5 py-3 rounded-lg lg:font-medium transition-all duration-200 bg-gray-100 ${
-                      currentStep === 0 ? "text-gray-400 cursor-not-allowed" : "text-gray-600 hover:text-gray-800 cursor-pointer"
-                    }`}
+                    className={`flex items-center text-[13px] lg:text-[15px] px-2 lg:px-5 py-3 rounded-lg lg:font-medium transition-all duration-200 bg-gray-100 ${currentStep === 0 ? "text-gray-400 cursor-not-allowed" : "text-gray-600 hover:text-gray-800 cursor-pointer"
+                      }`}
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Previous</span>
@@ -511,11 +510,10 @@ const SignUpPage: React.FC = () => {
                       type="button"
                       onClick={nextStep}
                       disabled={!isStepValid(currentStep, values, errors)}
-                      className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                        isStepValid(currentStep, values, errors)
-                          ? "bg-[var(--base)] hover:bg-[var(--base-hover)] text-white shadow-lg hover:shadow-xl cursor-pointer"
-                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      }`}
+                      className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${isStepValid(currentStep, values, errors)
+                        ? "bg-[var(--base)] hover:bg-[var(--base-hover)] text-white shadow-lg hover:shadow-xl cursor-pointer"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        }`}
                     >
                       <span>Next</span>
                       <ChevronRight className="w-4 h-4" />

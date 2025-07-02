@@ -370,3 +370,21 @@ button{
 .border-destructive {
   border-color: red !important;
 }
+
+.slider .slick-dots {
+  bottom: 20px;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+}
+
+.slider .slick-dots li {
+  width: 7px;
+  height: auto;
+}
+
+.slider li.slick-active div {
+  width: 10px !important;
+  height: 10px !important;
+  background: #fff !important;
+}

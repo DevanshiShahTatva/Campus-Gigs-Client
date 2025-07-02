@@ -2,18 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Slider from "react-slick";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import { ArrowLeftIcon, CalendarIcon, CheckCircle, ClockIcon, MessageCircle, TagIcon, Star } from "lucide-react";
+import GigDetailSkeleton from "@/components/skeleton/gigDetailSkeleton";
 import { gigBidFields } from "@/config/gigbid.config";
+
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const mockGigRequest = {
   id: 1,
   title: "Need help with calculus homework - derivatives and integrals",
   images: [
-    "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500&h=300&fit=crop&crop=entropy&auto=format",
-    "https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=500&h=300&fit=crop&crop=entropy&auto=format"
+    "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=240&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=240&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=400&h=240&fit=crop&auto=format",
   ],
   budget: "$50-80",
   budgetType: "Fixed Price",
@@ -134,61 +140,80 @@ const GigDetail = () => {
   };
 
   if (!gitDetails) {
-    return <div className="fle justify-center items-center h-[500px]">Loading...</div>;
+    return <GigDetailSkeleton />;
   }
 
   return (
-    <div className="mt-[64px] min-h-screen bg-gray-50">
+    <div className=" bg-gray-50">
       <div className="bg-white shadow">
-        <div className="mx-auto py-6 px-4 sm:px-6 lg:px-8 flex items-center">
+        <div className="mx-auto py-4 px-3 sm:py-6 sm:px-4 lg:px-8 flex items-center">
           <button
             onClick={() => router.back()}
-            className="mr-4 p-1 rounded-full hover:bg-gray-100 cursor-pointer"
+            className="mr-3 p-1 rounded-full hover:bg-gray-100 cursor-pointer flex-shrink-0"
           >
             <ArrowLeftIcon className="h-5 w-5 text-gray-600" />
           </button>
-          <h1 className="text-xl font-bold text-gray-900 truncate">
+          <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">
             {gitDetails.title}
           </h1>
         </div>
       </div>
-      <main className="mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="lg:grid lg:grid-cols-3 lg:gap-8">
-          <div className="lg:col-span-2">
-            <div className="h-full bg-white shadow rounded-lg overflow-hidden">
-              <div className='min-h-[380px]'>
-                {/* <ImageCarousel images={event.images} /> */}
+      <main className="mx-auto py-4 px-3 sm:py-6 sm:px-4 lg:px-8">
+        <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-8 space-y-6 lg:space-y-0">
+          <div className="lg:col-span-2 order-1">
+            <div className="bg-white shadow rounded-lg overflow-hidden">
+              <div className="h-auto md:min-h-[360px]">
+                <div className="slider h-full">
+                  <Slider
+                    speed={3000}
+                    autoplay={true}
+                    dots={gitDetails.images.length > 1}
+                    infinite={gitDetails.images.length > 1}
+                    customPaging={() => (
+                      <div className="w-[7px] h-[7px] bg-gray-400 rounded-full transition" />
+                    )}
+                  >
+                    {gitDetails.images.map((image: string, i: number) => (
+                      <img
+                        key={`${i + 1}`}
+                        src={image}
+                        alt={gitDetails.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ))}
+                  </Slider>
+                </div>
               </div>
             </div>
           </div>
-          <div className="lg:col-span-1 min-h-[380px]">
-            <div className="bg-white shadow rounded-lg p-6 h-full flex flex-col justify-between min-h-[380px]">
+          <div className="lg:col-span-1 order-2">
+            <div className="h-full bg-white shadow rounded-lg p-4 sm:p-6 flex flex-col justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
                   {gitDetails.title}
                 </h2>
                 <div className="space-y-3 pb-4">
-                  <div className="flex items-top text-gray-600">
-                    <CalendarIcon className="mt-1 h-5 w-5 mr-2 text-gray-400" />
-                    <span>
+                  <div className="flex items-start text-gray-600">
+                    <CalendarIcon className="mt-1 h-4 w-4 sm:h-5 sm:w-5 mr-2 text-gray-400 flex-shrink-0" />
+                    <span className="text-sm sm:text-base break-words">
                       {gitDetails.date}
                     </span>
                   </div>
                   <div className="flex items-center text-gray-600">
-                    <ClockIcon className="mt-1 h-5 w-5 mr-2 text-gray-400" />
-                    <span>
+                    <ClockIcon className="mt-1 h-4 w-4 sm:h-5 sm:w-5 mr-2 text-gray-400 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
                       Duration - ({gitDetails.expires})
                     </span>
                   </div>
                   <div className="flex items-center text-gray-600">
-                    <TagIcon className="mt-1 h-5 w-5 mr-2 text-gray-400" />
-                    <div>
+                    <TagIcon className="mt-1 h-4 w-4 sm:h-5 sm:w-5 mr-2 text-gray-400 flex-shrink-0" />
+                    <div className="text-sm sm:text-base">
                       {gitDetails.category}
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {gitDetails.skills.map((tag: string, i: number) => (
-                      <span key={`${i + 1}`} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                      <span key={`${i + 1}`} className="px-2 py-1 sm:px-3 bg-gray-100 text-gray-700 rounded-full text-xs sm:text-sm">
                         {tag}
                       </span>
                     ))}
@@ -197,14 +222,14 @@ const GigDetail = () => {
               </div>
               <div className="flex items-center justify-between bg-white pt-4 border-t-2 border-gray-200">
                 <div className="flex flex-col">
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-green-600">{gitDetails.budget}</div>
-                    <div className="text-sm text-gray-500">in {gitDetails.budgetType}</div>
+                  <div className="text-left sm:text-right">
+                    <div className="text-xl sm:text-2xl font-bold text-green-600">{gitDetails.budget}</div>
+                    <div className="text-xs sm:text-sm text-gray-500">in {gitDetails.budgetType}</div>
                   </div>
                 </div>
                 <Button
                   onClick={() => setIsModalOpen(true)}
-                  className='w-31 px-4 py-6 text-md rounded-lg font-semibold'
+                  className="px-3 py-2 sm:px-4 sm:py-6 text-sm sm:text-md rounded-lg font-semibold"
                 >
                   Submit Bid
                 </Button>
@@ -212,14 +237,14 @@ const GigDetail = () => {
             </div>
           </div>
         </div>
-        <div className='mt-10 p-6 shadow-lg rounded-lg bg-white'>
+        <div className="mt-6 lg:mt-10 p-4 sm:p-6 shadow-lg rounded-lg bg-white">
           <div className="bg-white w-full border-b border-gray-300">
-            <div className="relative space-x-4 flex w-full md:w-auto">
+            <div className="relative flex w-full">
               {["Description", "Requirements", "Bids"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`relative pb-3 px-2 text-sm md:text-base font-medium transition-all duration-200 cursor-pointer ${activeTab === tab
+                  className={`relative pb-3 px-3 sm:px-4 text-sm sm:text-base font-medium transition-all duration-200 cursor-pointer whitespace-nowrap flex-shrink-0 ${activeTab === tab
                     ? "text-[var(--base)] after:content-[''] after:absolute after:-bottom-[1px] after:left-0 after:w-full after:h-[2px] after:bg-[var(--base)]"
                     : "text-gray-600 hover:text-[var(--base)]"
                     }`}
@@ -230,93 +255,89 @@ const GigDetail = () => {
             </div>
           </div>
           {activeTab === "Description" && (
-            <div>
-              <div className="pt-6">
-                <div className="prose max-w-none">
-                  <div className="whitespace-pre-line text-gray-700 leading-relaxed">
-                    {mockGigRequest.description}
-                  </div>
+            <div className="pt-4 sm:pt-6">
+              <div className="prose max-w-none">
+                <div className="whitespace-pre-line text-gray-700 leading-relaxed text-sm sm:text-base">
+                  {mockGigRequest.description}
                 </div>
               </div>
             </div>
           )}
           {activeTab === "Requirements" && (
-            <div>
-              <div className="pt-6">
-                <div className="space-y-3">
-                  {mockGigRequest.requirements.map((req, i) => (
-                    <div key={`${i + 1}`} className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">{req}</span>
-                    </div>
-                  ))}
-                </div>
+            <div className="pt-4 sm:pt-6">
+              <div className="space-y-3">
+                {mockGigRequest.requirements.map((req, i) => (
+                  <div key={`${i + 1}`} className="flex items-start gap-3">
+                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700 text-sm sm:text-base">{req}</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
           {activeTab === "Bids" && (
-            <div className="flex flex-col gap-5 mt-3">
+            <div className="flex flex-col gap-4 sm:gap-5 mt-3">
               {mockGigRequest.bids.map((bid) => (
                 <Card key={bid.id} className="gap-0 py-0">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-start space-x-4">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-0 mb-4">
+                      <div className="flex items-start space-x-3 sm:space-x-4">
                         {bid.provider.avatar ? (
                           <img
                             alt="not found"
                             src={bid.provider.avatar}
-                            className="w-15 h-15 rounded-full"
+                            className="w-12 h-12 sm:w-15 sm:h-15 rounded-full flex-shrink-0"
                           />
                         ) : (
-                          <div className="w-15 h-15 bg-purple-500 text-white rounded-full flex items-center justify-center font-semibold text-3xl">
+                          <div className="w-12 h-12 sm:w-15 sm:h-15 bg-purple-500 text-white rounded-full flex items-center justify-center font-semibold text-lg sm:text-3xl flex-shrink-0">
                             {bid.provider.name.charAt(0).toUpperCase()}
                           </div>
                         )}
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold text-lg">{bid.provider.name} •</h4>
-                            <div className="flex items-center space-x-1 text-sm text-gray-500">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
+                            <h4 className="font-semibold text-base sm:text-lg truncate">{bid.provider.name}</h4>
+                            <span className="hidden sm:inline">•</span>
+                            <div className="flex items-center space-x-1 text-xs sm:text-sm text-gray-500">
                               <div className="flex items-center space-x-1">
-                                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                                <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 fill-current" />
                                 <span className="font-medium">{bid.provider.rating}</span>
                                 <span>({bid.provider.reviews} reviews)</span>
                               </div>
                             </div>
                           </div>
-                          <p className="text-sm text-gray-600 mb-2">{bid.provider.expertise}</p>
+                          <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">{bid.provider.expertise}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-green-600">${bid.amount}</div>
-                        <div className="text-sm text-gray-500">in {bid.timeframe}</div>
+                      <div className="text-left sm:text-right flex-shrink-0">
+                        <div className="text-xl sm:text-2xl font-bold text-green-600">${bid.amount}</div>
+                        <div className="text-xs sm:text-sm text-gray-500">in {bid.timeframe}</div>
                       </div>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                      <p className="text-gray-700 leading-relaxed">{bid.proposal}</p>
+                    <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4">
+                      <p className="text-gray-700 leading-relaxed text-sm sm:text-base">{bid.proposal}</p>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">Bid placed {bid.postedAgo}</span>
-                      <div className="flex gap-2 ">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                        >
-                          <MessageCircle className="w-4 h-4 mr-2" />
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+                      <span className="text-xs sm:text-sm text-gray-500">Bid placed {bid.postedAgo}</span>
+                      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <Button size="sm" variant="outline" className="w-full sm:w-auto">
+                          <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                           Message
                         </Button>
-                        <Button
-                          size="sm"
-                          className="bg-red-400 hover:bg-red-700"
-                        >
-                          Reject Bid
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => handleAcceptBid(bid)}
-                          className="bg-green-400 hover:bg-green-700"
-                        >
-                          Accept Bid
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            className="bg-red-600 hover:bg-red-700 flex-1 sm:flex-initial"
+                          >
+                            Reject Bid
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleAcceptBid(bid)}
+                            className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-initial"
+                          >
+                            Accept Bid
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>

@@ -35,43 +35,12 @@ export const SignupFormSchema = yup.object().shape({
 });
 
 export const educationOptions = [
-  { value: "High School", label: "High School" },
-  { value: "Associate Degree", label: "Associate Degree" },
-  { value: "Bachelor's Degree", label: "Bachelor's Degree" },
-  { value: "Master's Degree", label: "Master's Degree" },
-  { value: "Doctoral Degree", label: "Doctoral Degree" },
-  { value: "Professional Certificate", label: "Professional Certificate" },
-  { value: "Diploma", label: "Diploma" },
-  { value: "Other", label: "Other" },
+  { id: "highschool", label: "High School" },
+  { id: "associate", label: "Associate Degree" },
+  { id: "bachelor", label: "Bachelor's Degree" },
+  { id: "masters", label: "Master's Degree" },
+  { id: "doctoral", label: "Doctoral Degree" },
+  { id: "professional", label: "Professional Certificate" },
+  { id: "Diploma", label: "Diploma" },
+  { id: "Other", label: "Other" },
 ];
-
-export const selectStyles = {
-  control: (base: any, state: any) => ({
-    ...base,
-    minHeight: "43px",
-    border: state.isFocused ? "1px solid var(--base)" : "1px solid #d1d5db",
-    borderRadius: "8px",
-    fontSize: "14px",
-    boxShadow: state.isFocused ? "0 0 0 1px var(--base)" : "none",
-    "&:hover": {
-      borderColor: "var(--base)",
-    },
-  }),
-  menuList: (base: any) => ({
-    ...base,
-    maxHeight: "156px",
-    overflowY: "auto",
-    borderRadius: "8px",
-  }),
-  option: (base: any, state: any) => ({
-    ...base,
-    padding: "5px 8px",
-    color: "#111827",
-    cursor: "pointer",
-    backgroundColor: state.isFocused ? "#f3f4f6" : "white",
-  }),
-  placeholder: (base: any) => ({
-    ...base,
-    color: "#9ca3af",
-  }),
-};
