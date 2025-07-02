@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import GigFilterModal from "./filterModel";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
-import GigListingSkeleton from "@/components/skeleton/gigListingSkeleton";
+import { SkeletonCard } from "@/components/skeleton/gigListingSkeleton";
 import { gigBidFields } from "@/config/gigbid.config";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -29,39 +29,53 @@ import { API_ROUTES } from "@/utils/constant";
 import { formatTimeDifference, Gigs } from "./helper";
 import { IPagination } from "@/utils/interface";
 import { getAvtarName } from "@/utils/helper";
-import dayjs from "dayjs";
 import moment from "moment";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const GigListing = () => {
   const [gigs, setGigs] = useState<Gigs[]>([]);
   const [meta, setMeta] = useState<IPagination>({
     page: 1,
-    pageSize: 10,
+    pageSize: 9,
     totalPages: 0,
     total: 1,
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const fetchGigs = async (page = 1) => {
+    try {
+      setLoading(true);
+
+      const resp = await apiCall({
+        endPoint: `${API_ROUTES.GIGS}?page=${page}&pageSize=9`,
+        method: "GET",
+      });
+
+      if (resp?.success) {
+        setGigs((prev) => (page === 1 ? resp.data : [...prev, ...resp.data]));
+        setMeta(resp.meta);
+        setCurrentPage(page);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch gigs");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchGigs = async () => {
-      try {
-        const resp = await apiCall({
-          endPoint: API_ROUTES.GIGS,
-          method: "GET",
-        });
-
-        if (resp?.success) {
-          setGigs(resp.data);
-          setMeta(resp.meta);
-        }
-      } catch (error) {
-        toast.error("Failed to fetch gigs");
-      }
-    };
-    fetchGigs();
+    fetchGigs(1);
   }, []);
+
+  const fetchNextPage = () => {
+    if (currentPage < meta.totalPages && !loading) {
+      fetchGigs(currentPage + 1);
+    }
+  };
 
   const handleApplyFilters = (filters: any) => {
     console.log("Applied filters:", filters);
@@ -70,10 +84,6 @@ const GigListing = () => {
   const handleSubmitBid = (data: any) => {
     console.log(data);
   };
-
-  if (!gigs.length) {
-    return <GigListingSkeleton />;
-  }
 
   const projectCardUI = (gig: Gigs) => {
     return (
@@ -204,54 +214,69 @@ const GigListing = () => {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {gigs.map((gig) => (
-            <Link key={gig.id} href={`/gigs/${gig.id}`} className="group">
-              <Card className="gap-0 py-0 relative overflow-hidden bg-white border-0 shadow-lg h-full flex flex-col hover:shadow-purple-500/10">
-                <div className="relative overflow-hidden">
-                  <div className="slider">
-                    <Slider
-                      slidesToShow={1}
-                      dots={gig.images.length > 1}
-                      infinite={gig.images.length > 1}
-                      customPaging={() => (
-                        <div className="w-[7px] h-[7px] bg-gray-400 rounded-full transition" />
-                      )}
-                    >
-                      {gig.images.map((image: string, i: number) => (
-                        <img
-                          key={`${i + 1}`}
-                          src={image}
-                          alt={gig.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ))}
-                    </Slider>
+
+        <InfiniteScroll
+          dataLength={gigs.length}
+          next={fetchNextPage}
+          hasMore={currentPage < meta.totalPages}
+          loader={
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          }
+          scrollThreshold={0.9}
+          scrollableTarget="scrollableDiv"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {gigs.map((gig) => (
+              <Link key={gig.id} href={`/gigs/${gig.id}`} className="group">
+                <Card className="gap-0 py-0 relative overflow-hidden bg-white border-0 shadow-lg h-full flex flex-col hover:shadow-purple-500/10">
+                  <div className="relative overflow-hidden">
+                    <div className="slider">
+                      <Slider
+                        slidesToShow={1}
+                        dots={gig.images.length > 1}
+                        infinite={gig.images.length > 1}
+                        customPaging={() => (
+                          <div className="w-[7px] h-[7px] bg-gray-400 rounded-full transition" />
+                        )}
+                      >
+                        {gig.images.map((image: string, i: number) => (
+                          <img
+                            key={`${i + 1}`}
+                            src={image}
+                            alt={gig.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ))}
+                      </Slider>
+                    </div>
+                    <CardContent className="content"></CardContent>
+                    <div className="w-fit absolute bottom-4 left-4 right-4">
+                      <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 shadow-lg font-medium">
+                        {gig.gig_category.name}
+                      </Badge>
+                    </div>
                   </div>
-                  <CardContent className="content"></CardContent>
-                  <div className="w-fit absolute bottom-4 left-4 right-4">
-                    <Badge
-                      className={`bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 shadow-lg font-medium`}
-                    >
-                      {gig.gig_category.name}
-                    </Badge>
-                  </div>
-                </div>
-                <CardContent className="p-6 flex-1 flex flex-col">
-                  <div className="mb-4">
-                    <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-[var(--base)] transition-colors line-clamp-2 leading-tight">
-                      {gig.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
-                      {gig.description}
-                    </p>
-                  </div>
-                  {projectCardUI(gig)}
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+                  <CardContent className="p-6 flex-1 flex flex-col">
+                    <div className="mb-4">
+                      <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-[var(--base)] transition-colors line-clamp-2 leading-tight">
+                        {gig.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
+                        {gig.description}
+                      </p>
+                    </div>
+                    {projectCardUI(gig)}
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </InfiniteScroll>
+
         <GigFilterModal
           isOpen={isFilterOpen}
           onClose={() => setIsFilterOpen(false)}
