@@ -367,6 +367,10 @@ button{
   100% { left: 125%; opacity: 0; }
 }
 
+.border-destructive {
+  border-color: red !important;
+}
+
 .slider .slick-dots {
   bottom: 20px;
   display: flex !important;

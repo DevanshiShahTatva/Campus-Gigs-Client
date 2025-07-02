@@ -6,7 +6,7 @@ import Link from "next/link";
 const sidebarItems = [
   { id: 1, title: "Dashboard", icon: <FaHome />, route: "#" },
   { id: 2, title: "Chat", icon: <FaComments />, route: "#" },
-  { id: 3, title: "Gigs", icon: <FaTasks />, route: "#" },
+  { id: 3, title: "Gigs", icon: <FaTasks />, route: "/gigs" },
   { id: 4, title: "Settings", icon: <FaCog />, route: "#" },
 ];
 

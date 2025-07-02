@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Formik, Form, useFormikContext, FormikValues } from "formik";
+import { Formik, Form, FormikValues } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,7 +44,7 @@ export type FormSubFieldConfig = {
     | "datetime";
   placeholder?: string;
   errorMessage?: string;
-  options?: { value: string; label: string }[];
+  options?: { id: string; label: string }[];
   minItems?: number;
   maxItems?: number;
   disabled?: boolean;
@@ -52,6 +52,9 @@ export type FormSubFieldConfig = {
   accept?: string;
   maxSize?: number;
   enableTimeSelect?: boolean;
+  minDate?: Date;
+  maxDate?: Date;
+  isMultiselectDataLoading?: boolean;
 };
 
 export type FormFieldConfig = {
@@ -67,6 +70,14 @@ interface DynamicFormProps {
   onSubmit: (values: any) => void;
   initialValues: FormikValues;
   isViewMode?: boolean;
+  onFieldChange?: (fieldName: string, value: any) => void;
+}
+
+interface InnerFormProps {
+  formik: any;
+  formConfig: FormFieldConfig[];
+  isViewMode?: boolean;
+  onFieldChange?: (fieldName: string, value: any) => void;
 }
 
 const DynamicForm = ({
@@ -74,6 +85,7 @@ const DynamicForm = ({
   onSubmit,
   initialValues,
   isViewMode,
+  onFieldChange,
 }: DynamicFormProps) => {
   const validationSchema = formConfig.reduce((acc: any, field) => {
     field.subfields.forEach((subfield) => {
@@ -83,7 +95,9 @@ const DynamicForm = ({
 
         switch (subfield.type) {
           case "number":
-            validator = Yup.number().typeError(`${label} must be a number`);
+            validator = Yup.number()
+              .typeError(`${label} must be a number`)
+              .min(1);
             break;
           case "checkbox":
             validator = Yup.boolean();
@@ -171,7 +185,23 @@ const DynamicForm = ({
     <Formik
       initialValues={initialValues}
       validationSchema={Yup.object().shape(validationSchema)}
-      onSubmit={onSubmit}
+      onSubmit={async (values, formikHelpers) => {
+        formikHelpers.setSubmitting(true);
+        const errors = await formikHelpers.validateForm();
+        if (Object.keys(errors).length > 0) {
+          formikHelpers.setTouched(
+            Object.keys(errors).reduce(
+              (acc, key) => ({ ...acc, [key]: true }),
+              {}
+            )
+          );
+          formikHelpers.setSubmitting(false);
+          return;
+        }
+
+        await onSubmit(values);
+        formikHelpers.setSubmitting(false);
+      }}
       enableReinitialize
     >
       {(formik) => (
@@ -179,6 +209,7 @@ const DynamicForm = ({
           formik={formik}
           formConfig={formConfig}
           isViewMode={isViewMode}
+          onFieldChange={onFieldChange}
         />
       )}
     </Formik>
@@ -189,13 +220,17 @@ const InnerForm = ({
   formik,
   formConfig,
   isViewMode,
-}: {
-  formik: any;
-  formConfig: FormFieldConfig[];
-  isViewMode?: boolean;
-}) => {
+  onFieldChange,
+}: InnerFormProps) => {
   const [tagInputs, setTagInputs] = useState<Record<string, string>>({});
   const { values, errors, touched, setFieldValue, handleSubmit } = formik;
+
+  const wrappedSetFieldValue = (name: string, value: any) => {
+    formik.setFieldValue(name, value);
+    if (onFieldChange) {
+      onFieldChange(name, value);
+    }
+  };
 
   const handleAddTag = (fieldName: string) => {
     const inputValue = tagInputs[fieldName]?.trim() || "";
@@ -218,7 +253,6 @@ const InnerForm = ({
   const renderField = (field: FormSubFieldConfig) => {
     const isDisabled = field.disabled || isViewMode;
     const value = values[field.name];
-    const error = touched[field.name] && errors[field.name];
 
     switch (field.type) {
       case "text":
@@ -229,6 +263,7 @@ const InnerForm = ({
             key={field.id}
             name={field.name}
             label={field.label || ""}
+            isRequired={field.required}
             type={field.type}
             placeholder={field.placeholder}
             disabled={isDisabled}
@@ -248,22 +283,30 @@ const InnerForm = ({
             )}
             <Select
               value={value}
-              onValueChange={(val) => setFieldValue(field.name, val)}
+              onValueChange={(val) => wrappedSetFieldValue(field.name, val)}
               disabled={isDisabled}
             >
-              <SelectTrigger className={error ? "border-destructive" : ""}>
+              <SelectTrigger
+                className={
+                  formik.submitCount > 0 && errors[field.name]
+                    ? "border-destructive"
+                    : ""
+                }
+              >
                 <SelectValue placeholder={field.placeholder} />
               </SelectTrigger>
               <SelectContent>
                 {field.options?.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem key={option.id} value={option.id}>
                     {option.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {error && (
-              <div className="text-sm text-destructive">{String(error)}</div>
+            {formik.submitCount > 0 && errors[field.name] && (
+              <div className="text-sm text-destructive">
+                {String(errors[field.name])}
+              </div>
             )}
           </div>
         );
@@ -281,17 +324,20 @@ const InnerForm = ({
             )}
             <MultiSelectDropdown
               options={(field.options || []).map((opt) => ({
-                id: opt.value,
+                id: opt.id,
                 label: opt.label,
               }))}
               value={value || []}
-              onValueChange={(val) => setFieldValue(field.name, val)}
+              onValueChange={(val) => wrappedSetFieldValue(field.name, val)}
               placeholder={field.placeholder}
               disabled={isDisabled}
-              error={!!error}
+              loading={field.isMultiselectDataLoading}
+              error={!!(formik.submitCount > 0 && errors[field.name])}
             />
-            {error && (
-              <div className="text-sm text-destructive">{String(error)}</div>
+            {formik.submitCount > 0 && errors[field.name] && (
+              <div className="text-sm text-destructive">
+                {String(errors[field.name])}
+              </div>
             )}
           </div>
         );
@@ -459,8 +505,10 @@ const InnerForm = ({
               disabled={isDisabled}
               placeholder={field.placeholder}
             />
-            {error && (
-              <div className="text-sm text-destructive">{String(error)}</div>
+            {formik.submitCount > 0 && errors[field.name] && (
+              <div className="text-sm text-destructive">
+                {String(errors[field.name])}
+              </div>
             )}
           </div>
         );
@@ -474,6 +522,14 @@ const InnerForm = ({
             disabled={isDisabled}
             placeholder={field.placeholder}
             enableTimeSelect={field.enableTimeSelect}
+            minDate={field.minDate}
+            maxDate={field.maxDate}
+            onChange={(value) => {
+              formik.setFieldValue(field.name, value);
+              if (onFieldChange) {
+                onFieldChange(field.name, value);
+              }
+            }}
           />
         );
 
@@ -488,7 +544,7 @@ const InnerForm = ({
         group.section ? (
           <Card key={`group-${index}`}>
             <CardHeader>
-              <CardTitle>{group.title}</CardTitle>
+              <CardTitle className="text-2xl">{group.title}</CardTitle>
               {group.description && (
                 <CardDescription>{group.description}</CardDescription>
               )}
@@ -525,6 +581,7 @@ const InnerForm = ({
 
       <div className="flex justify-end">
         <Button
+          size={"lg"}
           type="submit"
           disabled={formik.isSubmitting || isViewMode}
           className="mt-4"

@@ -43,6 +43,7 @@ export const ROUTES = {
 export const API_ROUTES = {
   LOGIN: "/api/login",
   CONTACT_US: "/contact-us",
+  GIGS: "/gigs",
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
     AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",
@@ -57,10 +58,21 @@ export const API_ROUTES = {
     GIG_CATEGORY: "/gig-category",
   },
 };
+
 export enum ROLE {
   Admin = "admin",
   User = "user",
   Organizer = "provider",
+}
+
+export enum PROFILE_TYPE {
+  USER = "user",
+  PROVIDER = "provider",
+}
+
+export enum PAYMENT_TYPE {
+  HOURLY = "hourly",
+  FIXED = "fixed",
 }
 
 export const USER_SIDEBAR_ITEMS = [
