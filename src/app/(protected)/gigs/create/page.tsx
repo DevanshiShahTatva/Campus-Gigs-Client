@@ -72,7 +72,7 @@ const CreateGig = () => {
       });
     }
 
-    values.image && formData.append("file", values.image);
+    values.image && formData.append("file", values.image[0]);
 
     try {
       const response = await apiCall({
@@ -113,7 +113,7 @@ const CreateGig = () => {
 
   return (
     <div className="w-full">
-      <div className="max-w-[980px] mx-auto pt-24 pb-15">
+      <div className="max-w-[980px] mx-auto pt-8 pb-4">
         {isFormSubmitted ? (
           <SuccessCard
             successTitle="Gig created successfully"
