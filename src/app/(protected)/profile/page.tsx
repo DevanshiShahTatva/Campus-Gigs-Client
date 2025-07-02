@@ -1,36 +1,12 @@
 "use client";
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef, useContext, useMemo } from "react";
 import { FiUpload, FiCamera, FiTrash2 } from "react-icons/fi";
 import DynamicForm from "@/components/common/form/DynamicForm";
 import { apiCall } from "@/utils/apiCall";
 import { RoleContext } from '@/context/role-context';
 import { getInitials, profileFormConfig } from "./helper";
 import { USER_PROFILE } from "@/utils/constant";
-
-
-
-const user = {
-  email: "student@umich.edu",
-  name: "Student Name",
-  profilePicture: null as File | null,
-  phone: "",
-  address: "",
-};
-
-const initialValues = {
-  profilePicture: null as File | null,
-  name: user.name,
-  phone: user.phone,
-  address: user.address,
-  skills: [] as string[],
-  certifications: "",
-  professionalInterests: "",
-  extracurriculars: "",
-  bio: "",
-  educationLevel: "",
-  customEducation: "",
-};
-
+import ProfileSkeleton from "@/components/skeleton/ProfileSkeleton";
 
 // Custom Profile Photo Component
 const ProfilePhotoUpload = ({
@@ -180,6 +156,25 @@ const Profile = () => {
   const { role: profileMode } = useContext(RoleContext);
   const [userProfile, setUserProfile] = useState<any>(null);
 
+  // Merge userProfile into initialValues for the form
+  const formInitialValues = useMemo(() => {
+    if (!userProfile) return undefined;
+    return {
+      name: userProfile.name || "",
+      email: userProfile.email || "",
+      phone: userProfile.phone || "",
+      address: userProfile.location || "",
+      educationLevel: userProfile.education || "",
+      customEducation: userProfile.customEducation || "",
+      professionalInterests: userProfile.professional_interests || "",
+      extracurriculars: userProfile.extracurriculars || "",
+      certifications: userProfile.certifications || "",
+      skills: Array.isArray(userProfile.skills) ? userProfile.skills : [],
+      headline: userProfile.headline || "",
+      bio: userProfile.bio || "",
+    };
+  }, [userProfile]);
+
   React.useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -189,7 +184,6 @@ const Profile = () => {
           withToken: true,
         });
         console.log(data, "DATA");
-        
         setUserProfile(data?.data);
       } catch (error) {
         console.error('Failed to fetch profile:', error);
@@ -198,6 +192,9 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
+  if (!userProfile) {
+    return <ProfileSkeleton />;
+  }
   return (
     <div>
       {/* Main LinkedIn-style Card */}
@@ -273,7 +270,7 @@ const Profile = () => {
             >
               {!profileImage ? (
                 <div className="w-full h-full flex items-center justify-center rounded-full" style={{ background: 'var(--base)' }}>
-                  <span className="text-white text-3xl font-bold">{getInitials(user.name)}</span>
+                  <span className="text-white text-3xl font-bold">{getInitials(userProfile?.name)}</span>
                 </div>
               ) : (
                 <img
@@ -351,14 +348,13 @@ const Profile = () => {
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-gray-900">{userProfile?.name}</h2>
               <div className="text-gray-600 mt-1">
-                Campus Ambassador | Content Writer | Event Volunteer
+                {userProfile?.headline}
               </div>
               <div className="text-sm text-gray-400 mt-1">
-                student@umich.edu
+                {userProfile?.email}
               </div>
               <div className="text-base text-gray-700 mt-2 max-w-2xl">
-                This is a short bio about the user. It can be up to 300
-                characters and will be displayed here just like LinkedIn.
+                {userProfile?.bio}
               </div>
             </div>
           </div>
@@ -412,10 +408,10 @@ const Profile = () => {
           {/* Tab Content */}
           <div className="px-6">
             <div className="min-w-[340px] min-h-[420px] transition-all duration-300">
-              {activeTab === "profile" && (
+              {activeTab === "profile" && formInitialValues && (
                 <DynamicForm
                   formConfig={profileFormConfig}
-                  initialValues={initialValues}
+                  initialValues={formInitialValues}
                   onSubmit={(values) => {
                     setSuccess(true);
                     setTimeout(() => setSuccess(false), 2000);
