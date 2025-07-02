@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import GigFilterModal from "./filterModel";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
-import { SkeletonCard } from "@/components/skeleton/gigListingSkeleton";
+import GigListingSkeleton, { SkeletonCard } from "@/components/skeleton/gigListingSkeleton";
 import { gigBidFields } from "@/config/gigbid.config";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -84,6 +84,10 @@ const GigListing = () => {
   const handleSubmitBid = (data: any) => {
     console.log(data);
   };
+
+   if (!gigs.length) {
+    return <GigListingSkeleton />;
+  }
 
   const projectCardUI = (gig: Gigs) => {
     return (
