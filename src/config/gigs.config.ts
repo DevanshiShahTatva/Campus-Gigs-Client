@@ -1,10 +1,12 @@
 import { FormFieldConfig } from "@/components/common/form/DynamicForm";
+import { PAYMENT_TYPE, PROFILE_TYPE } from "@/utils/constant";
 import { IDropdownOption } from "@/utils/interface";
 
 export const gigsFields = (
-  initialValues: any,
+  formValues: GigsFormVal,
   gigCategories: IDropdownOption[],
-  skillsDropdown: IDropdownOption[]
+  skillsDropdown: IDropdownOption[],
+  isMultiselectDataLoading: boolean
 ) => {
   return [
     {
@@ -75,8 +77,8 @@ export const gigsFields = (
           required: true,
           enableTimeSelect: true,
           placeholder: "Choose date and time",
-          minDate: initialValues.start_date_time
-            ? new Date(initialValues.start_date_time)
+          minDate: formValues.start_date_time
+            ? new Date(formValues.start_date_time)
             : new Date(),
         },
       ],
@@ -102,6 +104,7 @@ export const gigsFields = (
           label: "Skills",
           type: "multiselect",
           required: true,
+          isMultiselectDataLoading: isMultiselectDataLoading,
           placeholder: "Please select skills",
           options: skillsDropdown ? skillsDropdown : [],
         },
@@ -133,12 +136,12 @@ export interface GigsFormVal {
   title: string;
   description: string;
   price: number;
-  payment_type: "hourly" | "fixed";
+  payment_type: PAYMENT_TYPE;
   start_date_time: null | Date;
   end_date_time: null | Date;
   gig_category_id: string;
   skills: Array<string>;
   image: File | null;
-  profile_type: "user" | "provider";
+  profile_type: PROFILE_TYPE;
   certifications: Array<string>
 }

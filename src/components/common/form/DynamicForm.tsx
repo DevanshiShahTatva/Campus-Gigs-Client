@@ -54,6 +54,7 @@ export type FormSubFieldConfig = {
   enableTimeSelect?: boolean;
   minDate?: Date;
   maxDate?: Date;
+  isMultiselectDataLoading?: boolean;
 };
 
 export type FormFieldConfig = {
@@ -329,6 +330,7 @@ const InnerForm = ({
               onValueChange={(val) => wrappedSetFieldValue(field.name, val)}
               placeholder={field.placeholder}
               disabled={isDisabled}
+              loading={field.isMultiselectDataLoading}
               error={!!(formik.submitCount > 0 && errors[field.name])}
             />
             {formik.submitCount > 0 && errors[field.name] && (

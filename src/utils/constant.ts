@@ -58,10 +58,21 @@ export const API_ROUTES = {
     GIG_CATEGORY: "/gig-category",
   },
 };
+
 export enum ROLE {
   Admin = "admin",
   User = "user",
   Organizer = "provider",
+}
+
+export enum PROFILE_TYPE {
+  USER = "user",
+  PROVIDER = "provider",
+}
+
+export enum PAYMENT_TYPE {
+  HOURLY = "hourly",
+  FIXED = "fixed",
 }
 
 export const USER_SIDEBAR_ITEMS = [

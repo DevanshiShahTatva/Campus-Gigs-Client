@@ -1,29 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import DynamicForm from "@/components/common/form/DynamicForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "react-toastify";
 import { apiCall } from "@/utils/apiCall";
-import { API_ROUTES } from "@/utils/constant";
+import { API_ROUTES, PAYMENT_TYPE, PROFILE_TYPE } from "@/utils/constant";
 import SuccessCard from "@/components/common/SuccessCard";
 import { gigsFields, GigsFormVal } from "@/config/gigs.config";
 import { FormikValues } from "formik";
 
+const initialFormState = {
+  title: "",
+  description: "",
+  price: 0,
+  payment_type: PAYMENT_TYPE.HOURLY,
+  start_date_time: null,
+  end_date_time: null,
+  gig_category_id: "",
+  certifications: [],
+  skills: [],
+  image: null,
+  profile_type: PROFILE_TYPE.USER,
+};
+
 const CreateGig = () => {
-  const [initialValues, setIntialValues] = useState<GigsFormVal>({
-    title: "",
-    description: "",
-    price: 0,
-    payment_type: "hourly",
-    start_date_time: null,
-    end_date_time: null,
-    gig_category_id: "",
-    certifications: [],
-    skills: [],
-    image: null,
-    profile_type: "user",
-  });
+  const [formValues, setFormValues] = useState<GigsFormVal>(initialFormState);
   const [gigCategoryDropdown, setGigCategoryDropdown] = useState([
     { id: "2", label: "Laundry" },
     { id: "7", label: "Delivery" },
@@ -32,23 +34,60 @@ const CreateGig = () => {
     { id: "1", label: "NextJs" },
     { id: "2", label: "ReactJs" },
   ]);
-  const [isFormSubmitted, setFormSubmitted] = useState<Boolean>(false);
-  
+  const [isFormSubmitted, setFormSubmitted] = useState<boolean>(false);
+  const [isSkillsLoading, setIsSkillsLoading] = useState<boolean>(false);
 
-  const handleFieldChange = (fieldName: string, value: any) => {
+  useEffect(() => {
+    // fetchGigCategories();
+  }, []);
+
+  const fetchGigCategories = async () => {
+  try {
+    const resp = await apiCall({
+      endPoint: `${API_ROUTES.ADMIN.GIG_CATEGORY}/dropdown`,
+      method: "GET",
+    });
+
+    if (resp?.success) {
+      setGigCategoryDropdown(resp.data);
+    }
+  } catch (error) {
+    toast.error("Failed to fetch categories");
+  }
+};
+
+const fetchSkillsBaseOnCategory = async (id: string) => {
+  try {
+    setIsSkillsLoading(true);
+    const resp = await apiCall({
+      endPoint: `${API_ROUTES}/category/${id}`,
+      method: "GET",
+    });
+
+    if (resp?.success) {
+      setSkillsDropdown(resp.data);
+    }
+  } catch (error) {
+    toast.error("Failed to fetch skills");
+  } finally {
+    setIsSkillsLoading(false);
+  }
+};
+
+  const handleFieldChange = useCallback((fieldName: string, value: any) => {
     if (fieldName === "gig_category_id" && value) {
-      console.log("DATA::", value);
+      // fetchSkillsBaseOnCategory(value);
     }
 
     if (fieldName === "start_date_time") {
-      setIntialValues({
-        ...initialValues,
+      setFormValues((prev) => ({
+        ...prev,
         [fieldName]: value,
-      });
+      }));
     }
-  };
+  }, []);
 
-  const handleSubmit = async (values: FormikValues) => {
+  const handleSubmit = useCallback(async (values: FormikValues) => {
     const formData = new FormData();
 
     formData.append("title", values.title);
@@ -87,19 +126,7 @@ const CreateGig = () => {
       if (response.success) {
         toast.success(response.message ?? "Gig created successfully!");
         setFormSubmitted(true);
-        setIntialValues({
-          title: "",
-          description: "",
-          price: 0,
-          payment_type: "hourly",
-          start_date_time: null,
-          end_date_time: null,
-          gig_category_id: "",
-          certifications: [],
-          skills: [],
-          image: null,
-          profile_type: "user",
-        });
+        setFormValues(initialFormState);
       } else {
         toast.error(
           response.message ?? "Gig creation failed. Please try again."
@@ -109,7 +136,10 @@ const CreateGig = () => {
       toast.error("An error occurred. Please try again.");
       console.error("Submission error:", error);
     }
-  };
+  }, []);
+
+  const memoizedGigCategoryDropdown = useMemo(() => gigCategoryDropdown, [gigCategoryDropdown]);
+  const memoizedSkillsDropdown = useMemo(() => skillsDropdown, [skillsDropdown]);
 
   return (
     <div className="w-full">
@@ -135,12 +165,13 @@ const CreateGig = () => {
               <CardContent>
                 <DynamicForm
                   formConfig={gigsFields(
-                    initialValues,
-                    gigCategoryDropdown,
-                    skillsDropdown
+                    formValues,
+                    memoizedGigCategoryDropdown,
+                    memoizedSkillsDropdown,
+                    isSkillsLoading
                   )}
                   onSubmit={handleSubmit}
-                  initialValues={initialValues}
+                  initialValues={formValues}
                   onFieldChange={handleFieldChange}
                 />
               </CardContent>
