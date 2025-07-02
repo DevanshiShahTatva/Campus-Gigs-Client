@@ -1,0 +1,147 @@
+// Profile page helpers and config
+import { educationOptions } from "@/app/(auth)/sign-up/helper";
+import { FiUpload, FiCamera, FiTrash2 } from "react-icons/fi";
+import React, { useState, useRef } from "react";
+
+export const CERTIFICATIONS = [
+  { label: "Google Analytics", id: "google-analytics" },
+  { label: "AWS Certified", id: "aws" },
+  { label: "Microsoft Office", id: "ms-office" },
+  { label: "Other", id: "other" },
+];
+
+export const selectStyles = {
+  control: (base: any, state: any) => ({
+    ...base,
+    minHeight: "43px",
+    border: state.isFocused ? "1px solid var(--base)" : "1px solid #d1d5db",
+    borderRadius: "8px",
+    fontSize: "14px",
+    boxShadow: state.isFocused ? "0 0 0 1px var(--base)" : "none",
+    "&:hover": {
+      borderColor: "var(--base)",
+    },
+  }),
+  menuList: (base: any) => ({
+    ...base,
+    maxHeight: "156px",
+    overflowY: "auto",
+    borderRadius: "8px",
+  }),
+  option: (base: any, state: any) => ({
+    ...base,
+    padding: "5px 8px",
+    color: "#111827",
+    cursor: "pointer",
+    backgroundColor: state.isFocused ? "#f3f4f6" : "white",
+  }),
+  placeholder: (base: any) => ({
+    ...base,
+    color: "#9ca3af",
+  }),
+};
+
+export const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((word) => word.charAt(0))
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+export const profileFormConfig = [
+  {
+    title: "Personal Information",
+    groupSize: 2 as 2,
+    section: true,
+    subfields: [
+      { id: "name", name: "name", label: "Full Name", type: "text" as const, required: true, errorMessage: "Name is required", placeholder: "Enter your full name" },
+      { id: "phone", name: "phone", label: "Phone", type: "text" as const, required: true, errorMessage: "Phone number is required", placeholder: "Enter phone number" },
+      { id: "address", name: "address", label: "Address", type: "text" as const, required: true, errorMessage: "Address is required", placeholder: "Enter address" },
+    ],
+  },
+  {
+    title: "Education",
+    description: "Your education background.",
+    groupSize: 1 as 1,
+    section: true,
+    subfields: [
+      { id: "educationLevel", name: "educationLevel", label: "Education Level", type: "select" as const, required: true, errorMessage: "Education level is required", options: educationOptions, placeholder: "Search or select your education level" },
+      { id: "customEducation", name: "customEducation", label: "Custom Education (if Other)", type: "text" as const, required: false, placeholder: "e.g., Trade School, Bootcamp, Self-taught, Online Courses..." },
+    ],
+  },
+  {
+    title: "Professional Background",
+    description: "Tell us about your professional interests and activities.",
+    groupSize: 1 as 1,
+    section: true,
+    subfields: [
+      { id: "professionalInterests", name: "professionalInterests", label: "Professional Interests", type: "textarea" as const, required: true, errorMessage: "Professional interests are required", placeholder: "What are your professional interests and career goals? (Optional)" },
+      { id: "extracurriculars", name: "extracurriculars", label: "Extracurricular Activities", type: "textarea" as const, required: true, errorMessage: "Extracurricular activities are required", placeholder: "Sports, clubs, volunteer work, hobbies, community involvement... (Optional)" },
+      { id: "certifications", name: "certifications", label: "Certifications", type: "text" as const, required: true, errorMessage: "Certifications are required", placeholder: "List your certifications (e.g., PMP, AWS, Google Analytics...) (Optional)" },
+    ],
+  },
+  {
+    title: "Skills",
+    description: "Add up to 10 skills to showcase your expertise.",
+    groupSize: 1 as 1,
+    section: true,
+    subfields: [
+      { id: "skills", name: "skills", label: "Skills", type: "tags" as const, required: true, errorMessage: "At least one skill is required", placeholder: "e.g., React, JavaScript", minItems: 1, maxItems: 10 },
+    ],
+  },
+  {
+    title: "About",
+    description: "Write a short bio about yourself (max 300 chars).",
+    groupSize: 1 as 1,
+    section: true,
+    subfields: [
+      { id: "bio", name: "bio", label: "Short Bio", type: "textarea" as const, required: true, errorMessage: "Short bio is required", placeholder: "Write a short bio (max 300 chars)" },
+    ],
+  },
+];
+
+export const handleSkillsChange = (
+  tags: string[],
+  setFieldValue: (field: string, value: any) => void
+) => {
+  if (tags.length <= 10) {
+    setFieldValue("skills", tags);
+  } else {
+    // You can add toast notification here if needed
+    console.warn("Maximum 10 skills allowed!");
+  }
+};
+
+export const handleEducationChange = (
+  selectedOption: any,
+  setFieldValue: (field: string, value: any) => void
+) => {
+  setFieldValue("educationLevel", selectedOption?.value || "");
+  if (selectedOption?.value !== "Other") {
+    setFieldValue("customEducation", "");
+  }
+};
+
+export const handleCoverChange = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  setCoverImage: (url: string | null) => void
+) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    const url = URL.createObjectURL(file);
+    setCoverImage(url);
+  }
+};
+
+export const handleProfileChange = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  setProfileImage: (url: string | null) => void
+) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    const url = URL.createObjectURL(file);
+    setProfileImage(url);
+  }
+}; 

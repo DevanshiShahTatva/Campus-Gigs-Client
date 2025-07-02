@@ -6,19 +6,13 @@ import Footer from "../landing-page-components/Footer";
 export function ClientLayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  const hideHeaderFooter =
-    pathname.startsWith("/admin") ||
-    pathname === "/login" ||
-    pathname === "/forgot-password" ||
-    pathname === "/reset-password" ||
-    pathname === "/sign-up" ||
-    pathname === "/user/buy-subscription";
+  const showHeaderFooter = ["/", "/ContactUs", "/FAQs", "/TermsConditions", "/PrivacyPolicy"].includes(pathname);
 
   return (
     <>
-      {!hideHeaderFooter && <Header />}
+      {showHeaderFooter && <Header />}
       {children}
-      {!hideHeaderFooter && <Footer />}
+      {showHeaderFooter && <Footer />}
     </>
   );
 }

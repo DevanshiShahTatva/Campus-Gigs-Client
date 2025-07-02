@@ -426,3 +426,54 @@ export const CONTACT_US_TEXT = {
   EMAIL: " support@campusgig.com",
   NOTE: 'For urgent issues, please mention "URGENT" in your subject line.',
 };
+
+export const USER_PROFILE = {
+  GIGS: [
+    {
+      id: 1,
+      title: "Campus Ambassador",
+      status: "Active",
+      date: "2024-05-01",
+    },
+    {
+      id: 2,
+      title: "Event Volunteer",
+      status: "Completed",
+      date: "2024-04-15",
+    },
+    {
+      id: 3,
+      title: "Content Writer",
+      status: "Active",
+      date: "2024-03-20",
+    },
+  ],
+  HISTORY: [
+    {
+      id: 1,
+      title: "Campus Ambassador",
+      status: "Completed",
+      date: "2024-04-10",
+    },
+    {
+      id: 2,
+      title: "Event Volunteer",
+      status: "Cancelled",
+      date: "2024-03-15",
+    },
+  ],
+  SUPPORT: [
+    {
+      id: 1,
+      subject: "Payment Issue",
+      status: "Resolved",
+      date: "2024-04-01",
+    },
+    {
+      id: 2,
+      subject: "Gig Approval",
+      status: "Pending",
+      date: "2024-04-20",
+    },
+  ],
+};

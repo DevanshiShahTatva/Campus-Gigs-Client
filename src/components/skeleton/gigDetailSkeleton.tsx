@@ -2,14 +2,14 @@ import React from 'react';
 
 const GigDetailSkeleton = () => {
   return (
-    <div className="mt-[64px] min-h-screen bg-gray-50 animate-pulse">
+    <div className=" min-h-screen bg-gray-50 animate-pulse">
       <div className="bg-white shadow">
         <div className="mx-auto py-6 px-4 sm:px-6 lg:px-8 flex items-center">
           <div className="mr-4 w-5 h-5 bg-gray-300 rounded-full" />
           <div className="h-6 bg-gray-300 rounded w-80 max-w-full" />
         </div>
       </div>
-      <main className="mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <main className="mx-auto py-6 ">
         <div className="lg:grid lg:grid-cols-3 lg:gap-8">
           <div className="lg:col-span-2">
             <div className="h-full bg-white shadow rounded-lg overflow-hidden">
