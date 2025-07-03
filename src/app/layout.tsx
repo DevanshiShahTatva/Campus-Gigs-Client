@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ToastContainer } from "react-toastify";
 import { ClientLayoutWrapper } from "@/components/Wrapper/ClientLayoutWrapper";
-import ReduxProvider from '@/components/Wrapper/ReduxProvider';
+import ReduxProvider from '@/provider/ReduxProvider';
 
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";

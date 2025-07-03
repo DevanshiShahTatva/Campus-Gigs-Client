@@ -40,7 +40,7 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-[var(--bg-dark)]/95 backdrop-blur-sm shadow-sm sticky w-full top-0 z-500">
+    <header className="bg-[var(--bg-dark)]/95 backdrop-blur-sm shadow-sm sticky w-full top-0 z-[1000]">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center">
           <span
