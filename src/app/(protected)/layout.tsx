@@ -8,11 +8,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <RoleProvider>
-      <div className="h-screen min-h-screen flex flex-col">
+      <div className="flex flex-col">
         <UserProviderHeader sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <div className="flex flex-1 min-h-0">
+        <div className="flex flex-1 flex-col overflow-auto">
           <UserProviderSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
-          <main id="scrollableDiv" className="w-full h-full overflow-auto py-6 bg-gray-50">
+          <main id="scrollableDiv" className="w-full h-full py-6 bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {children}
             </div>

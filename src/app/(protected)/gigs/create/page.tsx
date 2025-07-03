@@ -9,6 +9,7 @@ import { API_ROUTES, PAYMENT_TYPE, PROFILE_TYPE } from "@/utils/constant";
 import SuccessCard from "@/components/common/SuccessCard";
 import { gigsFields, GigsFormVal } from "@/config/gigs.config";
 import { FormikValues } from "formik";
+import { IDropdownOption } from "@/utils/interface";
 
 const initialFormState = {
   title: "",
@@ -26,30 +27,34 @@ const initialFormState = {
 
 const CreateGig = () => {
   const [formValues, setFormValues] = useState<GigsFormVal>(initialFormState);
-  const [gigCategoryDropdown, setGigCategoryDropdown] = useState([
-    { id: "2", label: "Laundry" },
-    { id: "7", label: "Delivery" },
-  ]);
-  const [skillsDropdown, setSkillsDropdown] = useState([
-    { id: "1", label: "NextJs" },
-    { id: "2", label: "ReactJs" },
-  ]);
+  const [gigCategoryDropdown, setGigCategoryDropdown] = useState<
+    IDropdownOption[]
+  >([]);
+  const [skillsDropdown, setSkillsDropdown] = useState<IDropdownOption[]>([]);
   const [isFormSubmitted, setFormSubmitted] = useState<boolean>(false);
   const [isSkillsLoading, setIsSkillsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    // fetchGigCategories();
+    fetchGigCategories();
   }, []);
 
   const fetchGigCategories = async () => {
     try {
       const resp = await apiCall({
-        endPoint: `${API_ROUTES.ADMIN.GIG_CATEGORY}/dropdown`,
+        endPoint: API_ROUTES.GIG_CATEGORY,
         method: "GET",
       });
 
       if (resp?.success) {
-        setGigCategoryDropdown(resp.data);
+        const options = resp.data.map(
+          (opt: { id: number; name: string }) => {
+            return {
+              id: String(opt.id),
+              label: opt.name,
+            };
+          }
+        );
+        setGigCategoryDropdown(options);
       }
     } catch (error) {
       toast.error("Failed to fetch categories");
@@ -60,12 +65,20 @@ const CreateGig = () => {
     try {
       setIsSkillsLoading(true);
       const resp = await apiCall({
-        endPoint: `${API_ROUTES}/category/${id}`,
+        endPoint: `${API_ROUTES.GIG_CATEGORY}/${id}`,
         method: "GET",
       });
 
       if (resp?.success) {
-        setSkillsDropdown(resp.data);
+        const options: IDropdownOption[] = resp.data.skills.map(
+          (opt: { id: number; name: string }) => {
+            return {
+              id: String(opt.id),
+              label: opt.name,
+            };
+          }
+        );
+        setSkillsDropdown(options);
       }
     } catch (error) {
       toast.error("Failed to fetch skills");
@@ -76,7 +89,7 @@ const CreateGig = () => {
 
   const handleFieldChange = useCallback((fieldName: string, value: any) => {
     if (fieldName === "gig_category_id" && value) {
-      // fetchSkillsBaseOnCategory(value);
+      fetchSkillsBaseOnCategory(value);
     }
 
     if (fieldName === "start_date_time" && value) {
