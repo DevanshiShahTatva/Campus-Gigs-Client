@@ -38,3 +38,87 @@ export const categories = [
   'Technology', 'Design', 'Marketing', 'Writing', 'Business',
   'Photography', 'Video', 'Music', 'Programming', 'Consulting'
 ];
+
+export function formatTimeDifference(start: Date, end: Date): string {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const diffMs = Math.abs(endDate.getTime() - startDate.getTime());
+  
+  let diffSeconds = Math.floor(diffMs / 1000);
+  
+  const MINUTE = 60;
+  const HOUR = MINUTE * 60;
+  const DAY = HOUR * 24;
+  const WEEK = DAY * 7;
+
+  const weeks = Math.floor(diffSeconds / WEEK);
+  if (weeks > 0) return `${weeks} Week${weeks !== 1 ? 's' : ''}`;
+  
+  diffSeconds %= WEEK;
+  const days = Math.floor(diffSeconds / DAY);
+  if (days > 0) return `${days} Day${days !== 1 ? 's' : ''}`;
+  
+  diffSeconds %= DAY;
+  const hours = Math.floor(diffSeconds / HOUR);
+  if (hours > 0) return `${hours} Hour${hours !== 1 ? 's' : ''}`;
+  
+  diffSeconds %= HOUR;
+  const minutes = Math.floor(diffSeconds / MINUTE);
+  if (minutes > 0) return `${minutes} Minute${minutes !== 1 ? 's' : ''}`;
+  
+  diffSeconds %= MINUTE;
+  return `${diffSeconds} Second${diffSeconds !== 1 ? 's' : ''}`;
+}
+
+export interface Tire {
+  id: number;
+  name: string;
+}
+
+export interface GigCategory {
+  id: number;
+  name: string;
+  description: string | null;
+  tire: Tire;
+}
+
+export interface Skill {
+  id: number;
+  name: string;
+}
+
+export interface User {
+  id: number;
+  email: string;
+  name: string;
+  role: string;
+  profile: string;
+  professional_interests: string | null;
+  extracurriculars: string | null;
+  certifications: string | null;
+  education: string;
+  skills: Skill[];
+}
+
+export interface Gigs {
+  id: number;
+  user_id: number;
+  provider_id: number | null;
+  title: string;
+  images: string[];
+  description: string;
+  gig_category_id: number;
+  payment_type: "hourly" | "fixed";
+  price: string;
+  certifications: string[];
+  profile_type: string;
+  status: string;
+  start_date_time: Date;
+  end_date_time: Date;
+  created_at: Date;
+  updated_at: Date;
+  is_deleted: boolean;
+  user: User;
+  skills: Skill[];
+  gig_category: GigCategory;
+}

@@ -75,6 +75,13 @@ export interface IDropdownOption {
   id: string;
 }
 
+export interface IPagination {
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  total: number;
+}
+
 export interface Tire {
   id: number;
   name: string;
