@@ -11,9 +11,6 @@ const Header = () => {
   const [isToken, setIsToken] = useState("");
 
   const onLogout = () => {
-    if (typeof window !== "undefined") {
-      localStorage?.clear();
-    }
     Cookie.remove("token");
     router.push("/login");
   };
@@ -43,8 +40,8 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-[var(--bg-dark)]/95 backdrop-blur-sm shadow-sm sticky w-full top-0 z-500">
-      <nav className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <header className="bg-[var(--bg-dark)]/95 backdrop-blur-sm shadow-sm sticky w-full top-0 z-[1000]">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center">
           <span
             className="text-xl sm:text-2xl font-bold text-[color:var(--base)] hover:text-[color:var(--base-hover)] transition-colors duration-300 cursor-pointer"

@@ -3,11 +3,14 @@ import React, { useState } from "react";
 import UserProviderHeader from "@/components/common/UserProviderHeader";
 import UserProviderSidebar from "@/components/common/UserProviderSidebar";
 import { RoleProvider } from "@/context/role-context";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <RoleProvider>
+      <ToastContainer />
       <div className="flex flex-col h-full">
         <UserProviderHeader sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <div className="flex flex-1 flex-col overflow-auto">

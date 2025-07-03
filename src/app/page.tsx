@@ -127,7 +127,7 @@ export default function Home() {
       {/* Splash Screen */}
       {showSplash && (
         <div
-          className={`fixed inset-0 z-[100] bg-[var(--bg-dark)] flex items-center justify-center transition-opacity duration-500 ${
+          className={`fixed inset-0 z-[99999] bg-[var(--bg-dark)] flex items-center justify-center transition-opacity duration-500 ${
             splashFading ? "opacity-0" : "opacity-100"
           }`}
         >

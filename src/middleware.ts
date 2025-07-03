@@ -19,7 +19,15 @@ const adminRoutes = [
   ROUTES.ADMIN.GIGCATEGORY,
 ];
 
-const userRoutes = [ROUTES.USER.DASHBOARD, ROUTES.USER.BUY_SUBSCRIPTION, ROUTES.USER.BUY_SUBSCRIPTION_CHECKOUT];
+const userRoutes = [
+  ROUTES.USER.DASHBOARD,
+  ROUTES.USER.BUY_SUBSCRIPTION,
+  ROUTES.USER.BUY_SUBSCRIPTION_CHECKOUT,
+  "/profile",
+  "/gigs",
+  "/gigs/create",
+  "/provider",
+];
 
 export async function middleware(request: NextRequest) {
   const currentPath = request.nextUrl.pathname;
@@ -63,6 +71,18 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(defaultRedirect, request.url));
     }
 
+    // Protect /profile, /gigs, and /provider routes
+    const isProtected =
+      currentPath.startsWith("/profile") ||
+      currentPath.startsWith("/gigs") ||
+      currentPath.startsWith("/gigs/create") ||
+      currentPath.startsWith("/provider");
+
+    if (isProtected && !token) {
+      const loginUrl = new URL("/login", request.url);
+      return NextResponse.redirect(loginUrl);
+    }
+
     return NextResponse.next();
   } catch (error) {
     console.error("Err:", error);
@@ -71,5 +91,16 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/login", "/sign-up", "/forgot-password", "/reset-password", "/admin/:path*", "/user/:path*"],
+  matcher: [
+    "/",
+    "/login",
+    "/sign-up",
+    "/forgot-password",
+    "/reset-password",
+    "/admin/:path*",
+    "/user/:path*",
+    "/profile/:path*",
+    "/gigs/:path*",
+    "/provider/:path*",
+  ],
 };
