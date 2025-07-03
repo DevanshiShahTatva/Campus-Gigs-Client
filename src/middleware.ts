@@ -19,7 +19,7 @@ const adminRoutes = [
   ROUTES.ADMIN.GIGCATEGORY,
 ];
 
-const userRoutes = [ROUTES.USER.DASHBOARD, ROUTES.USER.BUY_SUBSCRIPTION];
+const userRoutes = [ROUTES.USER.DASHBOARD, ROUTES.USER.BUY_SUBSCRIPTION, ROUTES.USER.BUY_SUBSCRIPTION_CHECKOUT];
 
 export async function middleware(request: NextRequest) {
   const currentPath = request.nextUrl.pathname;
