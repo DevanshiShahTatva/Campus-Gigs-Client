@@ -9,6 +9,7 @@ import { SUBSCRIPTION_PLAN_CATEGORIES } from "@/utils/constant";
 import IconMap from "@/components/common/IconMap";
 
 const SubscriptionPlan = () => {
+  const [isToken, setIsToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hoveredPlan, setHoveredPlan] = useState<number | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
@@ -17,6 +18,9 @@ const SubscriptionPlan = () => {
 
   useEffect(() => {
     fetchSubscriptionPlan();
+    if (localStorage) {
+      setIsToken(localStorage.getItem("token") as string);
+    }
   }, []);
 
   const fetchSubscriptionPlan = useCallback(async () => {
@@ -105,14 +109,25 @@ const SubscriptionPlan = () => {
                     </ul>
 
                     {/* CTA Button - This will always be at the bottom */}
-                    <Link href="/sign-up">
-                      <button
-                        className={`w-full py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 mt-auto text-sm sm:text-base bg-[var(--base)] text-white hover:bg-[var(--base-hover)] shadow-lg`}
-                        onClick={() => setSelectedPlan(index)}
-                      >
-                        {plan.button_text}
-                      </button>
-                    </Link>
+                    {isToken ? (
+                      <Link href="/user/buy-subscription">
+                        <button
+                          className={`w-full py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 mt-auto text-sm sm:text-base bg-[var(--base)] text-white hover:bg-[var(--base-hover)] shadow-lg`}
+                          onClick={() => setSelectedPlan(index)}
+                        >
+                          {plan.button_text}
+                        </button>
+                      </Link>
+                    ) : (
+                      <Link href="/login">
+                        <button
+                          className={`w-full py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 mt-auto text-sm sm:text-base bg-[var(--base)] text-white hover:bg-[var(--base-hover)] shadow-lg`}
+                          onClick={() => setSelectedPlan(index)}
+                        >
+                          {plan.button_text}
+                        </button>
+                      </Link>
+                    )}
                   </div>
                 </div>
               ))}
