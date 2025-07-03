@@ -1,82 +1,120 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
-import { Edit } from "lucide-react";
+import React, { useEffect, useState, useCallback } from "react";
+import { Edit, Trash } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 
 import { DynamicTable } from "@/components/common/DynamicTables";
 import { DEFAULT_PAGINATION } from "@/utils/constant";
-import { SortOrder, ISubscriptionPlan, ISubscriptionPlanApiResponse } from "@/utils/interface";
-import { useRouter } from "next/navigation";
 import { apiCall } from "@/utils/apiCall";
-import { toast } from "react-toastify";
-import { CentralLoader } from "@/components/common/Loader";
+
+import { SortOrder, ISubscriptionPlan, ISubscriptionPlanApiResponse } from "@/utils/interface";
+import { Button } from "@/components/ui/button";
 
 const SubscriptionPlan = () => {
   const router = useRouter();
-  const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const [queryParams, setQueryParams] = useState({
+    page: DEFAULT_PAGINATION.page,
+    pageSize: DEFAULT_PAGINATION.pageSize,
+    search: "",
+    sortKey: "name",
+    sortOrder: "asc" as SortOrder,
+  });
 
   const [plans, setPlans] = useState<ISubscriptionPlan[]>([]);
+  const [totalPages, setTotalPages] = useState(DEFAULT_PAGINATION.totalPages);
+  const [isLoading, setIsLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-    fetchSubscriptionPlan("", "", "", pagination.page);
-  }, []);
+  const fetchSubscriptionPlans = useCallback(async () => {
+    setIsLoading(true);
 
-  const fetchSubscriptionPlan = useCallback(
-    async (searchTerm: string, sortKey = "", sortOrder = "", page = 1) => {
-      setIsLoading(true);
-      const { pageSize } = pagination;
-      // Build query parameters
-      const params = new URLSearchParams({
-        page: page.toString(),
-        pageSize: pageSize.toString(),
-        ...(searchTerm && { search: searchTerm }),
-        ...(sortKey && { sortBy: sortKey }),
-        ...(sortKey && sortOrder && { sortOrder }),
-      });
+    try {
+      const { page, pageSize, search, sortKey, sortOrder } = queryParams;
 
       const res: ISubscriptionPlanApiResponse = await apiCall({
-        endPoint: `/subscription/plan?${params.toString()}`,
+        endPoint: `/subscription/plan?page=${page}&pageSize=${pageSize}&search=${search}&sortKey=${sortKey}&sortOrder=${sortOrder}`,
         method: "GET",
       });
 
       if (res.status === 200) {
         const { data, meta } = res;
         setPlans(data);
-        setPagination(meta);
+        setTotalPages(meta.totalPages);
       } else {
-        toast.error("Something went wrong, please try again later.");
+        throw new Error("Failed to fetch subscription plans.");
       }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Something went wrong. Please try again later.";
+      toast.error(errorMessage);
+    } finally {
       setIsLoading(false);
-    },
-    [pagination.page]
-  );
+    }
+  }, [queryParams]);
 
-  const handlePageChange = (page: number) => {
-    setPagination((prev) => ({ ...prev, page }));
+  useEffect(() => {
+    fetchSubscriptionPlans();
+  }, [fetchSubscriptionPlans]);
+
+  const handlePageSizeChange = (pageSize: number) => setQueryParams((prev) => ({ ...prev, pageSize, page: 1 }));
+
+  const handlePageChange = (page: number) => setQueryParams((prev) => ({ ...prev, page }));
+
+  const handleSearchSort = (searchTerm: string, key: string, order: SortOrder, page: number) => {
+    setQueryParams((prev) => ({
+      ...prev,
+      search: searchTerm,
+      sortKey: key || "name",
+      sortOrder: order,
+      page,
+    }));
   };
 
-  const handleSearchSort = (searchTerm: string, key: keyof ISubscriptionPlan, order: SortOrder, page: number) => {
-    fetchSubscriptionPlan(searchTerm, key, order, page);
+  const handleDeleteClick = (planId: number) => {
+    setSelectedPlanId(planId);
+    setDeleteDialogOpen(true);
   };
 
-  const handleCreatePlan = () => {
-    router.push("/admin/subscription-plan/new");
+  const handleDeletePlan = async () => {
+    if (!selectedPlanId) return;
+
+    setIsDeleting(true);
+
+    try {
+      const res: ISubscriptionPlanApiResponse = await apiCall({
+        endPoint: `/subscription/plan/${selectedPlanId}`,
+        method: "DELETE",
+      });
+
+      if (res.status === 200) {
+        toast.success("Subscription plan deleted successfully.");
+        fetchSubscriptionPlans();
+        setDeleteDialogOpen(false);
+      } else {
+        toast.error(res?.message || "Something went wrong. Please try again later.");
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Something went wrong. Please try again later.";
+      toast.error(errorMessage);
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setSelectedPlanId(null);
+    }
   };
+
+  const handleCreatePlan = () => router.push("/admin/subscription-plan/new");
 
   return (
     <>
-      <CentralLoader loading={isLoading} />
-
       <DynamicTable<ISubscriptionPlan>
-        data={plans}
         title="Subscription Plan"
-        totalPages={pagination.totalPages}
-        currentPage={pagination.page}
-        handlePageChange={handlePageChange}
-        onSearchSort={handleSearchSort}
-        onClickCreateButton={handleCreatePlan}
-        isCreateButtonDisabled={plans.length >= 3}
+        data={plans}
         columns={[
           {
             key: "name",
@@ -167,16 +205,35 @@ const SubscriptionPlan = () => {
             ),
           },
         ]}
-        actions={(row) => (
+        totalPages={totalPages}
+        currentPage={queryParams.page}
+        pageSize={queryParams.pageSize}
+        handlePageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        onSearchSort={handleSearchSort}
+        loading={isLoading}
+        onClickCreateButton={handleCreatePlan}
+        isCreateButtonDisabled={plans.length >= 3}
+        actions={(plan) => (
           <div className="flex items-center justify-center gap-x-3">
-            <button className="text-blue-500 hover:text-blue-700" onClick={() => router.push(`/admin/subscription-plan/${row.id}`)}>
+            <Button size={"icon"} onClick={() => router.push(`/admin/subscription-plan/${plan.id}`)}>
               <Edit size={16} />
-            </button>
-            {/* <button className="text-red-500 hover:text-red-700" onClick={() => console.log("Delete", row.id)}>
-            <Trash size={16} />
-          </button> */}
+            </Button>
+            <Button className="bg-red-500 hover:bg-red-500" size={"icon"} onClick={() => handleDeleteClick(plan.id)}>
+              <Trash size={16} />
+            </Button>
           </div>
         )}
+      />
+
+      <ConfirmationDialog
+        isOpen={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDeletePlan}
+        title="Delete Subscription Plan"
+        description="Are you sure you want to delete this subscription plan?"
+        confirmText="Delete Plan"
+        isDeleting={isDeleting}
       />
     </>
   );

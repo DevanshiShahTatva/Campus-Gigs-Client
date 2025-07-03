@@ -487,7 +487,14 @@ const CreateEditSubscriptionPlan = ({ params }: PageProps) => {
               />
 
               <div className="flex flex-col md:flex-row justify-start gap-4 pt-6">
-                <Button variant="outlined" className="font-medium hover:text-white" onClick={goBack}>
+                <Button
+                  variant="outlined"
+                  className="font-medium hover:text-white"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    goBack();
+                  }}
+                >
                   Cancel
                 </Button>
                 <Button type="submit" disabled={isSubmitting} variant="green" className="font-medium">

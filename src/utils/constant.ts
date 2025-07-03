@@ -87,7 +87,7 @@ export const USER_SIDEBAR_ITEMS = [
     id: 2,
     title: "Subscription Plan",
     route: ROUTES.ADMIN.SUBSCRIPTION,
-    icon: "/assets/DashboardIcon.svg",
+    icon: "/assets/subscription.svg",
   },
   {
     id: 3,
