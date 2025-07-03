@@ -16,7 +16,7 @@ const UserProviderSidebar = ({ open, setOpen }: { open: boolean; setOpen: (open:
     <>
       {/* Sidebar Drawer (fixed left, white, 20rem wide) */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 md:w-80 bg-white z-50 transform transition-transform duration-300 ${
+        className={`fixed top-0 left-0 h-full w-64 md:w-80 bg-white z-[99999] transform transition-transform duration-300 ${
           open ? "translate-x-0" : "-translate-x-full"
         } min-w-0 overflow-y-auto`}
         style={{ maxWidth: "90vw" }}
@@ -94,7 +94,7 @@ const UserProviderSidebar = ({ open, setOpen }: { open: boolean; setOpen: (open:
         </nav>
       </aside>
       {/* Overlay (covers the rest of the screen, only when open) */}
-      {open && <div className="fixed inset-0  bg-black opacity-40 z-40 transition-opacity duration-1000" onClick={() => setOpen(false)} />}
+      {open && <div className="fixed inset-0  bg-black opacity-40 z-[99998] transition-opacity duration-1000" onClick={() => setOpen(false)} />}
     </>
   );
 };
