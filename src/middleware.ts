@@ -23,10 +23,10 @@ const userRoutes = [
   ROUTES.USER.DASHBOARD,
   ROUTES.USER.BUY_SUBSCRIPTION,
   ROUTES.USER.BUY_SUBSCRIPTION_CHECKOUT,
-  "/profile",
-  "/gigs",
-  "/gigs/create",
-  "/provider",
+  ROUTES.USER.PROFILE,
+  ROUTES.USER.GIGS,
+  ROUTES.USER.GIGS_CREATE,
+  ROUTES.USER.PROVIDER,
 ];
 
 export async function middleware(request: NextRequest) {

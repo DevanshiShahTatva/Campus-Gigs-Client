@@ -224,7 +224,7 @@ const ProviderPortfolioPage = () => {
         </div>
 
         {/* Reviews Section */}
-        <div className="max-w-7xl mx-auto mt-12 mb-10">
+        <div className="max-w-8xl mx-auto mt-12 mb-10">
           <h3 className="text-xl font-bold mb-4 text-gray-900">Ratings & Reviews</h3>
           <div className="space-y-4">
             {(provider?.reviews || dummyReviews).map((review: any, idx: any) => (
@@ -243,7 +243,7 @@ const ProviderPortfolioPage = () => {
         </div>
 
         {/* Completed Gigs Section */}
-        <div className="max-w-7xl mx-auto mt-12 mb-16">
+        <div className="max-w-8xl mx-auto mt-12 mb-16">
           <h3 className="text-xl font-bold mb-6 text-gray-900 flex items-center gap-2">Completed Gigs</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {completedGigs.map((gig) => (
