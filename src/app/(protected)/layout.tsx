@@ -15,7 +15,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <UserProviderHeader sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <div className="flex flex-1 flex-col overflow-auto">
           <UserProviderSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
-          <main id="scrollableDiv" className="w-full h-full py-6">
+          <main id="scrollableDiv" className="w-full h-full py-6 bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               {children}
             </div>

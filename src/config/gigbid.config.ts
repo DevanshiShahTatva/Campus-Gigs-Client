@@ -2,7 +2,7 @@ import { CommonFormField } from "@/components/common/form/CommonFormModal";
 
 export const gigBidFields: CommonFormField[] = [
   {
-    name: "Bid Type",
+    name: "bid_type",
     label: "Bid Type",
     type: "select",
     options: [
@@ -13,14 +13,14 @@ export const gigBidFields: CommonFormField[] = [
     required: true,
   },
   {
-    name: "Your Bid Amount",
+    name: "bid_amount",
     label: "Your Bid Amount",
     type: "number",
     placeholder: "Enter your bid amount",
     required: true
   },
   {
-    name: "Cover letter",
+    name: "description",
     label: "Cover letter",
     type: "textarea",
     placeholder: "Explain why you're the perfect fit for this project...",
