@@ -3,10 +3,10 @@ import React from 'react';
 const BidSkeleton = () => {
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-      <div className="p-4 sm:p-6">
+      <div className="p-4">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-0 mb-4">
           <div className="flex items-start space-x-3 sm:space-x-4">
-            <div className="w-12 h-12 sm:w-15 sm:h-15 rounded-full bg-gray-200 animate-pulse flex-shrink-0"></div>
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 animate-pulse flex-shrink-0"></div>
             <div className="min-w-0 flex-1">
               <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
                 <div className="h-5 sm:h-6 bg-gray-200 rounded animate-pulse w-32"></div>

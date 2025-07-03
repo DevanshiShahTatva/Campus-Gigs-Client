@@ -28,6 +28,7 @@ interface IBid {
     about: string;
   },
   bid_amount: number;
+  payment_type: string;
   description: string;
   created_at: string;
 }
@@ -57,8 +58,14 @@ const GigDetail = () => {
     getGitDetails();
   }, [id]);
 
-  const handleAcceptBid = (bid: any) => {
-    // Implementation here
+  const fetchBids = async () => {
+    const response = await apiCall({
+      endPoint: `/bids/gig/${id}`,
+      method: "GET",
+    });
+    if (response?.success) {
+      setBids(response.data);
+    }
   };
 
   const handleSubmitBid = async (data: any) => {
@@ -77,20 +84,15 @@ const GigDetail = () => {
       if (response?.success) {
         setIsModalOpen(false);
         setBidLoading(false);
+        setBids([response.data, ...bids]);
       }
     } catch (error) {
       console.log(error);
     }
   };
 
-  const fetchBids = async () => {
-    const response = await apiCall({
-      endPoint: `/bids/gig/${id}`,
-      method: "GET",
-    });
-    if (response?.success) {
-      setBids(response.data);
-    }
+  const handleAcceptBid = (bid: any) => {
+    // Implementation here
   };
 
   const handleTabChange = (tab: string) => {
@@ -145,7 +147,7 @@ const GigDetail = () => {
                   key={`${i + 1}`}
                   src={image}
                   alt={gitDetails.title}
-                  className="w-full h-full object-cover"
+                  className="max-h-[210px] lg:max-h-[400px] w-full h-full object-cover"
                 />
               ))}
             </Slider>
@@ -272,17 +274,17 @@ const GigDetail = () => {
 
   const renderBidCard = (bid: IBid) => (
     <Card key={bid.id} className="gap-0 py-0">
-      <CardContent className="p-4 sm:p-6">
+      <CardContent className="p-4">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-0 mb-4">
           <div className="flex items-start space-x-3 sm:space-x-4">
             {bid.provider.profile ? (
               <img
                 alt="not found"
                 src={bid.provider.profile}
-                className="w-12 h-12 sm:w-15 sm:h-15 rounded-full flex-shrink-0"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0"
               />
             ) : (
-              <div className="w-12 h-12 sm:w-15 sm:h-15 bg-purple-500 text-white rounded-full flex items-center justify-center font-semibold text-lg sm:text-3xl flex-shrink-0">
+              <div className="w-12 h-12 sm:w-12 sm:h-12 bg-[var(--base)] text-white rounded-full flex items-center justify-center font-semibold text-lg sm:text-2xl flex-shrink-0">
                 {bid.provider.name.charAt(0).toUpperCase()}
               </div>
             )}
@@ -303,6 +305,7 @@ const GigDetail = () => {
           </div>
           <div className="text-left sm:text-right flex-shrink-0">
             <div className="text-xl sm:text-2xl font-bold text-green-600">${bid.bid_amount}</div>
+            <div className="text-xs sm:text-sm text-gray-500">{bid.payment_type === "fixed" ? "Fixed Price" : "/Hour"}</div>
           </div>
         </div>
         <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4">
