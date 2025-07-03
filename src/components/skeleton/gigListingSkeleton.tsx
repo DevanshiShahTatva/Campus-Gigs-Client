@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search } from 'lucide-react';
 
-const SkeletonCard = () => (
+export const SkeletonCard = () => (
   <div className="bg-white border-0 shadow-lg h-full flex flex-col rounded-lg overflow-hidden animate-pulse">
     <div className="relative h-48 bg-gray-200">
       <div className="absolute bottom-4 left-4">
