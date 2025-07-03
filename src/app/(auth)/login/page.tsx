@@ -301,7 +301,7 @@ const LogInPage = () => {
                 onSubmit={handleLogInSubmit}
                 validationSchema={logInFormSchema}
               >
-                {({ isSubmitting }) => (
+                {({ isSubmitting }: any) => (
                   <Form className="space-y-5">
                     <FormikTextField name="email" label="Email" placeholder="Enter your email" type="email" />
                     <FormikTextField
