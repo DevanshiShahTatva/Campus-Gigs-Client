@@ -10,7 +10,9 @@ import { apiCall } from "@/utils/apiCall";
 import FormikTextField from "@/components/common/FormikTextField";
 import Button from "@/components/common/Button";
 import moment from "moment";
-import Cookie from "js-cookie";
+import Cookie from 'js-cookie';
+import { useDispatch } from "react-redux";
+import { setAuthData } from '@/redux/slices/userSlice';
 
 import "../../termsContent.css";
 
@@ -215,6 +217,7 @@ const LogInPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [loginResponse, setLoginResponse] = useState<ILoginResponse | null>(null);
+  const dispatch = useDispatch();
 
   const handleLogInSubmit = async (values: ILogInFormValues, actions: FormikHelpers<ILogInFormValues>) => {
     actions.setSubmitting(true);
@@ -244,20 +247,16 @@ const LogInPage = () => {
 
   const handleAllowedLogin = (loginResponse: ILoginResponse | null) => {
     if (loginResponse) {
-      if (loginResponse.data?.token) {
+      if (loginResponse.data?.token && loginResponse.data.user) {
         Cookie.set("token", loginResponse.data.token);
-        if (typeof window !== "undefined") {
-          localStorage?.setItem("token", loginResponse.data.token);
-        }
+        document.cookie = `token=${loginResponse.data.token}; path=/;`;
+        dispatch(setAuthData({
+          token: loginResponse.data.token,
+          name: loginResponse.data.user.name,
+          profile: loginResponse.data.user.profile,
+          user_id: loginResponse.data.user._id,
+        }));
       }
-      if (loginResponse.data.user) {
-        if (typeof window !== "undefined") {
-          localStorage?.setItem("name", loginResponse.data.user.name);
-          localStorage?.setItem("profile", loginResponse.data.user.profile);
-          localStorage?.setItem("user_id", loginResponse.data.user._id);
-        }
-      }
-
       if (loginResponse.success) {
         toast.success(loginResponse.message);
       } else {

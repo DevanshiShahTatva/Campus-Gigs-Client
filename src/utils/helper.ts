@@ -8,7 +8,6 @@ export const getAuthToken = () => {
 
 export const logout = () => {
   if (typeof window === "undefined") return;
-  localStorage?.clear();
   sessionStorage?.clear();
 }
 

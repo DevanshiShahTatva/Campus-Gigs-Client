@@ -11,9 +11,6 @@ const Header = () => {
   const [isToken, setIsToken] = useState("");
 
   const onLogout = () => {
-    if (typeof window !== "undefined") {
-      localStorage?.clear();
-    }
     Cookie.remove("token");
     router.push("/login");
   };

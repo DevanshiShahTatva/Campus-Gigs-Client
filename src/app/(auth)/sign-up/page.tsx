@@ -16,6 +16,8 @@ import FormikTextField from "@/components/common/FormikTextField";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { SignupFormSchema, educationOptions } from "./helper";
 import { ISignupFormValues, Step, ApiResponse, EducationOption } from "./type";
+import { useDispatch } from "react-redux";
+import { setAuthData } from '@/redux/slices/userSlice';
 
 const steps: Step[] = [
   {
@@ -43,6 +45,7 @@ const steps: Step[] = [
 
 const SignUpPage: React.FC = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -114,18 +117,14 @@ const SignUpPage: React.FC = () => {
       actions.setSubmitting(false);
 
       if (response.success) {
-        if (response.data?.token) {
+        if (response.data?.token && response.data?.user) {
           Cookie.set("token", response.data.token);
-          if (typeof window !== "undefined") {
-            localStorage?.setItem("token", response.data.token);
-          }
-        }
-        if (response.data?.user) {
-          if (typeof window !== "undefined") {
-            localStorage?.setItem("name", response.data.user.name);
-            localStorage?.setItem("profile", response.data.user.profile);
-            localStorage?.setItem("user_id", response.data.user.id);
-          }
+          dispatch(setAuthData({
+            token: response.data.token,
+            name: response.data.user.name,
+            profile: response.data.user.profile,
+            user_id: response.data.user.id,
+          }));
         }
         router.push("/user/buy-subscription");
         toast.success(response.message ?? "Account created successfully!");

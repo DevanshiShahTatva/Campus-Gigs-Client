@@ -7,16 +7,19 @@ import storage from 'redux-persist/lib/storage';
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['user'], // only user will be persisted
+  whitelist: ['user', 'api'], // persist both user and api slices
 };
 
-const persistedUserReducer = persistReducer(persistConfig, userReducer);
+import { combineReducers } from 'redux';
+const rootReducer = combineReducers({
+  user: userReducer,
+  [api.reducerPath]: api.reducer,
+});
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
-  reducer: {
-    user: persistedUserReducer,
-    [api.reducerPath]: api.reducer,
-  },
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,

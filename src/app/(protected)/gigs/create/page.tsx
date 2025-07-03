@@ -187,7 +187,8 @@ const CreateGig = () => {
             <Card>
               <CardContent>
                 <DynamicForm
-                  formConfig={gigsFields(
+                  formConfig={
+                    gigsFields(
                     formValues,
                     memoizedGigCategoryDropdown,
                     memoizedSkillsDropdown,

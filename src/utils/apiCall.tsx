@@ -1,6 +1,6 @@
 'use client'
 import api from "./api";
-import { getAuthToken } from "./helper";
+import { store } from "@/redux";
 
 export interface IRequestParams {
   endPoint: string;
@@ -24,10 +24,10 @@ export const apiCall = async ({
       ...headers,
     };
 
-    if (withToken && typeof window !== "undefined") {
-      const token = getAuthToken();
+    if (withToken) {
+      const token = store.getState().user.token;
       if (token) {
-        finalHeaders["token"] = `${token}`;
+        finalHeaders["Authorization"] = `Bearer ${token}`;
       }
     }
 
