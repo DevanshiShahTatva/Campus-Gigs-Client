@@ -5,47 +5,43 @@ import he from "he";
 import "../../termsContent.css";
 import Loader from "@/components/common/Loader";
 
-export default function TermsConditions() {
-  const [termsContent, setTermsContent] = useState("");
+export default function PrivacyPolicy() {
+  const [policyContent, setPolicyContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchTermsContent = useCallback(async () => {
+  const fetchPolicyContent = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
       const response = await apiCall({
-        endPoint: "terms-conditions",
+        endPoint: "privacy-policy",
         method: "GET",
       });
       if (response && response.success && response.data && response.data[0]?.content) {
-        setTermsContent(response.data[0].content);
+        setPolicyContent(response.data[0].content);
       } else {
-        setError("No terms and conditions found.");
+        setError("No privacy policy found.");
       }
     } catch (err) {
-      setError("Failed to load Terms & Conditions. Please try again later.");
+      setError("Failed to load Privacy Policy. Please try again later.");
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchTermsContent();
-  }, [fetchTermsContent]);
+    fetchPolicyContent();
+  }, [fetchPolicyContent]);
 
-  const decodedHTML = useMemo(() => he.decode(termsContent ?? ""), [termsContent]);
+  const decodedHTML = useMemo(() => he.decode(policyContent ?? ""), [policyContent]);
 
   return (
-    <section className="min-h-screen py-20 bg-[var(--bg-light)] w-full">
+    <section className="min-h-screen bg-[var(--bg-light)] py-12 w-full">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center my-12">
-          <h1 className="text-3xl sm:text-4xl font-bold text-[var(--text-dark)] mb-4">
-            Terms & Conditions
-          </h1>
-          <p className="text-[var(--text-semi-dark)] text-base sm:text-lg">
-            Please read these terms and conditions carefully before using CampusGig.
-          </p>
+        <div className="text-center mb-12">
+          <h1 className="text-3xl sm:text-4xl font-bold text-[var(--text-dark)] mb-4">Privacy Policy</h1>
+          <p className="text-[var(--text-semi-dark)] text-base sm:text-lg">Please read our privacy policy carefully before using CampusGig.</p>
         </div>
         <div className="bg-[var(--card-light)] rounded-2xl shadow-lg p-6 sm:p-10 border border-[var(--base)]/10 w-full">
           {loading && (
@@ -53,9 +49,7 @@ export default function TermsConditions() {
               <Loader size={48} colorClass="text-[var(--base)]" />
             </div>
           )}
-          {error && !loading && (
-            <div className="text-center text-red-600 font-medium py-8">{error}</div>
-          )}
+          {error && !loading && <div className="text-center text-red-600 font-medium py-8">{error}</div>}
           {!loading && !error && (
             <div className="terms-and-conditions prose prose-lg max-w-none text-[var(--text-dark)]">
               <div dangerouslySetInnerHTML={{ __html: decodedHTML }} />
