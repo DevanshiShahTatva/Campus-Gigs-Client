@@ -28,10 +28,11 @@ import { apiCall } from "@/utils/apiCall";
 import { API_ROUTES } from "@/utils/constant";
 import { formatTimeDifference, Gigs } from "./helper";
 import { IPagination } from "@/utils/interface";
-import { getAvtarName } from "@/utils/helper";
+import { getAvtarName, renderBaseOnCondition } from "@/utils/helper";
 import moment from "moment";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Loader from "@/components/common/Loader";
+import useDebounce from "@/hooks/useDebounce";
 
 const GigListing = () => {
   const [gigs, setGigs] = useState<Gigs[]>([]);
@@ -47,12 +48,14 @@ const GigListing = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchGigs = async (page = 1) => {
+  const debounceSearch = useDebounce(searchQuery, 700);
+
+  const fetchGigs = async (page = 1, search = "") => {
     try {
       setLoading(true);
 
       const resp = await apiCall({
-        endPoint: `${API_ROUTES.GIGS}?page=${page}&pageSize=9`,
+        endPoint: `${API_ROUTES.GIGS}?page=${page}&pageSize=9&search=${search}`,
         method: "GET",
       });
 
@@ -69,8 +72,8 @@ const GigListing = () => {
   };
 
   useEffect(() => {
-    fetchGigs(1);
-  }, []);
+    fetchGigs(1, debounceSearch);
+  }, [debounceSearch]);
 
   const fetchNextPage = () => {
     if (currentPage < meta.totalPages && !loading) {
@@ -189,7 +192,7 @@ const GigListing = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by keywords, location, or category..."
+                placeholder="Search by title, description or category..."
                 className="pl-12 h-12 text-base bg-white border-gray-200"
               />
             </div>
@@ -222,73 +225,85 @@ const GigListing = () => {
           </div>
         </div>
 
-        {gigs.length === 0 ? (
-          <Card>
-            <CardContent className="text-xl text-center font-semibold capitalize">
-              No gigs found
-            </CardContent>
-          </Card>
-        ) : (
-          <InfiniteScroll
-            dataLength={gigs.length}
-            next={fetchNextPage}
-            hasMore={currentPage < meta.totalPages}
-            loader={
-              <div className="h-20 mt-14 w-full text-center">
-                <Loader size={50} />
-              </div>
-            }
-            scrollThreshold={0.9}
-            scrollableTarget="scrollableDiv"
-            className="py-4"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {gigs.map((gig) => (
-                <Link key={gig.id} href={`/gigs/${gig.id}`} className="group">
-                  <Card className="gap-0 py-0 relative overflow-hidden bg-white border-0 shadow-lg h-full flex flex-col hover:shadow-purple-500/10">
-                    <div className="relative overflow-hidden">
-                      <div className="slider h-[200px]">
-                        <Slider
-                          slidesToShow={1}
-                          dots={gig.images.length > 1}
-                          infinite={gig.images.length > 1}
-                          customPaging={() => (
-                            <div className="w-[7px] h-[7px] bg-gray-400 rounded-full transition" />
-                          )}
-                        >
-                          {gig.images.map((image: string, i: number) => (
-                            <img
-                              key={`${i + 1}`}
-                              src={image}
-                              alt={gig.title}
-                              className="w-full h-full object-cover"
-                            />
-                          ))}
-                        </Slider>
-                      </div>
-                      <CardContent className="content"></CardContent>
-                      <div className="w-fit absolute bottom-4 left-4 right-4">
-                        <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 shadow-lg font-medium">
-                          {gig.gig_category.name}
-                        </Badge>
-                      </div>
-                    </div>
-                    <CardContent className="p-6 flex-1 flex flex-col">
-                      <div className="mb-4">
-                        <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-[var(--base)] transition-colors line-clamp-2 leading-tight">
-                          {gig.title}
-                        </h3>
-                        <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
-                          {gig.description}
-                        </p>
-                      </div>
-                      {projectCardUI(gig)}
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </InfiniteScroll>
+        {renderBaseOnCondition(
+          loading,
+          <div className="h-20 mt-14 w-full text-center">
+            <Loader size={50} />
+          </div>,
+          <>
+            {gigs.length === 0 ? (
+              <Card>
+                <CardContent className="text-xl text-center font-semibold capitalize">
+                  No gigs found
+                </CardContent>
+              </Card>
+            ) : (
+              <InfiniteScroll
+                dataLength={gigs.length}
+                next={fetchNextPage}
+                hasMore={currentPage < meta.totalPages}
+                loader={
+                  <div className="h-20 mt-14 w-full text-center">
+                    <Loader size={50} />
+                  </div>
+                }
+                scrollThreshold={0.9}
+                scrollableTarget="scrollableDiv"
+                className="py-4"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {gigs.map((gig) => (
+                    <Link
+                      key={gig.id}
+                      href={`/gigs/${gig.id}`}
+                      className="group"
+                    >
+                      <Card className="gap-0 py-0 relative overflow-hidden bg-white border-0 shadow-lg h-full flex flex-col hover:shadow-purple-500/10">
+                        <div className="relative overflow-hidden">
+                          <div className="slider h-[200px]">
+                            <Slider
+                              slidesToShow={1}
+                              dots={gig.images.length > 1}
+                              infinite={gig.images.length > 1}
+                              customPaging={() => (
+                                <div className="w-[7px] h-[7px] bg-gray-400 rounded-full transition" />
+                              )}
+                            >
+                              {gig.images.map((image: string, i: number) => (
+                                <img
+                                  key={`${i + 1}`}
+                                  src={image}
+                                  alt={gig.title}
+                                  className="w-full h-full object-cover"
+                                />
+                              ))}
+                            </Slider>
+                          </div>
+                          <CardContent className="content"></CardContent>
+                          <div className="w-fit absolute bottom-4 left-4 right-4">
+                            <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 shadow-lg font-medium">
+                              {gig.gig_category.name}
+                            </Badge>
+                          </div>
+                        </div>
+                        <CardContent className="p-6 flex-1 flex flex-col">
+                          <div className="mb-4">
+                            <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-[var(--base)] transition-colors line-clamp-2 leading-tight">
+                              {gig.title}
+                            </h3>
+                            <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
+                              {gig.description}
+                            </p>
+                          </div>
+                          {projectCardUI(gig)}
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </InfiniteScroll>
+            )}
+          </>
         )}
 
         <GigFilterModal

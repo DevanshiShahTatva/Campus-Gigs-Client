@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export const getAuthToken = () => {
   if (typeof window === "undefined") return "";
   const token = localStorage?.getItem("token") ?? sessionStorage.getItem("token") ?? "";
@@ -17,4 +19,12 @@ export const getAvtarName = (name: string) => {
     return `${parts[0].charAt(0)}${parts[1].charAt(0)}`;
   }
   return name.charAt(0);
+};
+
+export const renderBaseOnCondition = (
+  condition: boolean,
+  trueValue: ReactNode,
+  falseValue: ReactNode
+) => {
+  return condition ? trueValue : falseValue;
 };
