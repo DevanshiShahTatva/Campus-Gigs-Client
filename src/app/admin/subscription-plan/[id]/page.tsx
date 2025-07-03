@@ -206,16 +206,12 @@ const CreateEditSubscriptionPlan = ({ params }: PageProps) => {
       body: submissionData,
     });
 
-    if (!response) {
-      throw new Error("No response from server");
-    }
-
     // Check for successful response
     if (response?.status === 200 || response?.status === 201) {
       toast.success(`Subscription plan ${isEditMode ? "updated" : "created"} successfully!`);
       router.push("/admin/subscription-plan");
     } else {
-      const errorMessage = response?.data?.message || "Something went wrong. Please try again later.";
+      const errorMessage = response?.message || "Something went wrong. Please try again later.";
       toast.error(errorMessage);
     }
     setIsSubmitting(false);
