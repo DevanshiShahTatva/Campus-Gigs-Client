@@ -38,7 +38,7 @@ export default function TermsConditions() {
 
   return (
     <section className="bg-[var(--bg-light)] w-full py-12">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--text-dark)] mb-4">Terms & Conditions</h1>
           <p className="text-[var(--text-semi-dark)] text-base sm:text-lg">
