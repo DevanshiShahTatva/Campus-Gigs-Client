@@ -2,7 +2,7 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { FaStar, FaCertificate, FaTag, FaLayerGroup, FaDollarSign, FaCrown } from "react-icons/fa";
-import { useGetProviderPublicProfileQuery } from '@/store/api';
+import { useGetProviderPublicProfileQuery } from '@/redux/api';
 import { useParams } from 'next/navigation';
 import ProfileSkeleton from '@/components/skeleton/ProfileSkeleton';
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaBell, FaUserCircle, FaChevronDown, FaExchangeAlt, FaUser, FaCog, FaSignOutAlt, FaCheckCircle, FaInfoCircle, FaBars, FaStar } from "react-icons/fa";
 import { RoleContext } from '@/context/role-context';
-import { useGetUserProfileQuery } from '@/store/api';
+import { useGetUserProfileQuery } from '@/redux/api';
 
 const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean, setSidebarOpen: (open: boolean) => void }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
