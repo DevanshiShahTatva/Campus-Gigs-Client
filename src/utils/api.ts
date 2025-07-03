@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
-import { getAuthToken } from "./helper";
+import { store } from "@/redux";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
 
@@ -10,11 +10,9 @@ const api: AxiosInstance = axios.create({
 
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    if (typeof window !== "undefined") {
-      const token: string | null = getAuthToken();
-      if (token && config.headers) {
-        config.headers['authorization'] = `Bearer ${token}`;
-      }
+    const token: string | null = store.getState().user.token;
+    if (token && config.headers) {
+      config.headers['authorization'] = `Bearer ${token}`;
     }
     return config;
   },

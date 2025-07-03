@@ -7,6 +7,7 @@ import { RoleContext } from '@/context/role-context';
 import { getInitials, profileFormConfig } from "./helper";
 import { USER_PROFILE } from "@/utils/constant";
 import ProfileSkeleton from "@/components/skeleton/ProfileSkeleton";
+import { toast } from "react-toastify";
 
 // Custom Profile Photo Component
 const ProfilePhotoUpload = ({
@@ -192,6 +193,25 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
+  // Function to handle profile update API call
+  const handleProfileUpdate = async (values: any) => {
+    try {
+      const response = await apiCall({
+        endPoint: '/user/profile',
+        method: 'PUT',
+        body: values,
+        withToken: true,
+      });
+      setUserProfile(response.data || values);
+      toast.success("Profile updated successfully");
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
+    } catch (error) {
+      setSuccess(false);
+      toast.error("Failed to update profile");
+    }
+  };
+
   if (!userProfile) {
     return <ProfileSkeleton />;
   }
@@ -345,7 +365,9 @@ const Profile = () => {
           </div>
           {/* User Info (name, bio, etc.) - left aligned */}
           <div className="flex flex-col sm:flex-row mt-20 px-6 pb-4 border-b border-gray-200 items-start sm:items-center justify-between">
-            <div className="flex-1">
+            <div className="flex justify-between w-full">
+              <div>
+
               <h2 className="text-2xl font-bold text-gray-900">{userProfile?.name}</h2>
               <div className="text-gray-600 mt-1">
                 {userProfile?.headline}
@@ -356,6 +378,20 @@ const Profile = () => {
               <div className="text-base text-gray-700 mt-2 max-w-2xl">
                 {userProfile?.bio}
               </div>
+              </div>
+              {/* Preview Portfolio Button for Providers */}
+              {/* {profileMode !== 'provider' && userProfile?._id && ( */}
+              <div className="flex">
+
+                <button
+                  className="mt-auto px-4 py-2 bg-[var(--base)] text-white rounded shadow hover:bg-[var(--base-hover)] transition"
+                  onClick={() => window.open(`/provider/${userProfile.id}`, '_blank')}
+                  type="button"
+                  >
+                  Preview Portfolio
+                </button>
+                  </div>
+              {/* )} */}
             </div>
           </div>
           {/* Tabs Navigation - responsive and scrollable */}
@@ -412,10 +448,7 @@ const Profile = () => {
                 <DynamicForm
                   formConfig={profileFormConfig as any}
                   initialValues={formInitialValues}
-                  onSubmit={(values) => {
-                    setSuccess(true);
-                    setTimeout(() => setSuccess(false), 2000);
-                  }}
+                  onSubmit={handleProfileUpdate}
                 />
               )}
               {profileMode === 'provider' && activeTab === "gigs" && (

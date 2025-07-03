@@ -2,6 +2,8 @@ import React from "react";
 import Cookie from 'js-cookie';
 import { useRouter } from "next/navigation";
 import IconMap from "./IconMap";
+import { useDispatch } from 'react-redux';
+import { logout } from '@/redux/slices/userSlice';
 
 interface AdminHeaderProps {
   pageTitle?: string;
@@ -11,11 +13,16 @@ interface AdminHeaderProps {
 
 const AdminHeader: React.FC<AdminHeaderProps> = ({ pageTitle = "Admin Panel", adminName = "Admin", onSidebarToggle }) => {
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const onLogout = () => {
     if (typeof window !== "undefined") {
-      localStorage?.clear();
+      if ((window as any).__PERSISTOR) {
+        (window as any).__PERSISTOR.purge();
+      }
+      document.cookie = 'token=; Max-Age=0; path=/;';
     }
+    dispatch(logout());
     Cookie.remove("token");
     router.push("/login");
   }

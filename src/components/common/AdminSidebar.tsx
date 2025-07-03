@@ -6,6 +6,8 @@ import Cookie from "js-cookie";
 import { useRouter } from "next/navigation";
 import ModalLayout from "./Modals/CommonModalLayout";
 import IconMap from "./IconMap";
+import { useDispatch } from 'react-redux';
+import { logout } from '@/redux/slices/userSlice';
 
 interface AdminSidebarProps {
   activeRoute?: string;
@@ -22,10 +24,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 }) => {
   const router = useRouter();
   const [showLogoutModal, setShowLogoutModal] = React.useState(false);
+  const dispatch = useDispatch();
   const handleLogout = () => {
     if (typeof window !== "undefined") {
-      localStorage?.clear();
+      if ((window as any).__PERSISTOR) {
+        (window as any).__PERSISTOR.purge();
+      }
+      document.cookie = 'token=; Max-Age=0; path=/;';
     }
+    dispatch(logout());
     Cookie.remove("token");
     router.push("/login");
   };
