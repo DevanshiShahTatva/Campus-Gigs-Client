@@ -25,11 +25,7 @@ const provider = {
       name: "Standard",
       price: 199,
       description: "Standard website with up to 7 pages and blog.",
-      features: [
-        "Everything in Basic",
-        "Blog Integration",
-        "Custom Animations",
-      ],
+      features: ["Everything in Basic", "Blog Integration", "Custom Animations"],
     },
     {
       name: "Premium",
@@ -110,35 +106,24 @@ const ProviderPortfolioPage = () => {
         <div className="mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="relative h-48 bg-gray-200">
             {!provider.coverImage ? (
-              <img
-                src={provider.coverImage}
-                alt="Cover"
-                className="w-full h-full object-cover"
-              />
+              <img src={provider.coverImage} alt="Cover" className="w-full h-full object-cover" />
             ) : (
               <div
                 className="w-full h-full"
                 style={{
-                  background:
-                    "linear-gradient(90deg, var(--base), var(--base-hover) 100%)",
+                  background: "linear-gradient(90deg, var(--base), var(--base-hover) 100%)",
                 }}
               />
             )}
             <div className="absolute left-8 -bottom-16 w-32 h-32 rounded-full border-4 border-white overflow-hidden shadow-lg bg-gray-100 transition-transform duration-300 ease-in-out hover:scale-110 hover:shadow-2xl">
-              <img
-                src={provider.profileImage}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
+              <img src={provider.profileImage} alt="Profile" className="w-full h-full object-cover" />
             </div>
           </div>
           <div className="pt-20 px-8 pb-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-1">
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    {provider.name}
-                  </h2>
+                  <h2 className="text-2xl font-bold text-gray-900">{provider.name}</h2>
                   <Badge className="bg-[var(--base)]/10 text-[var(--base)] font-semibold px-4 py-1 text-sm rounded-full border border-[var(--base)]/30 shadow-sm tracking-wide flex items-center gap-1">
                     <FaCrown className="text-[var(--base)] text-base mb-0.5" />
                     Most Rated
@@ -154,9 +139,7 @@ const ProviderPortfolioPage = () => {
                 <div className="text-gray-600 mt-1">
                   {provider.title} • {provider.location}
                 </div>
-                <div className="text-base text-gray-700 mt-2 max-w-2xl">
-                  {provider.bio}
-                </div>
+                <div className="text-base text-gray-700 mt-2 max-w-2xl">{provider.bio}</div>
               </div>
               {/* Rating Card */}
               <div className="mt-6 sm:mt-0 flex flex-col items-center bg-[var(--base)]/10 rounded-xl px-8 py-4 min-w-[160px] shadow border border-[var(--base)]/20">
@@ -179,9 +162,7 @@ const ProviderPortfolioPage = () => {
               className="bg-white rounded-xl shadow p-6 flex flex-col hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-[var(--base)]/10"
             >
               <div className="flex items-center gap-2 mb-2">
-                <Badge className="bg-[var(--base)] text-white font-semibold px-3 py-1 text-xs border-0">
-                  {tier.name}
-                </Badge>
+                <Badge className="bg-[var(--base)] text-white font-semibold px-3 py-1 text-xs border-0">{tier.name}</Badge>
                 <span className="text-2xl font-bold text-[var(--base)]">${tier.price}</span>
               </div>
               <div className="text-gray-600 mb-3">{tier.description}</div>
@@ -206,11 +187,7 @@ const ProviderPortfolioPage = () => {
                 key={idx}
                 className="bg-white rounded-xl shadow p-4 flex flex-col hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-[var(--base)]/10"
               >
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="rounded-lg h-48 w-full object-cover mb-2"
-                />
+                <img src={item.image} alt={item.title} className="rounded-lg h-48 w-full object-cover mb-2" />
                 <div className="font-semibold text-gray-800 mb-1">{item.title}</div>
                 <div className="text-gray-500 text-sm mb-2">{item.description}</div>
                 {/* Mock extra info */}
@@ -225,7 +202,7 @@ const ProviderPortfolioPage = () => {
         </div>
 
         {/* Reviews Section */}
-        <div className="max-w-7xl mx-auto mt-12 mb-10">
+        <div className="max-w-8xl mx-auto mt-12 mb-10">
           <h3 className="text-xl font-bold mb-4 text-gray-900">Ratings & Reviews</h3>
           <div className="space-y-4">
             {provider.reviews.map((review, idx) => (
@@ -244,7 +221,7 @@ const ProviderPortfolioPage = () => {
         </div>
 
         {/* Completed Gigs Section */}
-        <div className="max-w-7xl mx-auto mt-12 mb-16">
+        <div className="max-w-8xl mx-auto mt-12 mb-16">
           <h3 className="text-xl font-bold mb-6 text-gray-900 flex items-center gap-2">Completed Gigs</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {completedGigs.map((gig) => (
@@ -253,9 +230,7 @@ const ProviderPortfolioPage = () => {
                 className="bg-white rounded-2xl shadow-lg p-6 flex flex-col gap-3 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-[var(--base)]/10 relative"
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge className="bg-[var(--base)] text-white font-semibold px-3 py-1 text-xs border-0">
-                    {gig.tier}
-                  </Badge>
+                  <Badge className="bg-[var(--base)] text-white font-semibold px-3 py-1 text-xs border-0">{gig.tier}</Badge>
                   <span className="flex-1 text-right text-[var(--base)] font-semibold">{gig.price}</span>
                 </div>
                 <h4 className="text-lg font-bold text-gray-900 mb-1">{gig.title}</h4>

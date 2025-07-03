@@ -193,7 +193,7 @@ export default function Home() {
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-secondary rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
           </div>
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-[color:var(--text-light)] ">
                 {LANDING_PAGE_TEXTS.GET_HELP}
@@ -253,7 +253,7 @@ export default function Home() {
 
         {/* How It Works */}
         <section id="how-it-works" className="py-20 bg-[var(--bg-light)] relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <h2 className="text-3xl font-bold text-center mb-4 text-[var(--text-dark)]">{LANDING_PAGE_TEXTS.HOW_IT_WORKS.TITLE}</h2>
             <p className="text-[var(--text-dark)] text-center max-w-3xl mx-auto mb-12">{LANDING_PAGE_TEXTS.HOW_IT_WORKS.DESCRIPTION}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -294,7 +294,7 @@ export default function Home() {
 
         {/* Call to Action */}
         <section className="py-20 bg-gradient-to-br from-[var(--bg-dark)]  to-[var(--bg-dark)] text-[color:var(--text-light)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl font-bold mb-6">{LANDING_PAGE_TEXTS.CALL_TO_ACTION.TITLE}</h2>
             <p className="text-xl mb-8 max-w-3xl mx-auto text-[color:var(--text-light)]/80">{LANDING_PAGE_TEXTS.CALL_TO_ACTION.SUBTITLE}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
