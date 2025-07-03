@@ -85,7 +85,7 @@ export interface IPagination {
 export interface Tire {
   id: number;
   name: string;
-  description: string
+  description: string;
 }
 
 export interface GigCategory {
@@ -95,5 +95,23 @@ export interface GigCategory {
   tire: {
     id: number;
     name: string;
-  }
+  };
+}
+
+export interface ISubscriptionCurrentPlanApiResponse {
+  status: number;
+  message: string;
+  data: {
+    id: number;
+    user_id: number;
+    subscription_plan_id: number;
+    price: number;
+    status: string;
+    subscription_expiry_date: string;
+    transaction_id: string;
+    created_at: string;
+    updated_at: string;
+    is_deleted: boolean;
+    subscription_plan: ISubscriptionPlan;
+  };
 }

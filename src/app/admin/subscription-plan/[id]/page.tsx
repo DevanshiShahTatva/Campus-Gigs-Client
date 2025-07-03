@@ -336,7 +336,7 @@ const CreateEditSubscriptionPlan = ({ params }: PageProps) => {
                   <div className="text-red-500 text-sm mt-1 whitespace-pre-line ">Please remove duplicate features before adding new ones</div>
                 )}
 
-                {values.features.length >= MAX_FEATURES && (
+                {values.features.length > MAX_FEATURES && (
                   <div className="text-red-500 text-sm mt-1 whitespace-pre-line">Maximum {MAX_FEATURES} features allowed</div>
                 )}
 

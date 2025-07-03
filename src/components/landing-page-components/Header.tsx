@@ -18,15 +18,15 @@ const Header = () => {
     router.push("/login");
   };
 
-  const gotoProfile=()=>{
+  const gotoProfile = () => {
     router.push("/profile");
-  }
+  };
 
   useEffect(() => {
     if (localStorage) {
       setIsToken(localStorage.getItem("token") as string);
     }
-  }, [])
+  }, []);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -43,15 +43,19 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-[var(--bg-dark)]/95 backdrop-blur-sm shadow-sm fixed w-full top-0 z-50">
+    <header className="bg-[var(--bg-dark)]/95 backdrop-blur-sm shadow-sm sticky w-full top-0 z-500">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center">
           <span
             className="text-xl sm:text-2xl font-bold text-[color:var(--base)] hover:text-[color:var(--base-hover)] transition-colors duration-300 cursor-pointer"
-            onClick={() => router.push('/')}
+            onClick={() => router.push("/")}
           >
             {/* CampusGig */}
-            <img src="/light-logo.svg" alt="CampusGig Logo" className="h-6 w-auto sm:h-8 md:h-10 object-contain min-w-[32px] sm:min-w-[40px] mr-2 transition-all duration-300" />
+            <img
+              src="/light-logo.svg"
+              alt="CampusGig Logo"
+              className="h-6 w-auto sm:h-8 md:h-10 object-contain min-w-[32px] sm:min-w-[40px] mr-2 transition-all duration-300"
+            />
           </span>
         </div>
 

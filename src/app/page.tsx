@@ -43,8 +43,7 @@ export default function Home() {
   // Handle scroll to top button visibility
   useEffect(() => {
     const handleScroll = () => {
-      const scrollTop =
-        window.pageYOffset || document.documentElement.scrollTop;
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
       setShowScrollToTop(scrollTop > 300); // Show button after scrolling 300px
     };
 
@@ -79,21 +78,13 @@ export default function Home() {
         return () => clearTimeout(timeout);
       } else {
         const timeout = setTimeout(() => {
-          setCurrentPlaceholderIndex(
-            (prev) => (prev + 1) % searchSuggestions.length
-          );
+          setCurrentPlaceholderIndex((prev) => (prev + 1) % searchSuggestions.length);
           setIsTyping(true);
         }, 500); // Pause before next suggestion
         return () => clearTimeout(timeout);
       }
     }
-  }, [
-    searchText,
-    isTyping,
-    currentPlaceholderIndex,
-    searchSuggestions,
-    isUserTyping,
-  ]);
+  }, [searchText, isTyping, currentPlaceholderIndex, searchSuggestions, isUserTyping]);
 
   // Handle user input
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -165,29 +156,18 @@ export default function Home() {
             </div>
 
             {/* Brand Name */}
-            <h1 className="text-4xl md:text-6xl font-bold text-[color:var(--text-light)] mb-4 animate-fade-in">
-              CampusGig
-            </h1>
+            <h1 className="text-4xl md:text-6xl font-bold text-[color:var(--text-light)] mb-4 animate-fade-in">CampusGig</h1>
 
             {/* Tagline */}
-            <p
-              className="text-xl md:text-2xl text-[color:var(--text-light)]/80 mb-8 animate-fade-in"
-              style={{ animationDelay: "0.5s" }}
-            >
+            <p className="text-xl md:text-2xl text-[color:var(--text-light)]/80 mb-8 animate-fade-in" style={{ animationDelay: "0.5s" }}>
               {LANDING_PAGE_TEXTS.TAGLINE}
             </p>
 
             {/* Loading Animation */}
             <div className="flex justify-center space-x-2">
               <div className="w-3 h-3 bg-[var(--base)] rounded-full animate-bounce"></div>
-              <div
-                className="w-3 h-3 bg-[var(--base)] rounded-full animate-bounce"
-                style={{ animationDelay: "0.1s" }}
-              ></div>
-              <div
-                className="w-3 h-3 bg-[var(--base)] rounded-full animate-bounce"
-                style={{ animationDelay: "0.2s" }}
-              ></div>
+              <div className="w-3 h-3 bg-[var(--base)] rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+              <div className="w-3 h-3 bg-[var(--base)] rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
             </div>
 
             {/* Progress Bar */}
@@ -198,7 +178,7 @@ export default function Home() {
         </div>
       )}
 
-      <main className="pt-16">
+      <main className="">
         <section
           id="hero"
           className="relative bg-gradient-to-br from-[var(--bg-dark)]  to-[var(--bg-dark)] text-[color:var(--text-light)] py-20 md:py-40 overflow-hidden"
@@ -218,9 +198,7 @@ export default function Home() {
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-[color:var(--text-light)] ">
                 {LANDING_PAGE_TEXTS.GET_HELP}
               </h1>
-              <p className="text-xl sm:text-2xl mb-8 max-w-3xl mx-auto text-[color:var(--text-light)]/80">
-                {LANDING_PAGE_TEXTS.FIND_OR_OFFER}
-              </p>
+              <p className="text-xl sm:text-2xl mb-8 max-w-3xl mx-auto text-[color:var(--text-light)]/80">{LANDING_PAGE_TEXTS.FIND_OR_OFFER}</p>
               <div className="max-w-2xl mx-auto mb-8">
                 <div className="relative group">
                   <div className="absolute -inset-0.5  rounded-full blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
@@ -238,10 +216,7 @@ export default function Home() {
                       <div
                         className="absolute top-1/2 -translate-y-1/2 w-0.5 h-6 bg-[color:var(--base)] typing-cursor"
                         style={{
-                          left: `${Math.min(
-                            searchText.length * 8 + 24,
-                            280
-                          )}px`,
+                          left: `${Math.min(searchText.length * 8 + 24, 280)}px`,
                         }}
                       ></div>
                     )}
@@ -277,17 +252,10 @@ export default function Home() {
         </section>
 
         {/* How It Works */}
-        <section
-          id="how-it-works"
-          className="py-20 bg-[var(--bg-light)] relative overflow-hidden"
-        >
+        <section id="how-it-works" className="py-20 bg-[var(--bg-light)] relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-            <h2 className="text-3xl font-bold text-center mb-4 text-[var(--text-dark)]">
-              {LANDING_PAGE_TEXTS.HOW_IT_WORKS.TITLE}
-            </h2>
-            <p className="text-[var(--text-dark)] text-center max-w-3xl mx-auto mb-12">
-              {LANDING_PAGE_TEXTS.HOW_IT_WORKS.DESCRIPTION}
-            </p>
+            <h2 className="text-3xl font-bold text-center mb-4 text-[var(--text-dark)]">{LANDING_PAGE_TEXTS.HOW_IT_WORKS.TITLE}</h2>
+            <p className="text-[var(--text-dark)] text-center max-w-3xl mx-auto mb-12">{LANDING_PAGE_TEXTS.HOW_IT_WORKS.DESCRIPTION}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {LANDING_PAGE_TEXTS.HOW_IT_WORKS.STEPS.map((step, index) => (
                 <div key={index} className="group relative h-full">
@@ -296,18 +264,11 @@ export default function Home() {
                     <div className="w-16 h-16 bg-[var(--base-hover)]/10 rounded-full flex items-center justify-center mx-auto mb-4 transform group-hover:scale-110 transition-transform duration-300 text-[var(--base)]">
                       <IconMap name={step.icon} />
                     </div>
-                    <h3 className="text-xl font-semibold mb-3 text-[var(--text-dark)]">
-                      {step.title}
-                    </h3>
-                    <p className="text-[var(--text-semi-dark)] mb-4">
-                      {step.description}
-                    </p>
+                    <h3 className="text-xl font-semibold mb-3 text-[var(--text-dark)]">{step.title}</h3>
+                    <p className="text-[var(--text-semi-dark)] mb-4">{step.description}</p>
                     <ul className="text-left space-y-2 flex-grow">
                       {step.details.map((detail, i) => (
-                        <li
-                          key={i}
-                          className="flex items-start gap-2 text-[var(--text-semi-dark)]"
-                        >
+                        <li key={i} className="flex items-start gap-2 text-[var(--text-semi-dark)]">
                           <IconMap name="check" />
                           {detail}
                         </li>
@@ -334,12 +295,8 @@ export default function Home() {
         {/* Call to Action */}
         <section className="py-20 bg-gradient-to-br from-[var(--bg-dark)]  to-[var(--bg-dark)] text-[color:var(--text-light)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold mb-6">
-              {LANDING_PAGE_TEXTS.CALL_TO_ACTION.TITLE}
-            </h2>
-            <p className="text-xl mb-8 max-w-3xl mx-auto text-[color:var(--text-light)]/80">
-              {LANDING_PAGE_TEXTS.CALL_TO_ACTION.SUBTITLE}
-            </p>
+            <h2 className="text-3xl font-bold mb-6">{LANDING_PAGE_TEXTS.CALL_TO_ACTION.TITLE}</h2>
+            <p className="text-xl mb-8 max-w-3xl mx-auto text-[color:var(--text-light)]/80">{LANDING_PAGE_TEXTS.CALL_TO_ACTION.SUBTITLE}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/sign-up">
                 <button
