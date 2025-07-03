@@ -10,7 +10,7 @@ import { apiCall } from "@/utils/apiCall";
 import FormikTextField from "@/components/common/FormikTextField";
 import Button from "@/components/common/Button";
 import moment from "moment";
-import Cookie from 'js-cookie';
+import Cookie from "js-cookie";
 
 import "../../termsContent.css";
 
@@ -39,21 +39,23 @@ interface ITermsResponse {
 }
 
 const logInFormSchema = yup.object().shape({
-  email: yup.string()
+  email: yup
+    .string()
     .required("Email is required")
-    .test('email-format', 'Please enter a valid email address', (value) => {
+    .test("email-format", "Please enter a valid email address", (value) => {
       if (!value) return true;
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       return emailRegex.test(value);
     }),
-  password: yup.string()
+  password: yup
+    .string()
     .required("Password is required")
     .min(8, "Password must be at least 8 characters")
     .max(50, "Password must be no more than 50 characters")
     .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
     .matches(/[a-z]/, "Password must contain at least one lowercase letter")
     .matches(/\d/, "Password must contain at least one number")
-    .matches(/[!@#$%^&*(),.?":{}|<>]/, "Password must contain at least one special character")
+    .matches(/[!@#$%^&*(),.?":{}|<>]/, "Password must contain at least one special character"),
 });
 
 const LoadingSpinner = () => (
@@ -69,14 +71,14 @@ const TermsModal = ({
   isOpen,
   loginResponse,
   onAccept,
-  onDecline
+  onDecline,
 }: {
   isOpen: boolean;
   loginResponse: ILoginResponse | null;
   onAccept: () => void;
   onDecline: () => void;
 }) => {
-  const [termsData, setTermsData] = useState<ITermsResponse['data'] | null>(null);
+  const [termsData, setTermsData] = useState<ITermsResponse["data"] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -117,7 +119,7 @@ const TermsModal = ({
         body: {
           is_agreed: true,
           userId: loginResponse?.data.user._id,
-        }
+        },
       });
 
       if (response.success) {
@@ -146,20 +148,13 @@ const TermsModal = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <FiAlertCircle className="h-6 w-6" />
-              <h3 className="text-xl font-bold">
-                Terms and Conditions
-              </h3>
+              <h3 className="text-xl font-bold">Terms and Conditions</h3>
             </div>
-            <button
-              onClick={() => onDecline()}
-              className="text-white hover:text-gray-200 transition-colors"
-            >
+            <button onClick={() => onDecline()} className="text-white hover:text-gray-200 transition-colors">
               <FiX className="h-6 w-6" />
             </button>
           </div>
-          <p className="text-sm text-blue-100 mt-2">
-            Please read and accept our terms to continue
-          </p>
+          <p className="text-sm text-blue-100 mt-2">Please read and accept our terms to continue</p>
         </div>
         <div className="p-6 max-h-96 overflow-y-auto">
           {isLoading && <LoadingSpinner />}
@@ -170,10 +165,7 @@ const TermsModal = ({
                 <p className="text-lg font-semibold">Unable to Load Terms</p>
                 <p className="text-sm text-gray-600 mt-2">{error}</p>
               </div>
-              <button
-                onClick={handleRetry}
-                className="px-4 py-2 bg-[#218189] text-white rounded-lg hover:bg-[#1a6b72] transition-colors text-sm"
-              >
+              <button onClick={handleRetry} className="px-4 py-2 bg-[#218189] text-white rounded-lg hover:bg-[#1a6b72] transition-colors text-sm">
                 Try Again
               </button>
             </div>
@@ -181,31 +173,20 @@ const TermsModal = ({
           {!isLoading && !error && termsData && (
             <div className="prose prose-sm max-w-none">
               <div className="space-y-6 text-gray-700">
-                <div
-                  className="text-sm terms-and-conditions"
-                  dangerouslySetInnerHTML={{ __html: termsData.content }}
-                />
+                <div className="text-sm terms-and-conditions" dangerouslySetInnerHTML={{ __html: termsData.content }} />
               </div>
               <div className="bg-gray-100 border border-gray-200 rounded-lg p-4 mt-6">
                 <p className="text-sm text-gray-800">
-                  <strong>Last Updated:</strong> {
-                    termsData.updatedAt
-                      ? moment(termsData.updatedAt).format("DD/MM/YYYY HH:mm")
-                      : moment().format("DD/MM/YYYY HH:mm")
-                  }
+                  <strong>Last Updated:</strong>{" "}
+                  {termsData.updatedAt ? moment(termsData.updatedAt).format("DD/MM/YYYY HH:mm") : moment().format("DD/MM/YYYY HH:mm")}
                 </p>
                 <p className="text-sm text-gray-600 mt-1">
-                  By clicking "I Agree", you acknowledge that you have read, understood,
-                  and agree to be bound by these Terms and Conditions.
+                  By clicking "I Agree", you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions.
                 </p>
               </div>
             </div>
           )}
-          {!isLoading && !error && !termsData && (
-            <div className="text-center py-8 text-gray-500">
-              No terms data available
-            </div>
-          )}
+          {!isLoading && !error && !termsData && <div className="text-center py-8 text-gray-500">No terms data available</div>}
         </div>
         <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
           <div className="flex gap-3 justify-end">
@@ -220,8 +201,7 @@ const TermsModal = ({
               disabled={isLoading || !!error || !termsData}
               className="px-6 py-2 bg-[#218189] text-white rounded-lg hover:bg-[#1a6b72] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              <FiCheck className="h-4 w-4" />
-              I Agree
+              <FiCheck className="h-4 w-4" />I Agree
             </button>
           </div>
         </div>
@@ -267,14 +247,14 @@ const LogInPage = () => {
       if (loginResponse.data?.token) {
         Cookie.set("token", loginResponse.data.token);
         if (typeof window !== "undefined") {
-          localStorage?.setItem('token', loginResponse.data.token);
+          localStorage?.setItem("token", loginResponse.data.token);
         }
       }
       if (loginResponse.data.user) {
         if (typeof window !== "undefined") {
-          localStorage?.setItem('name', loginResponse.data.user.name);
-          localStorage?.setItem('profile', loginResponse.data.user.profile);
-          localStorage?.setItem('user_id', loginResponse.data.user._id);
+          localStorage?.setItem("name", loginResponse.data.user.name);
+          localStorage?.setItem("profile", loginResponse.data.user.profile);
+          localStorage?.setItem("user_id", loginResponse.data.user._id);
         }
       }
 
@@ -284,10 +264,10 @@ const LogInPage = () => {
         toast.error(loginResponse.message ?? "Login failed. Please try again.");
       }
       const { role } = loginResponse.data.user;
-      if (role === 'admin') {
+      if (role === "admin") {
         router.push("/admin/dashboard");
       } else {
-        router.push("/");
+        router.push("/user/dashboard");
       }
     }
 
@@ -316,12 +296,12 @@ const LogInPage = () => {
               <Formik
                 initialValues={{
                   email: "",
-                  password: ""
+                  password: "",
                 }}
                 onSubmit={handleLogInSubmit}
                 validationSchema={logInFormSchema}
               >
-                {({ isSubmitting }) => (
+                {({ isSubmitting }: any) => (
                   <Form className="space-y-5">
                     <FormikTextField name="email" label="Email" placeholder="Enter your email" type="email" />
                     <FormikTextField
@@ -330,18 +310,8 @@ const LogInPage = () => {
                       placeholder="Enter your password"
                       type={showPassword ? "text" : "password"}
                       endIcon={
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setShowPassword(!showPassword)
-                          }
-                          className="text-gray-500 cursor-pointer"
-                        >
-                          {showPassword ? (
-                            <FiEyeOff className="h-6 w-6 text-gray-500 mt-1" />
-                          ) : (
-                            <FiEye className="h-6 w-6 text-gray-500 mt-1" />
-                          )}
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-gray-500 cursor-pointer">
+                          {showPassword ? <FiEyeOff className="h-6 w-6 text-gray-500 mt-1" /> : <FiEye className="h-6 w-6 text-gray-500 mt-1" />}
                         </button>
                       }
                     />
@@ -354,7 +324,8 @@ const LogInPage = () => {
                       type="submit"
                       variant="green"
                       disabled={isSubmitting}
-                      className="w-full py-3 transition-colors disabled:opacity-50 bg-[#218189]">
+                      className="w-full py-3 transition-colors disabled:opacity-50 bg-[#218189]"
+                    >
                       {isSubmitting ? "Logging In..." : "Log In"}
                     </Button>
                     <p className="text-center text-sm text-gray-500 mt-4">
@@ -367,9 +338,7 @@ const LogInPage = () => {
                 )}
               </Formik>
             </div>
-            <p className="text-xs text-gray-400 text-center mt-10">
-              Copyright © {new Date().getFullYear()} All Rights Reserved.
-            </p>
+            <p className="text-xs text-gray-400 text-center mt-10">Copyright © {new Date().getFullYear()} All Rights Reserved.</p>
           </div>
           <div className="relative w-full h-full bg-[#fff] text-white hidden lg:block">
             <img src="/illustration.svg" alt="" />

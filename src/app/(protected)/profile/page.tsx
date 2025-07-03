@@ -430,7 +430,7 @@ const Profile = () => {
             <div className="min-w-[340px] min-h-[420px] transition-all duration-300">
               {activeTab === "profile" && formInitialValues && (
                 <DynamicForm
-                  formConfig={profileFormConfig}
+                  formConfig={profileFormConfig as any}
                   initialValues={formInitialValues}
                   onSubmit={handleProfileUpdate}
                 />

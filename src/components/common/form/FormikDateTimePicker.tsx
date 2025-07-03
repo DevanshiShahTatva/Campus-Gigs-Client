@@ -1,9 +1,10 @@
 import React from "react";
 import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import { useField, useFormikContext } from "formik";
 import { CalendarIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
+
+import "react-datepicker/dist/react-datepicker.css";
 
 interface Props {
   name: string;

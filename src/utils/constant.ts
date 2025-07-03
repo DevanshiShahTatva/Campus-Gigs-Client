@@ -45,6 +45,7 @@ export const API_ROUTES = {
   LOGIN: "/api/login",
   CONTACT_US: "/contact-us",
   GIGS: "/gigs",
+  GIG_CATEGORY: "/gig-category",
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
     AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",
@@ -87,7 +88,7 @@ export const USER_SIDEBAR_ITEMS = [
     id: 2,
     title: "Subscription Plan",
     route: ROUTES.ADMIN.SUBSCRIPTION,
-    icon: "/assets/DashboardIcon.svg",
+    icon: "/assets/subscription.svg",
   },
   {
     id: 3,
