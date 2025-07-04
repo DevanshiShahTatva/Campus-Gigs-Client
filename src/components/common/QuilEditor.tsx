@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import dynamic from "next/dynamic";
-// import "react-quill-new/dist/quill.snow.css";
+import "react-quill-new/dist/quill.snow.css";
 import { IQuillEditorProps } from "./types";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
