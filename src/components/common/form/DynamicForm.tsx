@@ -68,6 +68,7 @@ export type FormFieldConfig = {
 interface DynamicFormProps {
   formConfig: FormFieldConfig[];
   onSubmit: (values: any) => void;
+  onCancel?: () => void;
   initialValues: FormikValues;
   isViewMode?: boolean;
   onFieldChange?: (fieldName: string, value: any) => void;
@@ -80,7 +81,8 @@ interface InnerFormProps {
   formConfig: FormFieldConfig[];
   isViewMode?: boolean;
   onFieldChange?: (fieldName: string, value: any) => void;
-  buttonText: string
+  buttonText: string;
+  onCancel?: () => void;
 }
 
 const DynamicForm = ({
@@ -90,7 +92,8 @@ const DynamicForm = ({
   isViewMode,
   onFieldChange,
   buttonText = "Submit",
-  enableReinitialize = false
+  enableReinitialize = false,
+  onCancel,
 }: DynamicFormProps) => {
   const validationSchema = formConfig.reduce((acc: any, field) => {
     field.subfields.forEach((subfield) => {
@@ -216,6 +219,7 @@ const DynamicForm = ({
           isViewMode={isViewMode}
           onFieldChange={onFieldChange}
           buttonText={buttonText}
+          onCancel={onCancel}
         />
       )}
     </Formik>
@@ -227,7 +231,8 @@ const InnerForm = ({
   formConfig,
   isViewMode,
   onFieldChange,
-  buttonText
+  buttonText,
+  onCancel,
 }: InnerFormProps) => {
   const [tagInputs, setTagInputs] = useState<Record<string, string>>({});
   const { values, errors, touched, setFieldValue, handleSubmit } = formik;
@@ -586,7 +591,19 @@ const InnerForm = ({
         )
       )}
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-4">
+        {onCancel && (
+          <Button
+            size={"lg"}
+            type="button"
+            variant={"outline"}
+            className="mt-4"
+            onClick={onCancel}
+          >
+            Cancel
+          </Button>
+        )}
+
         <Button
           size={"lg"}
           type="submit"

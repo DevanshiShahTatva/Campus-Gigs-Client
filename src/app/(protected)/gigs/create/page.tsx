@@ -273,6 +273,7 @@ const CreateGig = () => {
                   onFieldChange={handleFieldChange}
                   buttonText={isEdit ? "Edit" : "Submit"}
                   enableReinitialize={isEdit ? true : false}
+                  onCancel={() => router.back()}
                 />
               </CardContent>
             </Card>
