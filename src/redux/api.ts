@@ -14,15 +14,25 @@ export const api = createApi({
       return headers;
     },
   }),
+  tagTypes: ["UserProfile"],
   endpoints: (builder) => ({
     getUserProfile: builder.query<any, void>({
       query: () => "/user/profile",
+      providesTags: ["UserProfile"],
     }),
     getProviderPublicProfile: builder.query<any, string>({
       query: (id: string) => `/user/profile/public/${id}`,
+    }),
+    updateUserProfile: builder.mutation<any, any>({
+      query: (body) => ({
+        url: "/user/profile",
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["UserProfile"],
     }),
     // Add more endpoints here
   }),
 });
 
-export const { useGetUserProfileQuery, useGetProviderPublicProfileQuery } = api;
+export const { useGetUserProfileQuery, useGetProviderPublicProfileQuery, useUpdateUserProfileMutation } = api;

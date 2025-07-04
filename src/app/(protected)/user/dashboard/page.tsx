@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, DollarSign, Users, CreditCard, TrendingUp, Clock, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useGetUserProfileQuery } from '@/redux/api';
 
 const stats = [
   {
@@ -84,6 +85,8 @@ const upcomingTasks = [
 ];
 
 export default function Dashboard() {
+  useGetUserProfileQuery(undefined, { refetchOnMountOrArgChange: true });
+
   return (
     <div className="space-y-6 max-w-8xl mx-auto">
       <div className="flex items-center justify-between">

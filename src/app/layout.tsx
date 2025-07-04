@@ -23,7 +23,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`antialiased`}>
         <ReduxProvider>
-          <ToastContainer />
+          <ToastContainer style={{zIndex: 999999999}} />
           <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
         </ReduxProvider>
       </body>
