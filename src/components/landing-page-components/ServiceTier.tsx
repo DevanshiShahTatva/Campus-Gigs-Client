@@ -12,14 +12,11 @@ const ServiceTier = () => {
   return (
     <div>
       <section id="service-tiers" className="py-20 bg-[var(--bg-light)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-4 text-[var(--text-dark)]">
-            Service Tiers Explained
-          </h2>
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-4 text-[var(--text-dark)]">Service Tiers Explained</h2>
           <p className="text-[var(--text-semi-dark)] text-center max-w-3xl mx-auto mb-12">
-            Our tiered system ensures quality and appropriate pricing for
-            different types of services. Each tier represents a different level
-            of expertise and complexity.
+            Our tiered system ensures quality and appropriate pricing for different types of services. Each tier represents a different level of
+            expertise and complexity.
           </p>
 
           {/* Tier Selection Tabs with Animated Underline */}
@@ -50,9 +47,7 @@ const ServiceTier = () => {
               <div
                 key={tab.id}
                 className={`cursor-pointer flex flex-wrap gap-2 transition-all duration-500 ease-in-out ${
-                  activeTier === tab.id
-                    ? "opacity-100 transform translate-y-0"
-                    : "opacity-0 transform -translate-y-4 pointer-events-none absolute"
+                  activeTier === tab.id ? "opacity-100 transform translate-y-0" : "opacity-0 transform -translate-y-4 pointer-events-none absolute"
                 }`}
               >
                 {tab.services.map((service, index) => (
@@ -91,19 +86,11 @@ const ServiceTier = () => {
                     />
                   </div>
                   <div className="w-full md:w-1/2">
-                    <h3 className="text-2xl font-bold text-[color:var(--base)] mb-2 transition-all duration-300">
-                      {tier.tier}
-                    </h3>
-                    <h4 className="text-xl font-semibold mb-4 text-[var(--text-dark)] transition-all duration-300">
-                      {tier.title}
-                    </h4>
-                    <p className="text-[var(--text-semi-dark)] mb-4 transition-all duration-300">
-                      {tier.description}
-                    </p>
+                    <h3 className="text-2xl font-bold text-[color:var(--base)] mb-2 transition-all duration-300">{tier.tier}</h3>
+                    <h4 className="text-xl font-semibold mb-4 text-[var(--text-dark)] transition-all duration-300">{tier.title}</h4>
+                    <p className="text-[var(--text-semi-dark)] mb-4 transition-all duration-300">{tier.description}</p>
                     <div className="mb-4">
-                      <h5 className="font-semibold text-[var(--text-dark)] mb-2 transition-all duration-300">
-                        Examples:
-                      </h5>
+                      <h5 className="font-semibold text-[var(--text-dark)] mb-2 transition-all duration-300">Examples:</h5>
                       <ul className="list-disc list-inside text-[var(--text-semi-dark)] space-y-1">
                         {tier.examples.map((example, i) => (
                           <li
@@ -118,9 +105,7 @@ const ServiceTier = () => {
                         ))}
                       </ul>
                     </div>
-                    <p className="text-[color:var(--base)] font-semibold transition-all duration-300">
-                      {tier.price}
-                    </p>
+                    <p className="text-[color:var(--base)] font-semibold transition-all duration-300">{tier.price}</p>
                   </div>
                 </div>
               </div>

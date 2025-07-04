@@ -6,7 +6,7 @@ import { ROUTES } from "@/utils/constant";
 
 const sidebarItems = [
   { id: 1, title: "Dashboard", icon: <FaHome />, route: "/user/dashboard" },
-  { id: 2, title: "Chat", icon: <FaComments />, route: "#" },
+  { id: 2, title: "Chat", icon: <FaComments />, route: "/chat" },
   { id: 3, title: "Gigs", icon: <FaTasks />, route: "/gigs" },
   { id: 5, title: "Subscription Plans", icon: <FaCreditCard />, route: "/user/buy-subscription" },
   { id: 4, title: "Settings", icon: <FaCog />, route: "#" },

@@ -278,7 +278,7 @@ const SupportRequestsPage = () => {
 
   return (
     <section>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-8xl mx-auto">
         {error ? (
           <div className="text-center text-red-600 font-medium py-8">{error}</div>
         ) : (

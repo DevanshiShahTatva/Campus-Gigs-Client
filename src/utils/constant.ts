@@ -39,6 +39,11 @@ export const ROUTES = {
   USER: {
     DASHBOARD: "/user/dashboard",
     BUY_SUBSCRIPTION: "/user/buy-subscription",
+    BUY_SUBSCRIPTION_CHECKOUT: "/user/buy-subscription/:id/checkout",
+    PROFILE: "/profile",
+    GIGS: "/gigs",
+    GIGS_CREATE: "/gigs/create",
+    PROVIDER: "/provider",
   },
 };
 

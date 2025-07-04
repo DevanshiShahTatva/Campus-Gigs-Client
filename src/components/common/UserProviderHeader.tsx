@@ -2,19 +2,13 @@
 import React, { useState, useContext } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { FaBell, FaUserCircle, FaChevronDown, FaExchangeAlt, FaUser, FaCog, FaSignOutAlt, FaCheckCircle, FaInfoCircle, FaBars, FaStar } from "react-icons/fa";
-import { RoleContext } from '@/context/role-context';
-import { useGetUserProfileQuery } from '@/redux/api';
-import { useDispatch } from 'react-redux';
-import { logout } from '@/redux/slices/userSlice';
+import { FaBell, FaChevronDown, FaExchangeAlt, FaUser, FaCog, FaSignOutAlt, FaCheckCircle, FaInfoCircle, FaBars, FaStar } from "react-icons/fa";
+import { RoleContext } from "@/context/role-context";
+import { useGetUserProfileQuery } from "@/redux/api";
+import { useDispatch } from "react-redux";
+import { logout } from "@/redux/slices/userSlice";
 
-const navLinks = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/gigs", label: "Gigs" },
-  { href: "/chat", label: "Chat" },
-];
-
-const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean, setSidebarOpen: (open: boolean) => void }) => {
+const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean; setSidebarOpen: (open: boolean) => void }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const { role, setRole } = useContext(RoleContext);
@@ -24,44 +18,50 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
     refetchOnMountOrArgChange: true,
   });
   const user = data?.data;
-  const initials = user?.name ? user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : '';
+  const initials = user?.name
+    ? user.name
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .toUpperCase()
+    : "";
   const dispatch = useDispatch();
-  
+
   // Placeholder notifications
   const notifications = [
-    { id: 1, type: 'info', message: 'Your gig was approved!', read: false },
-    { id: 2, type: 'success', message: 'Payment received for completed gig.', read: false },
-    { id: 3, type: 'info', message: 'New message from Alice.', read: true },
+    { id: 1, type: "info", message: "Your gig was approved!", read: false },
+    { id: 2, type: "success", message: "Payment received for completed gig.", read: false },
+    { id: 3, type: "info", message: "New message from Alice.", read: true },
   ];
 
   const handleRoleSwitch = () => {
-    setRole(role === 'user' ? 'provider' : 'user');
+    setRole(role === "user" ? "provider" : "user");
   };
 
   const handleLogout = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       if ((window as any).__PERSISTOR) {
         (window as any).__PERSISTOR.purge();
       }
-      document.cookie = 'token=; Max-Age=0; path=/;';
+      document.cookie = "token=; Max-Age=0; path=/;";
     }
     dispatch(logout());
-    router.push('/login');
+    router.push("/login");
   };
 
   // Close dropdowns on outside click
   React.useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (!(e.target as HTMLElement).closest('.notif-dropdown')) setNotifOpen(false);
-      if (!(e.target as HTMLElement).closest('.profile-dropdown')) setDropdownOpen(false);
+      if (!(e.target as HTMLElement).closest(".notif-dropdown")) setNotifOpen(false);
+      if (!(e.target as HTMLElement).closest(".profile-dropdown")) setDropdownOpen(false);
     };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
   return (
     <header className="w-full h-16 flex items-center justify-between border-b border-[var(--base)]/10 shadow bg-white sticky top-0 z-[999]">
-      <div className="w-full mx-auto flex flex-wrap items-center justify-between max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="w-full mx-auto flex flex-wrap items-center justify-between max-w-8xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 md:gap-6 min-w-0">
           {/* Hamburger menu icon (always visible, themed) */}
           <button
@@ -71,24 +71,13 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
           >
             <FaBars className="w-6 h-6 text-[var(--base)]" />
           </button>
-          <span className="flex items-center cursor-pointer min-w-0" onClick={() => router.push('/')}> 
-            <img src="/logo.svg" alt="CampusGig Logo" className="h-6 w-auto min-w-[24px] sm:h-8 sm:min-w-[32px] md:h-10 md:min-w-[40px] object-contain transition-all duration-300" />
+          <span className="flex items-center cursor-pointer min-w-0" onClick={() => router.push("/")}>
+            <img
+              src="/logo.svg"
+              alt="CampusGig Logo"
+              className="h-6 w-auto min-w-[24px] sm:h-8 sm:min-w-[32px] md:h-10 md:min-w-[40px] object-contain transition-all duration-300"
+            />
           </span>
-          <nav className="hidden md:flex gap-4 flex-wrap min-w-0">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`truncate font-medium transition-all duration-300 px-2 py-1 rounded-md ${
-                  pathname === link.href
-                    ? "text-[var(--base)] bg-[var(--base)]/10"
-                    : "text-gray-700 hover:text-[var(--base)]"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
         </div>
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           {/* Notifications always visible */}
@@ -103,47 +92,49 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
             </button>
             {/* Notifications Dropdown */}
             <div
-              className={`notif-dropdown absolute right-0 mt-2 w-80 bg-white border border-[var(--base)]/20 rounded-xl shadow-2xl transition-all duration-200 z-40 overflow-hidden ${notifOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'}`}
+              className={`notif-dropdown absolute right-0 mt-2 w-80 bg-white border border-[var(--base)]/20 rounded-xl shadow-2xl transition-all duration-200 z-40 overflow-hidden ${
+                notifOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
+              }`}
               onMouseLeave={() => setNotifOpen(false)}
             >
               <div className="px-5 py-4 border-b border-gray-100 bg-[var(--base)]/5 font-semibold text-gray-900 text-base">Notifications</div>
               <div className="max-h-64 overflow-y-auto divide-y divide-gray-100">
                 {notifications.length === 0 ? (
                   <div className="px-5 py-6 text-center text-gray-400">No notifications</div>
-                ) : notifications.map((notif) => (
-                  <div key={notif.id} className={`flex items-start gap-3 px-5 py-4 ${notif.read ? 'bg-gray-50' : 'bg-white'}`}> 
-                    <span className="mt-1">
-                      {notif.type === 'success' ? (
-                        <FaCheckCircle className="text-green-500 text-lg" />
-                      ) : (
-                        <FaInfoCircle className="text-[var(--base)] text-lg" />
-                      )}
-                    </span>
-                    <div className="flex-1">
-                      <div className="text-sm text-gray-800">{notif.message}</div>
-                      {!notif.read && (
-                        <button className="mt-2 text-xs text-[var(--base)] hover:underline">Mark as read</button>
-                      )}
+                ) : (
+                  notifications.map((notif) => (
+                    <div key={notif.id} className={`flex items-start gap-3 px-5 py-4 ${notif.read ? "bg-gray-50" : "bg-white"}`}>
+                      <span className="mt-1">
+                        {notif.type === "success" ? (
+                          <FaCheckCircle className="text-green-500 text-lg" />
+                        ) : (
+                          <FaInfoCircle className="text-[var(--base)] text-lg" />
+                        )}
+                      </span>
+                      <div className="flex-1">
+                        <div className="text-sm text-gray-800">{notif.message}</div>
+                        {!notif.read && <button className="mt-2 text-xs text-[var(--base)] hover:underline">Mark as read</button>}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
           {/* User/Provider toggle for md+ (header, outside dropdown) */}
           <div className="hidden md:flex items-center gap-2 ml-2 bg-white border border-gray-200 rounded-full px-2 py-1 shadow-sm">
-            <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold select-none w-20
-              ${role === 'user' ? 'bg-gray-100 text-gray-700' : 'bg-[var(--base)]/10 text-[var(--base)]'}`}>
-              {role === 'user'
-                ? <FaUser className="w-3.5 h-3.5" />
-                : <FaStar className="w-3.5 h-3.5" />}
-              {role === 'user' ? 'User' : 'Provider'}
+            <span
+              className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold select-none w-20
+              ${role === "user" ? "bg-gray-100 text-gray-700" : "bg-[var(--base)]/10 text-[var(--base)]"}`}
+            >
+              {role === "user" ? <FaUser className="w-3.5 h-3.5" /> : <FaStar className="w-3.5 h-3.5" />}
+              {role === "user" ? "User" : "Provider"}
             </span>
             <button
               className="p-2 rounded-full hover:bg-[var(--base)]/10 transition-colors text-[var(--base)]"
               onClick={handleRoleSwitch}
-              title={`Switch to ${role === 'user' ? 'Provider' : 'User'}`}
-              aria-label={`Switch to ${role === 'user' ? 'Provider' : 'User'}`}
+              title={`Switch to ${role === "user" ? "Provider" : "User"}`}
+              aria-label={`Switch to ${role === "user" ? "Provider" : "User"}`}
             >
               <FaExchangeAlt className="w-4 h-4" />
             </button>
@@ -164,11 +155,13 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
                   {initials}
                 </span>
               )}
-              <FaChevronDown className={`text-xs text-gray-700 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+              <FaChevronDown className={`text-xs text-gray-700 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
             </button>
             {/* Profile Dropdown */}
             <div
-              className={`profile-dropdown absolute right-0 mt-2 w-56 bg-white border border-[var(--base)]/20 rounded-xl shadow-2xl transition-all duration-200 z-40 overflow-hidden ${dropdownOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'}`}
+              className={`profile-dropdown absolute right-0 mt-2 w-56 bg-white border border-[var(--base)]/20 rounded-xl shadow-2xl transition-all duration-200 z-40 overflow-hidden ${
+                dropdownOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
+              }`}
               onMouseLeave={() => setDropdownOpen(false)}
             >
               <div className="px-5 py-4 flex items-center gap-3 border-b border-gray-100 bg-[var(--base)]/5">
@@ -184,10 +177,13 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
                 <div>
                   {user?.name && <div className="font-semibold text-gray-900 text-base">{user.name}</div>}
                   {user?.email && <div className="text-xs text-gray-500 truncate max-w-xs">{user.email}</div>}
-                  <div className="text-xs text-gray-500">{role === 'user' ? 'User' : 'Provider'} Mode</div>
+                  <div className="text-xs text-gray-500">{role === "user" ? "User" : "Provider"} Mode</div>
                 </div>
               </div>
-              <Link href="/profile" className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-[var(--base)]/10 transition text-sm font-medium">
+              <Link
+                href="/profile"
+                className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-[var(--base)]/10 transition text-sm font-medium"
+              >
                 <FaUser className="text-[var(--base)]" /> Profile
               </Link>
               <Link href="#" className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-[var(--base)]/10 transition text-sm font-medium">
@@ -195,31 +191,33 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
               </Link>
               {/* User/Provider toggle for mobile (only visible on small screens) */}
               <div className="flex md:hidden items-center gap-2 px-5 py-3 border-t border-gray-100">
-                <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold select-none w-20
-                  ${role === 'user' ? 'bg-gray-100 text-gray-700' : 'bg-[var(--base)]/10 text-[var(--base)]'}`}>
-                  {role === 'user'
-                    ? <FaUser className="w-3.5 h-3.5" />
-                    : <FaStar className="w-3.5 h-3.5" />}
-                  {role === 'user' ? 'User' : 'Provider'}
+                <span
+                  className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold select-none w-20
+                  ${role === "user" ? "bg-gray-100 text-gray-700" : "bg-[var(--base)]/10 text-[var(--base)]"}`}
+                >
+                  {role === "user" ? <FaUser className="w-3.5 h-3.5" /> : <FaStar className="w-3.5 h-3.5" />}
+                  {role === "user" ? "User" : "Provider"}
                 </span>
                 <button
                   className="p-2 rounded-full hover:bg-[var(--base)]/10 transition-colors text-[var(--base)]"
                   onClick={handleRoleSwitch}
-                  title={`Switch to ${role === 'user' ? 'Provider' : 'User'}`}
-                  aria-label={`Switch to ${role === 'user' ? 'Provider' : 'User'}`}
+                  title={`Switch to ${role === "user" ? "Provider" : "User"}`}
+                  aria-label={`Switch to ${role === "user" ? "Provider" : "User"}`}
                 >
                   <FaExchangeAlt className="w-4 h-4" />
                 </button>
               </div>
-              <button className="flex items-center gap-3 w-full text-left px-5 py-3 text-red-600 hover:bg-red-50 transition text-sm font-medium border-t border-gray-100" onClick={handleLogout}>
+              <button
+                className="flex items-center gap-3 w-full text-left px-5 py-3 text-red-600 hover:bg-red-50 transition text-sm font-medium border-t border-gray-100"
+                onClick={handleLogout}
+              >
                 <FaSignOutAlt className="text-red-500" /> Logout
               </button>
             </div>
           </div>
-          
         </div>
       </div>
     </header>
   );
 };
-export default UserProviderHeader; 
+export default UserProviderHeader;
