@@ -22,8 +22,11 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import Loader from "@/components/common/Loader";
 import MyGigSkelton from "@/components/skeleton/MyGigSkelton";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
+ import { useRouter, usePathname } from 'next/navigation';
 
 const MyGigs = () => {
+  const router = useRouter();
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState("un_started");
   const [loading, setLoading] = useState<boolean>(true);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -114,6 +117,12 @@ const MyGigs = () => {
     } else {
       return "completed"
     }
+  };
+
+  const handleNavigateToEdit = (id: number) => {
+    const newQuery = { gigId: String(id) };
+    const newUrl = `gigs/create?${new URLSearchParams(newQuery).toString()}`;
+    router.push(newUrl)
   };
 
   return (
@@ -209,6 +218,7 @@ const MyGigs = () => {
                                 size="icon"
                                 variant="outline"
                                 className="text-teal-600 border-teal-600 hover:bg-teal-50"
+                                onClick={() => handleNavigateToEdit(gig.id)}
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>

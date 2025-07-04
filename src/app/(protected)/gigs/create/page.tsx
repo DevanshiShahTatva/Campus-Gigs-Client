@@ -9,7 +9,9 @@ import { API_ROUTES, PAYMENT_TYPE, PROFILE_TYPE } from "@/utils/constant";
 import SuccessCard from "@/components/common/SuccessCard";
 import { gigsFields, GigsFormVal } from "@/config/gigs.config";
 import { FormikValues } from "formik";
-import { IDropdownOption } from "@/utils/interface";
+import { Gigs, IDropdownOption } from "@/utils/interface";
+import { useSearchParams } from "next/navigation";
+import Loader from "@/components/common/Loader";
 
 const initialFormState = {
   title: "",
@@ -33,10 +35,56 @@ const CreateGig = () => {
   const [skillsDropdown, setSkillsDropdown] = useState<IDropdownOption[]>([]);
   const [isFormSubmitted, setFormSubmitted] = useState<boolean>(false);
   const [isSkillsLoading, setIsSkillsLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
+  const searchParams = useSearchParams();
+
+  const gigId = searchParams.get("gigId");
 
   useEffect(() => {
+    if (gigId) {
+      fetchGigDetails(gigId);
+    }
     fetchGigCategories();
   }, []);
+
+  const fetchGigDetails = async (gigId: string) => {
+    try {
+      setLoading(true);
+
+      const resp = await apiCall({
+        endPoint: `${API_ROUTES.GIGS + "/" + gigId}`,
+        method: "GET",
+      });
+
+      if (resp?.success) {
+        const formData = getFormData(resp.data);
+        fetchSkillsBaseOnCategory(formData.gig_category_id)
+        setFormValues(formData);
+        setIsEdit(true);
+      }
+    } catch (error) {
+      toast.error("Failed to delete gig");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getFormData = (gig: Gigs): GigsFormVal => {
+    return {
+      title: gig.title,
+      description: gig.description,
+      certifications: gig.certifications,
+      profile_type: gig.payment_type as PROFILE_TYPE,
+      payment_type: gig.payment_type as PAYMENT_TYPE,
+      price: Number(gig.price),
+      gig_category_id: String(gig.gig_category_id),
+      skills: gig.skills.map((skill) => String(skill.id)),
+      start_date_time: gig.start_date_time,
+      end_date_time: gig.end_date_time,
+      images: []
+    }
+  }
 
   const fetchGigCategories = async () => {
     try {
@@ -46,14 +94,12 @@ const CreateGig = () => {
       });
 
       if (resp?.success) {
-        const options = resp.data.map(
-          (opt: { id: number; name: string }) => {
-            return {
-              id: String(opt.id),
-              label: opt.name,
-            };
-          }
-        );
+        const options = resp.data.map((opt: { id: number; name: string }) => {
+          return {
+            id: String(opt.id),
+            label: opt.name,
+          };
+        });
         setGigCategoryDropdown(options);
       }
     } catch (error) {
@@ -166,6 +212,11 @@ const CreateGig = () => {
 
   return (
     <div className="w-full">
+      {loading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <Loader size={48} colorClass="text-[var(--base)]" />
+        </div>
+      )}
       <div className="max-w-[980px] mx-auto pt-8 pb-4">
         {isFormSubmitted ? (
           <SuccessCard
@@ -177,7 +228,7 @@ const CreateGig = () => {
           <>
             <div className="flex flex-col items-center justify-center gap-3 mb-6">
               <h3 className="text-3xl font-bold text-[var(--base)]">
-                Post Your Gig Request
+                {isEdit ? "Edit" : "Post"} Your Gig Request
               </h3>
               <p>
                 Tell us what you need done and receive bids from skilled
@@ -187,8 +238,7 @@ const CreateGig = () => {
             <Card>
               <CardContent>
                 <DynamicForm
-                  formConfig={
-                    gigsFields(
+                  formConfig={gigsFields(
                     formValues,
                     memoizedGigCategoryDropdown,
                     memoizedSkillsDropdown,
@@ -197,6 +247,8 @@ const CreateGig = () => {
                   onSubmit={handleSubmit}
                   initialValues={formValues}
                   onFieldChange={handleFieldChange}
+                  buttonText={isEdit ? "Edit" : "Submit"}
+                  enableReinitialize={isEdit ? true : false}
                 />
               </CardContent>
             </Card>
