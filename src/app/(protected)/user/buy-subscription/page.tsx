@@ -94,7 +94,7 @@ const BuySubscription = () => {
   return (
     <>
       <CentralLoader loading={isCentralLoading} />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header with Skip Button */}
         <div className="flex justify-between items-center mb-8">
           <div>

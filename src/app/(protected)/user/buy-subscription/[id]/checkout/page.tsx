@@ -51,7 +51,7 @@ const Checkout = ({ params }: PageProps) => {
   };
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="text-center mb-12">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[var(--base)] to-[var(--base-hover)] rounded-full mb-4">
@@ -208,7 +208,7 @@ const Checkout = ({ params }: PageProps) => {
       )}
 
       {/* FAQ or Help Section */}
-      <div className="mt-12 text-center">
+      <div className="mt-12 mb-4 text-center">
         <p className="text-gray-600">
           Need help?{" "}
           <Link href="/ContactUs" className="text-[var(--base)] hover:text-[var(--base-hover)] font-medium">
