@@ -254,7 +254,7 @@ const LogInPage = () => {
           token: loginResponse.data.token,
           name: loginResponse.data.user.name,
           profile: loginResponse.data.user.profile,
-          user_id: loginResponse.data.user._id,
+          user_id: loginResponse.data.user.id,
         }));
       }
       if (loginResponse.success) {
