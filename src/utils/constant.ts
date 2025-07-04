@@ -45,6 +45,7 @@ export const API_ROUTES = {
   LOGIN: "/api/login",
   CONTACT_US: "/contact-us",
   GIGS: "/gigs",
+  MY_GIGS: "/gigs/my-gigs",
   GIG_CATEGORY: "/gig-category",
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",

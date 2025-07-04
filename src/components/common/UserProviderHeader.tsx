@@ -60,7 +60,7 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
   }, []);
 
   return (
-    <header className="w-full h-16 flex items-center justify-between border-b border-[var(--base)]/10 shadow bg-white sticky top-0 z-[99997]">
+    <header className="w-full h-16 flex items-center justify-between border-b border-[var(--base)]/10 shadow bg-white sticky top-0 z-[999]">
       <div className="w-full mx-auto flex flex-wrap items-center justify-between max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 md:gap-6 min-w-0">
           {/* Hamburger menu icon (always visible, themed) */}

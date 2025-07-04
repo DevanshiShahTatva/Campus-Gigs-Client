@@ -26,8 +26,8 @@ import "slick-carousel/slick/slick-theme.css";
 import { toast } from "react-toastify";
 import { apiCall } from "@/utils/apiCall";
 import { API_ROUTES } from "@/utils/constant";
-import { formatTimeDifference, Gigs } from "./helper";
-import { IPagination } from "@/utils/interface";
+import { formatTimeDifference } from "./helper";
+import { IPagination, Gigs } from "@/utils/interface";
 import { getAvtarName, renderBaseOnCondition } from "@/utils/helper";
 import moment from "moment";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -42,11 +42,11 @@ const GigListing = () => {
     totalPages: 0,
     total: 1,
   });
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   const debounceSearch = useDebounce(searchQuery, 700);
 
@@ -160,16 +160,6 @@ const GigListing = () => {
               </div>
             </div>
           </div>
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsModalOpen(true);
-            }}
-            className="px-4 py-4 rounded-sm"
-          >
-            Place Bid
-          </Button>
         </div>
       </div>
     );
