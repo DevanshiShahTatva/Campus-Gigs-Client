@@ -2,7 +2,7 @@ import { CommonFormField } from "@/components/common/form/CommonFormModal";
 
 export const gigBidFields: CommonFormField[] = [
   {
-    name: "bid_type",
+    name: "payment_type",
     label: "Bid Type",
     type: "select",
     options: [
