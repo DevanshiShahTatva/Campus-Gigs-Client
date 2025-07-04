@@ -22,7 +22,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import Loader from "@/components/common/Loader";
 import MyGigSkelton from "@/components/skeleton/MyGigSkelton";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
- import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname } from "next/navigation";
 
 const MyGigs = () => {
   const router = useRouter();
@@ -110,19 +110,19 @@ const MyGigs = () => {
   };
 
   const geGigStatus = (status: string) => {
-    if(status === "un_started") {
+    if (status === "un_started") {
       return "Open Gigs";
-    } else if(status === "in_progress") {
+    } else if (status === "in_progress") {
       return "in Progress";
     } else {
-      return "completed"
+      return "completed";
     }
   };
 
   const handleNavigateToEdit = (id: number) => {
     const newQuery = { gigId: String(id) };
     const newUrl = `gigs/create?${new URLSearchParams(newQuery).toString()}`;
-    router.push(newUrl)
+    router.push(newUrl);
   };
 
   return (
@@ -214,22 +214,14 @@ const MyGigs = () => {
                           </div>
                           {activeTab === "un_started" && (
                             <div className="flex gap-2 ml-4">
-                              <Button
-                                size="icon"
-                                variant="outline"
-                                className="text-teal-600 border-teal-600 hover:bg-teal-50"
+                              <Edit
                                 onClick={() => handleNavigateToEdit(gig.id)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="icon"
-                                variant="outline"
-                                className="text-red-600 border-red-600 hover:bg-red-50"
+                                className="cursor-pointer h-5 w-5 text-teal-600 hover:text-teal-600"
+                              />
+                              <Trash2
                                 onClick={() => handleDelete(gig.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                                className="cursor-pointer h-5 w-5 text-red-600 hover:text-red-600"
+                              />
                             </div>
                           )}
                         </div>
