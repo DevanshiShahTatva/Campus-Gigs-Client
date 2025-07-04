@@ -14,8 +14,8 @@ import {
 import { cn } from "@/lib/utils";
 
 interface FileUploadProps {
-  value?: File[];
-  onChange?: (files: File[]) => void;
+  value?: (File | string)[];
+  onChange?: (files: (File | string)[]) => void;
   multiple?: boolean;
   accept?: string;
   maxSize?: number; // in MB
@@ -245,38 +245,48 @@ const FileUpload: React.FC<FileUploadProps> = ({
             Selected Files ({value.length})
           </h4>
           <div className="space-y-2">
-            {value.map((file, index) => (
-              <div
-                key={`${file.name}-${file.size}-${index}`}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
-              >
-                <div className="flex items-center space-x-3 flex-1 min-w-0">
-                  {getFileIcon(file)}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {file.name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {formatFileSize(file.size)}
-                    </p>
+            {value.map((file, index) => {
+              const isFile = file instanceof File;
+              const fileName = isFile
+                ? file.name
+                : file.split("/").pop() || "image.jpg";
+              const fileSize = isFile ? formatFileSize(file.size) : "Existing";
+
+              return (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
+                >
+                  <div className="flex items-center space-x-3 flex-1 min-w-0">
+                    {isFile ? (
+                      getFileIcon(file)
+                    ) : (
+                      <FiImage className="w-5 h-5 text-blue-500" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {fileName}
+                      </p>
+                      <p className="text-xs text-gray-500">{fileSize}</p>
+                    </div>
                   </div>
+                  {!disabled && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFile(index);
+                      }}
+                      className="text-gray-400 hover:text-red-500"
+                    >
+                      <FiX className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
-                {!disabled && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeFile(index);
-                    }}
-                    className="text-gray-400 hover:text-red-500"
-                  >
-                    <FiX className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

@@ -2,6 +2,7 @@
 import React from "react";
 import { FaComments, FaTasks, FaCog, FaHome, FaTimes, FaCreditCard } from "react-icons/fa";
 import Link from "next/link";
+import { ROUTES } from "@/utils/constant";
 
 const sidebarItems = [
   { id: 1, title: "Dashboard", icon: <FaHome />, route: "/user/dashboard" },
@@ -9,7 +10,7 @@ const sidebarItems = [
   { id: 3, title: "Gigs", icon: <FaTasks />, route: "/gigs" },
   { id: 5, title: "Subscription Plans", icon: <FaCreditCard />, route: "/user/buy-subscription" },
   { id: 4, title: "Settings", icon: <FaCog />, route: "#" },
-  { id: 6, title: "My Gigs", icon: <FaCog />, route: "/my-gigs" },
+  { id: 6, title: "My Gigs", icon: <FaCog />, route: ROUTES.MY_GIGS },
 ];
 
 const UserProviderSidebar = ({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) => {
@@ -86,6 +87,7 @@ const UserProviderSidebar = ({ open, setOpen }: { open: boolean; setOpen: (open:
             <Link
               key={item.id}
               href={item.route}
+              onClick={() => setOpen(false)}
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[var(--base)]/10 hover:text-[var(--base)] transition"
             >
               <span className="text-lg text-[var(--base)]">{item.icon}</span>

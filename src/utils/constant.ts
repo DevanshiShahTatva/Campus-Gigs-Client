@@ -24,6 +24,7 @@ export const ROUTES = {
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
   GIGS: "/gigs",
+  MY_GIGS: "/my-gigs",
   ADMIN: {
     DASHBOARD: "/admin/dashboard",
     SUBSCRIPTION: "/admin/subscription-plan",
