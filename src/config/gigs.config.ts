@@ -141,7 +141,7 @@ export interface GigsFormVal {
   end_date_time: null | Date;
   gig_category_id: string;
   skills: Array<string>;
-  images: Array<File> | null;
+  images: Array<File | string> | null;
   profile_type: PROFILE_TYPE;
   certifications: Array<string>
 }

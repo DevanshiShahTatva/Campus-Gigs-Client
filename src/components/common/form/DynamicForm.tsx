@@ -68,9 +68,12 @@ export type FormFieldConfig = {
 interface DynamicFormProps {
   formConfig: FormFieldConfig[];
   onSubmit: (values: any) => void;
+  onCancel?: () => void;
   initialValues: FormikValues;
   isViewMode?: boolean;
   onFieldChange?: (fieldName: string, value: any) => void;
+  buttonText?: string;
+  enableReinitialize?: boolean;
 }
 
 interface InnerFormProps {
@@ -78,6 +81,8 @@ interface InnerFormProps {
   formConfig: FormFieldConfig[];
   isViewMode?: boolean;
   onFieldChange?: (fieldName: string, value: any) => void;
+  buttonText: string;
+  onCancel?: () => void;
 }
 
 const DynamicForm = ({
@@ -86,6 +91,9 @@ const DynamicForm = ({
   initialValues,
   isViewMode,
   onFieldChange,
+  buttonText = "Submit",
+  enableReinitialize = false,
+  onCancel,
 }: DynamicFormProps) => {
   const validationSchema = formConfig.reduce((acc: any, field) => {
     field.subfields.forEach((subfield) => {
@@ -185,6 +193,7 @@ const DynamicForm = ({
     <Formik
       initialValues={initialValues}
       validationSchema={Yup.object().shape(validationSchema)}
+      enableReinitialize={enableReinitialize}
       onSubmit={async (values, formikHelpers) => {
         formikHelpers.setSubmitting(true);
         const errors = await formikHelpers.validateForm();
@@ -209,6 +218,8 @@ const DynamicForm = ({
           formConfig={formConfig}
           isViewMode={isViewMode}
           onFieldChange={onFieldChange}
+          buttonText={buttonText}
+          onCancel={onCancel}
         />
       )}
     </Formik>
@@ -220,6 +231,8 @@ const InnerForm = ({
   formConfig,
   isViewMode,
   onFieldChange,
+  buttonText,
+  onCancel,
 }: InnerFormProps) => {
   const [tagInputs, setTagInputs] = useState<Record<string, string>>({});
   const { values, errors, touched, setFieldValue, handleSubmit } = formik;
@@ -578,14 +591,26 @@ const InnerForm = ({
         )
       )}
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-4">
+        {onCancel && (
+          <Button
+            size={"lg"}
+            type="button"
+            variant={"outline"}
+            className="mt-4"
+            onClick={onCancel}
+          >
+            Cancel
+          </Button>
+        )}
+
         <Button
           size={"lg"}
           type="submit"
           disabled={formik.isSubmitting || isViewMode}
           className="mt-4"
         >
-          {formik.isSubmitting ? <CircularProgress size={20} /> : "Submit"}
+          {formik.isSubmitting ? <CircularProgress size={20} /> : buttonText}
         </Button>
       </div>
     </Form>

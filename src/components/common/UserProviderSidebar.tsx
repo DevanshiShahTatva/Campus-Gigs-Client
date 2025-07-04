@@ -2,6 +2,7 @@
 import React from "react";
 import { FaComments, FaTasks, FaCog, FaHome, FaTimes, FaCreditCard } from "react-icons/fa";
 import Link from "next/link";
+import { ROUTES } from "@/utils/constant";
 
 const sidebarItems = [
   { id: 1, title: "Dashboard", icon: <FaHome />, route: "/user/dashboard" },
@@ -9,6 +10,7 @@ const sidebarItems = [
   { id: 3, title: "Gigs", icon: <FaTasks />, route: "/gigs" },
   { id: 5, title: "Subscription Plans", icon: <FaCreditCard />, route: "/user/buy-subscription" },
   { id: 4, title: "Settings", icon: <FaCog />, route: "#" },
+  { id: 6, title: "My Gigs", icon: <FaCog />, route: ROUTES.MY_GIGS },
 ];
 
 const UserProviderSidebar = ({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) => {
@@ -16,7 +18,7 @@ const UserProviderSidebar = ({ open, setOpen }: { open: boolean; setOpen: (open:
     <>
       {/* Sidebar Drawer (fixed left, white, 20rem wide) */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 md:w-80 bg-white z-[99999] transform transition-transform duration-300 ${
+        className={`fixed top-0 left-0 h-full w-64 md:w-72 bg-white z-[99999] transform transition-transform duration-300 ${
           open ? "translate-x-0" : "-translate-x-full"
         } min-w-0 overflow-y-auto`}
         style={{ maxWidth: "90vw" }}
