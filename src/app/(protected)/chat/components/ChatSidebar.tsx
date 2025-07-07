@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FiSearch, FiMessageSquare, FiChevronLeft } from "react-icons/fi";
+import { FiSearch, FiMessageSquare } from "react-icons/fi";
 import Image from "next/image";
 
 interface ChatSidebarProps {

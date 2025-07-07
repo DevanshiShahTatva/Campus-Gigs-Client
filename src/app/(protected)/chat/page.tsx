@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+
 import ChatSidebar from "./components/ChatSidebar";
 import ChatWindow from "./components/ChatWindow";
 
@@ -9,12 +10,24 @@ export default function ChatPage() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
+    const el = document.getElementById("scrollableDiv");
+    if (el) {
+      el.classList.add("overflow-hidden");
+    }
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      const el = document.getElementById("scrollableDiv");
+      if (el) {
+        el.classList.remove("overflow-hidden");
+      }
+    };
   }, []);
+
+  
 
   const handleSelectChat = (chatId: string) => {
     setSelectedChat(chatId);
