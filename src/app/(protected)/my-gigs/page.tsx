@@ -45,6 +45,7 @@ const MyGigs = () => {
   });
 
   const fetchGigs = async (page = 1, status = "") => {
+    setActiveTab(status);
     try {
       setLoading(true);
 

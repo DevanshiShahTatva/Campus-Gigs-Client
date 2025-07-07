@@ -22,7 +22,7 @@ const GigPipeline = () => {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [gigs, setGigs] = useState<Gigs[]>([]);
-  const [activeTab, setActiveTab] = useState("requested");
+  const [activeTab, setActiveTab] = useState("pending");
   const { data: userProfile } = useGetUserProfileQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
@@ -32,6 +32,7 @@ const GigPipeline = () => {
   }, []);
 
   const fetchGigsPipeline = async (page = 1, status = "") => {
+    setActiveTab(status);
     try {
       setLoading(true);
 
@@ -58,12 +59,42 @@ const GigPipeline = () => {
     }
   };
 
-  const handleStartGig = (gigId: number) => {};
+  const findNextTab = (status: string) => {
+    if (status === "accepted") {
+      return "in_progress";
+    }
 
-  const handleCompleteGig = (gigId: string) => {};
+    if (status === "in_progress") {
+      return "completed";
+    }
+
+    if (status === "completed") {
+      return "rejected";
+    }
+
+    return "pending";
+  };
+
+  const handleChangeStatusGig = async (gigId: number, status: string) => {
+    try {
+      const resp = await apiCall({
+        endPoint: `${API_ROUTES.GIG_STATUS_CHANGE}/${gigId}`,
+        method: "PUT",
+        body: { status: status },
+      });
+
+      if (resp?.success) {
+        toast.success(resp.data.message ?? "Gig status changed successfully");
+        setActiveTab(findNextTab(activeTab));
+        fetchGigsPipeline(1, findNextTab(activeTab));
+      }
+    } catch (error) {
+      toast.error("Failed to fetch gigs");
+    }
+  };
 
   const handlePriorityChange = (
-    gigId: string,
+    gigId: number,
     priority: "high" | "medium" | "low"
   ) => {};
 
@@ -91,7 +122,7 @@ const GigPipeline = () => {
         title = "No accepted gigs";
         description = "Accepted gigs will appear here";
         break;
-      case "in-progress":
+      case "in_progress":
         icon = "⚡";
         title = "No active gigs";
         description = "Gigs you're working on will appear here";
@@ -179,16 +210,18 @@ const GigPipeline = () => {
                     gig={gig}
                     userId={userProfile.data.id}
                     onStartGig={
-                      activeTab === "accepted" ? handleStartGig : undefined
+                      activeTab === "accepted"
+                        ? handleChangeStatusGig
+                        : undefined
                     }
                     onPriorityChange={
-                      activeTab === "in-progress"
+                      activeTab === "in_progress"
                         ? handlePriorityChange
                         : undefined
                     }
                     onCompleteGig={
-                      activeTab === "in-progress"
-                        ? handleCompleteGig
+                      activeTab === "in_progress"
+                        ? handleChangeStatusGig
                         : undefined
                     }
                   />

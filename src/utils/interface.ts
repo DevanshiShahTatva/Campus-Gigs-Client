@@ -177,4 +177,7 @@ export interface Gigs {
   skills: Skill[];
   gig_category: GigCategory;
   bids: Array<Bid>;
+  priority?: string;
+  rating?: number;
+  review?: string;
 }

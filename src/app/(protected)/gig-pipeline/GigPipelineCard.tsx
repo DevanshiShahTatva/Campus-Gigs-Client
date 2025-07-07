@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import {
   Calendar,
   DollarSign,
-  MapPin,
   Clock,
   Star,
   User,
@@ -13,13 +12,13 @@ import {
 import { Gigs } from "@/utils/interface";
 import moment from "moment";
 import { useMemo } from "react";
-// import type { Gig } from "@/types/gig";
+import { BID_STATUS, GIG_STATUS } from "@/utils/constant";
 
 interface GigCardProps {
   gig: Gigs;
-  onStartGig?: (id: number) => void;
-  onCompleteGig?: (id: string) => void;
-  onPriorityChange?: (id: string, priority: "high" | "medium" | "low") => void;
+  onStartGig?: (id: number, status: string) => void;
+  onCompleteGig?: (id: number, status: string) => void;
+  onPriorityChange?: (id: number, priority: "high" | "medium" | "low") => void;
   userId: number;
 }
 
@@ -43,14 +42,14 @@ const GigCard = ({
     }
   };
 
-  const getStatusColor = (status: string | undefined) => {
+  const getStatusColor = (status: string | null) => {
     if (!status) return "";
     switch (status) {
       case "pending":
         return "bg-blue-100 text-blue-800 border-blue-200";
       case "accepted":
         return "bg-teal-100 text-teal-800 border-teal-200";
-      case "in-progress":
+      case "in_progress":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "completed":
         return "bg-green-100 text-green-800 border-green-200";
@@ -61,14 +60,14 @@ const GigCard = ({
     }
   };
 
-  const getStatusText = (status: string | undefined) => {
+  const getStatusText = (status: string | null) => {
     if (!status) return "";
     switch (status) {
       case "pending":
         return "Pending Approval";
       case "accepted":
         return "Ready to Start";
-      case "in-progress":
+      case "in_progress":
         return "In Progress";
       case "completed":
         return "Completed";
@@ -84,6 +83,34 @@ const GigCard = ({
     [gig]
   );
 
+  const pipelineStage = useMemo(() => {
+    if (!bid) return null;
+
+    if (bid.status === BID_STATUS.PENDING) return "pending";
+    if (
+      bid.status === BID_STATUS.REJECTED ||
+      gig.status === GIG_STATUS.REJECTED
+    )
+      return "rejected";
+    if (
+      bid.status === BID_STATUS.ACCEPTED &&
+      gig.status === GIG_STATUS.UNSTARTED
+    )
+      return "accepted";
+    if (
+      bid.status === BID_STATUS.ACCEPTED &&
+      gig.status === GIG_STATUS.INPROGRESS
+    )
+      return "in_progress";
+    if (
+      bid.status === BID_STATUS.ACCEPTED &&
+      gig.status === GIG_STATUS.COMPLETED
+    )
+      return "completed";
+
+    return null;
+  }, [bid, gig.status]);
+
   return (
     <Card className="mb-4 hover:shadow-lg transition-all duration-200 border-l-4 border-l-[var(--base)]">
       <CardHeader className="pb-3">
@@ -94,9 +121,11 @@ const GigCard = ({
                 {gig.title}
               </h3>
               <Badge
-                className={`${getStatusColor(bid?.status)} border font-medium`}
+                className={`${getStatusColor(
+                  pipelineStage
+                )} border font-medium`}
               >
-                {getStatusText(bid?.status)}
+                {getStatusText(pipelineStage)}
               </Badge>
               {/* {gig.priority && (
                 <Badge
@@ -161,29 +190,12 @@ const GigCard = ({
               </span>
             </div>
           )}
-
-          {/* {gig.location && (
-            <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-md">
-              <MapPin className="h-4 w-4 text-teal-600" />
-              <span>{gig.location}</span>
-            </div>
-          )}
-
-          {gig.acceptedDate && (
-            <div className="flex items-center gap-2 text-sm text-gray-600 bg-green-50 p-2 rounded-md">
-              <Clock className="h-4 w-4 text-green-600" />
-              <span className="text-green-700 font-medium">
-                Accepted: {gig.acceptedDate}
-              </span>
-            </div>
-          )} */}
         </div>
 
-        {/* Accepted Gigs - Start Work Button */}
-        {gig.status === "accepted" && (
+        {pipelineStage === BID_STATUS.ACCEPTED && (
           <div className="border-t pt-4">
             <Button
-              onClick={() => onStartGig?.(gig.id)}
+              onClick={() => onStartGig?.(gig.id, "in_progress")}
               className="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-3"
               size="lg"
             >
@@ -192,8 +204,7 @@ const GigCard = ({
           </div>
         )}
 
-        {/* In Progress Gigs - Priority & Complete */}
-        {/* {gig.status === "in-progress" && (
+        {pipelineStage === "in_progress" && (
           <div className="border-t pt-4 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-700">
@@ -219,17 +230,16 @@ const GigCard = ({
             </div>
 
             <Button
-              onClick={() => onCompleteGig?.(gig.id)}
+              onClick={() => onCompleteGig?.(gig.id, "completed")}
               className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3"
               size="lg"
             >
               ✅ Mark as Completed
             </Button>
           </div>
-        )} */}
+        )}
 
-        {/* Completed Gigs - Review Display */}
-        {/* {gig.status === "completed" && gig.rating && (
+        {gig.status === "completed" && (gig.rating = 2) && (
           <div className="border-t pt-4 bg-green-50 rounded-lg p-4 mt-4">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-semibold text-green-800">
@@ -256,35 +266,35 @@ const GigCard = ({
                 "{gig.review}"
               </p>
             )}
-            {gig.completedDate && (
+            {/* {gig.completedDate && (
               <div className="flex items-center gap-2 text-sm text-green-600">
                 <Clock className="h-4 w-4" />
                 <span className="font-medium">
                   Completed on {gig.completedDate}
                 </span>
               </div>
-            )}
+            )} */}
           </div>
-        )} */}
+        )}
 
-        {/* Rejected Gigs - Info */}
-        {gig.status === "rejected" && (
+        {pipelineStage === "rejected" && (
           <div className="border-t pt-4 bg-red-50 rounded-lg p-4 mt-4">
             <p className="text-sm text-red-700">
               <strong>Not selected:</strong> The client chose another provider
               for this gig. Keep applying to more opportunities!
             </p>
-            {/* {gig.bidDate && (
+            {bid?.created_at && (
               <div className="flex items-center gap-2 text-sm text-red-600 mt-2">
                 <Clock className="h-4 w-4" />
-                <span>Bid placed on {gig.bidDate}</span>
+                <span>
+                  Bid placed on {moment(bid?.created_at).format("DD/MM/YYYY")}
+                </span>
               </div>
-            )} */}
+            )}
           </div>
         )}
 
-        {/* Requested Gigs - Waiting Status */}
-        {bid?.status === "pending" && (
+        {pipelineStage === "pending" && (
           <div className="border-t pt-4 bg-blue-50 rounded-lg p-4 mt-4">
             <p className="text-sm text-blue-700">
               <strong>⏳ Waiting for approval:</strong> Your bid is under review

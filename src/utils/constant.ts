@@ -55,6 +55,7 @@ export const API_ROUTES = {
   MY_GIGS: "/gigs/my-gigs",
   GIG_CATEGORY: "/gig-category",
   GIG_PIPELINE: "/gigs/gig-pipeline",
+  GIG_STATUS_CHANGE: "/gigs/change-status",
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
     AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",
@@ -162,7 +163,7 @@ export const MESSAGES = {
 export const GIGS_PIPELINE_TABS = [
   { id: "pending", label: "Requested"},
   { id: "accepted", label: "Accepted" },
-  { id: "in-progress", label: "In Progress"},
+  { id: "in_progress", label: "In Progress"},
   { id: "completed", label: "Completed"},
   { id: "rejected", label: "Rejected" },
 ];
