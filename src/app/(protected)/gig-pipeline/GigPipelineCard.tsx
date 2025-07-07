@@ -95,7 +95,7 @@ const GigCard = ({
   };
 
   return (
-    <Card className="mb-4 hover:shadow-lg transition-all duration-200 border-l-4 border-l-teal-500">
+    <Card className="mb-4 hover:shadow-lg transition-all duration-200 border-l-4 border-l-[var(--base)]">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
           <div className="flex-1">

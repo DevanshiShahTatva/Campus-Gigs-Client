@@ -158,6 +158,14 @@ export const MESSAGES = {
   FAQ_DELETE_SUCCESS: "FAQ deleted successfully",
 };
 
+export const GIGS_PIPELINE_TABS = [
+  { id: "requested", label: "Requested"},
+  { id: "accepted", label: "Accepted" },
+  { id: "in-progress", label: "In Progress"},
+  { id: "completed", label: "Completed"},
+  { id: "rejected", label: "Rejected" },
+];
+
 // Landing page texts
 
 export const LANDING_PAGE_TEXTS = {

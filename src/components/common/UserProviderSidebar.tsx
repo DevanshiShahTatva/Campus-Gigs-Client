@@ -12,7 +12,7 @@ const sidebarItems = [
   { id: 5, title: "Subscription Plans", icon: <FaCreditCard />, route: "/user/buy-subscription", access: ["user", "provider"] },
   { id: 4, title: "Settings", icon: <FaCog />, route: "#", access: ["user", "provider"] },
   { id: 6, title: "My Gigs", icon: <FaCog />, route: ROUTES.MY_GIGS, access: ["user", "provider"] },
-  { id: 7, title: "Gigs Pipeline", icon: <FaCog />, route: ROUTES.GIGS_PIPELINE, access: ["provider"] },
+  { id: 7, title: "Gigs Pipeline", icon: <FaTasks />, route: ROUTES.GIGS_PIPELINE, access: ["provider"] },
 ];
 
 const UserProviderSidebar = ({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) => {

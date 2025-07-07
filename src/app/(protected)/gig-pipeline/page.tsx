@@ -1,12 +1,8 @@
-"use client"
+"use client";
 
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-// import { useToast } from "@/hooks/use-toast";
 import GigCard from "./GigPipelineCard";
-// import type { Gig } from "@/types/gig";
+import { GIGS_PIPELINE_TABS } from "@/utils/constant";
 
 export interface Gig {
   id: string;
@@ -14,13 +10,13 @@ export interface Gig {
   description: string;
   category: string;
   price: number;
-  priceType: 'fixed' | 'hourly';
+  priceType: "fixed" | "hourly";
   deadline: string;
   location?: string;
   client: string;
   clientRating?: number;
-  status: 'requested' | 'accepted' | 'in-progress' | 'completed' | 'rejected';
-  priority?: 'high' | 'medium' | 'low';
+  status: "requested" | "accepted" | "in-progress" | "completed" | "rejected";
+  priority?: "high" | "medium" | "low";
   rating?: number;
   review?: string;
   completedDate?: string;
@@ -31,137 +27,132 @@ export interface Gig {
 }
 
 const GigPipeline = () => {
-//   const { toast } = useToast();
-  
   const [gigs, setGigs] = useState<Gig[]>([
     {
       id: "1",
       title: "Laundry work",
-      description: "A laundry worker, also known as a laundry attendant, is someone who washes, dries, folds, and irons laundry items like clothes, linens, and towels.",
+      description:
+        "A laundry worker, also known as a laundry attendant, is someone who washes, dries, folds, and irons laundry items like clothes, linens, and towels.",
       category: "Household",
-      price: 50.00,
+      price: 50.0,
       priceType: "fixed",
       deadline: "01/08/2025",
       client: "John Smith",
       clientRating: 4.5,
       status: "requested",
-      bidAmount: 45.00,
-      bidDate: "25/07/2025"
+      bidAmount: 45.0,
+      bidDate: "25/07/2025",
     },
     {
       id: "2",
       title: "Learning Maths Tutoring",
-      description: "Mathematics tutoring for high school student. Need help with algebra and geometry concepts.",
+      description:
+        "Mathematics tutoring for high school student. Need help with algebra and geometry concepts.",
       category: "Education",
-      price: 25.00,
+      price: 25.0,
       priceType: "hourly",
       deadline: "1 Week Timeline",
       client: "Sarah Johnson",
       clientRating: 4.8,
       status: "requested",
-      bidAmount: 20.00,
-      bidDate: "26/07/2025"
+      bidAmount: 20.0,
+      bidDate: "26/07/2025",
     },
     {
       id: "3",
       title: "Web Development Project",
-      description: "Build a responsive e-commerce website with React and Node.js backend.",
+      description:
+        "Build a responsive e-commerce website with React and Node.js backend.",
       category: "Tech",
-      price: 120.00,
+      price: 120.0,
       priceType: "fixed",
       deadline: "15/08/2025",
       client: "Tech Startup Inc",
       clientRating: 4.2,
       status: "accepted",
-      bidAmount: 115.00,
-      acceptedDate: "28/07/2025"
+      bidAmount: 115.0,
+      acceptedDate: "28/07/2025",
     },
     {
       id: "4",
       title: "Mobile App UI Design",
-      description: "Design modern and intuitive UI for a fitness tracking mobile application.",
+      description:
+        "Design modern and intuitive UI for a fitness tracking mobile application.",
       category: "Design",
-      price: 80.00,
+      price: 80.0,
       priceType: "fixed",
       deadline: "10/08/2025",
       client: "FitLife App",
       clientRating: 4.6,
       status: "in-progress",
       priority: "high",
-      bidAmount: 75.00,
-      startedDate: "30/07/2025"
+      bidAmount: 75.0,
+      startedDate: "30/07/2025",
     },
     {
       id: "5",
       title: "Data Analysis Report",
-      description: "Analyze sales data and create comprehensive report with insights and recommendations.",
+      description:
+        "Analyze sales data and create comprehensive report with insights and recommendations.",
       category: "Data Science",
-      price: 200.00,
+      price: 200.0,
       priceType: "fixed",
       deadline: "Completed",
       client: "Business Analytics Co",
       clientRating: 4.9,
       status: "completed",
       rating: 5,
-      review: "Excellent work! The analysis was thorough and the insights were very valuable for our business decisions.",
+      review:
+        "Excellent work! The analysis was thorough and the insights were very valuable for our business decisions.",
       completedDate: "25/07/2025",
-      bidAmount: 190.00
+      bidAmount: 190.0,
     },
     {
       id: "6",
       title: "Logo Design",
-      description: "Create a modern logo for a new tech company with brand guidelines.",
+      description:
+        "Create a modern logo for a new tech company with brand guidelines.",
       category: "Design",
-      price: 75.00,
+      price: 75.0,
       priceType: "fixed",
       deadline: "Completed",
       client: "InnovateTech",
       clientRating: 4.3,
       status: "completed",
       rating: 4,
-      review: "Good work, delivered on time. Would recommend for future projects.",
+      review:
+        "Good work, delivered on time. Would recommend for future projects.",
       completedDate: "20/07/2025",
-      bidAmount: 70.00
+      bidAmount: 70.0,
     },
     {
       id: "7",
       title: "Content Writing",
-      description: "Write SEO-optimized blog posts for digital marketing website.",
+      description:
+        "Write SEO-optimized blog posts for digital marketing website.",
       category: "Writing",
-      price: 15.00,
+      price: 15.0,
       priceType: "hourly",
       deadline: "Rejected",
       client: "Marketing Pro",
       status: "rejected",
-      bidAmount: 12.00,
-      bidDate: "22/07/2025"
-    }
+      bidAmount: 12.0,
+      bidDate: "22/07/2025",
+    },
   ]);
 
-  const handleStartGig = (gigId: string) => {
-  };
+  const handleStartGig = (gigId: string) => {};
 
-  const handleCompleteGig = (gigId: string) => {
-  };
+  const handleCompleteGig = (gigId: string) => {};
 
-  const handlePriorityChange = (gigId: string, priority: 'high' | 'medium' | 'low') => {
-  };
+  const handlePriorityChange = (
+    gigId: string,
+    priority: "high" | "medium" | "low"
+  ) => {};
 
   const getGigsByStatus = (status: string) => {
-    return gigs.filter(gig => gig.status === status);
+    return gigs.filter((gig) => gig.status === status);
   };
-
-  const getStatusCount = (status: string) => {
-    return getGigsByStatus(status).length;
-  };
-
-  const tabs = [
-    { id: "requested", label: "Pending", count: getStatusCount("requested") },
-    { id: "accepted", label: "Accepted", count: getStatusCount("accepted") },
-    { id: "in-progress", label: "Active", count: getStatusCount("in-progress") },
-    { id: "completed", label: "Completed", count: getStatusCount("completed") },
-    { id: "rejected", label: "Rejected", count: getStatusCount("rejected") },
-  ];
 
   const [activeTab, setActiveTab] = useState("requested");
 
@@ -182,55 +173,13 @@ const GigPipeline = () => {
     }
   };
 
-  const getTabHeadingColor = () => {
-    switch (activeTab) {
-      case "requested":
-        return "bg-blue-500";
-      case "accepted":
-        return "bg-teal-500";
-      case "in-progress":
-        return "bg-yellow-500";
-      case "completed":
-        return "bg-green-500";
-      case "rejected":
-        return "bg-red-500";
-      default:
-        return "";
-    }
-  };
-
-  const getTabTitle = () => {
-    switch (activeTab) {
-      case "requested": return "Pending Approval";
-      case "accepted": return "Ready to Start";
-      case "in-progress": return "Active Work";
-      case "completed": return "Completed Work";
-      case "rejected": return "Not Selected";
-      default: return "";
-    }
-  };
-
-  const getTabDescription = () => {
-    const count = getStatusCount(activeTab);
-    switch (activeTab) {
-      case "requested": 
-        return `${count} gigs waiting for client approval`;
-      case "accepted": 
-        return `${count} gigs ready to begin`;
-      case "in-progress": 
-        return `${count} gigs currently in progress`;
-      case "completed": 
-        return `${count} successfully completed gigs`;
-      case "rejected": 
-        return `${count} gigs where client chose another provider`;
-      default: return "";
-    }
-  };
-
   const getEmptyState = () => {
     let icon = "📋";
     let title = "No gigs found";
-    let description = `You don't have any ${activeTab.replace("-", " ")} gigs at the moment.`;
+    let description = `You don't have any ${activeTab.replace(
+      "-",
+      " "
+    )} gigs at the moment.`;
 
     switch (activeTab) {
       case "requested":
@@ -271,17 +220,21 @@ const GigPipeline = () => {
     );
   };
 
-   return (
+  return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">My Gig Pipeline</h1>
-        <p className="text-gray-600 text-lg">Track and manage all your bidded gigs in one place</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          My Gig Pipeline
+        </h1>
+        <p className="text-gray-600 text-lg">
+          Track and manage all your bidded gigs in one place
+        </p>
       </div>
 
       <div className="mb-8">
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8">
-            {tabs.map((tab) => (
+            {GIGS_PIPELINE_TABS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -310,9 +263,15 @@ const GigPipeline = () => {
               <GigCard
                 key={gig.id}
                 gig={gig}
-                onStartGig={activeTab === "accepted" ? handleStartGig : undefined}
-                onPriorityChange={activeTab === "in-progress" ? handlePriorityChange : undefined}
-                onCompleteGig={activeTab === "in-progress" ? handleCompleteGig : undefined}
+                onStartGig={
+                  activeTab === "accepted" ? handleStartGig : undefined
+                }
+                onPriorityChange={
+                  activeTab === "in-progress" ? handlePriorityChange : undefined
+                }
+                onCompleteGig={
+                  activeTab === "in-progress" ? handleCompleteGig : undefined
+                }
               />
             ))}
           </div>
