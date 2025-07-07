@@ -5,9 +5,10 @@ import { useRouter, usePathname } from "next/navigation";
 import { FaBell, FaChevronDown, FaExchangeAlt, FaUser, FaCog, FaSignOutAlt, FaCheckCircle, FaInfoCircle, FaBars, FaStar } from "react-icons/fa";
 import { RoleContext } from "@/context/role-context";
 import { useGetUserProfileQuery, useUpdateUserProfileMutation } from "@/redux/api";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/redux/slices/userSlice";
 import { getRoleLabel, getAvatarName } from "@/utils/helper";
+import { useSocket } from "@/hooks/useSocket";
 
 // Types
 interface UserProviderHeaderProps {
@@ -59,13 +60,13 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
   const [updateUserProfile] = useUpdateUserProfileMutation();
   const { optimisticRole, handleRoleSwitch } = useOptimisticRole(role, setRole, updateUserProfile);
   const currentRole: RoleType = optimisticRole ?? role;
-
-  // Placeholder notifications
-  const notifications = [
-    { id: 1, type: "info", message: "Your gig was approved!", read: false },
-    { id: 2, type: "success", message: "Payment received for completed gig.", read: false },
+  const userId = useSelector((state: any) => state.user?.user_id || state.user?.user?.id);
+  const [notifications, setNotifications] = useState([
+    { id: 1, type: "info", message: "Your gig was approved!", read: true },
+    { id: 2, type: "success", message: "Payment received for completed gig.", read: true },
     { id: 3, type: "info", message: "New message from Alice.", read: true },
-  ];
+  ]);
+  const socket = useSocket(userId);
 
   // Get user initials for avatar fallback
   const initials = getAvatarName(user?.name || "", true);
@@ -103,6 +104,24 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
   // Determine if toggle should be shown based on subscription plan  
   const showRoleToggle = !!(user?.subscription && user.subscription.subscription_plan && user.subscription.subscription_plan.price > 0);
 
+  // Calculate if there are unread notifications
+  const hasUnread = notifications.some((notif) => !notif.read);
+
+  React.useEffect(() => {
+    if (!socket) return;
+    const handleProfileUpdate = (data: any) => {
+      setNotifications((prev) => [
+        { id: Date.now(), type: "info", message: data.message || "Your profile was updated.", read: false },
+        ...prev,
+      ]);
+      // Do NOT open the notification dropdown automatically
+    };
+    socket.on("profileUpdate", handleProfileUpdate);
+    return () => {
+      socket.off("profileUpdate", handleProfileUpdate);
+    };
+  }, [socket]);
+
   return (
     <header className="w-full h-16 flex items-center justify-between border-b border-[var(--base)]/10 shadow bg-white sticky top-0 z-[40]">
       <div className="w-full mx-auto flex flex-wrap items-center justify-between max-w-8xl px-4 sm:px-6 lg:px-8">
@@ -132,7 +151,12 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
               onClick={() => setNotifOpen((open) => !open)}
             >
               <FaBell className="text-xl text-[var(--base)]" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              {hasUnread && (
+                <span className="absolute top-1 right-1 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+              )}
             </button>
             {/* Notifications Dropdown */}
             <div
