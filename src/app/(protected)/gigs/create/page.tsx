@@ -5,14 +5,20 @@ import DynamicForm from "@/components/common/form/DynamicForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "react-toastify";
 import { apiCall } from "@/utils/apiCall";
-import { API_ROUTES, PAYMENT_TYPE, PROFILE_TYPE, ROUTES } from "@/utils/constant";
+import {
+  API_ROUTES,
+  PAYMENT_TYPE,
+  PROFILE_TYPE,
+  ROUTES,
+} from "@/utils/constant";
 import SuccessCard from "@/components/common/SuccessCard";
 import { gigsFields, GigsFormVal } from "@/config/gigs.config";
 import { FormikValues } from "formik";
 import { Gigs, IDropdownOption } from "@/utils/interface";
 import { useSearchParams } from "next/navigation";
 import Loader from "@/components/common/Loader";
-import { useRouter } from "next/navigation"
+import { useRouter } from "next/navigation";
+import { useGetUserProfileQuery } from "@/redux/api";
 
 const initialFormState = {
   title: "",
@@ -34,12 +40,15 @@ const CreateGig = () => {
   const [gigCategoryDropdown, setGigCategoryDropdown] = useState<
     IDropdownOption[]
   >([]);
+  const searchParams = useSearchParams();
   const [skillsDropdown, setSkillsDropdown] = useState<IDropdownOption[]>([]);
   const [isFormSubmitted, setFormSubmitted] = useState<boolean>(false);
   const [isSkillsLoading, setIsSkillsLoading] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
-  const searchParams = useSearchParams();
+  const { data: userProfile } = useGetUserProfileQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
 
   const gigId = searchParams.get("gigId");
 
@@ -159,7 +168,7 @@ const CreateGig = () => {
       formData.append("start_date_time", values.start_date_time);
       formData.append("end_date_time", values.end_date_time);
       formData.append("gig_category_id", values.gig_category_id);
-      formData.append("profile_type", values.profile_type);
+      formData.append("profile_type", userProfile.data.profile_type);
 
       if (values.skills.length > 0) {
         values.skills.forEach((skill: string) => {
@@ -207,7 +216,7 @@ const CreateGig = () => {
               `Gig ${isEdit ? "edited" : "created"} successfully!`
           );
           if (isEdit) {
-            router.push(ROUTES.MY_GIGS)
+            router.push(ROUTES.MY_GIGS);
           } else {
             setFormSubmitted(true);
             setFormValues(initialFormState);
@@ -222,7 +231,7 @@ const CreateGig = () => {
         console.error("Submission error:", error);
       }
     },
-    [isEdit]
+    [isEdit, userProfile]
   );
 
   const memoizedGigCategoryDropdown = useMemo(
