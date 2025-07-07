@@ -22,11 +22,11 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import Loader from "@/components/common/Loader";
 import MyGigSkelton from "@/components/skeleton/MyGigSkelton";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useGetUserProfileQuery } from "@/redux/api";
 
 const MyGigs = () => {
   const router = useRouter();
-  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState("un_started");
   const [loading, setLoading] = useState<boolean>(true);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -40,6 +40,9 @@ const MyGigs = () => {
     totalPages: 0,
     total: 1,
   });
+  const { data: userProfile } = useGetUserProfileQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
 
   const tabs = [
     { id: "un_started", label: "Open Gigs" },
@@ -52,7 +55,7 @@ const MyGigs = () => {
       setLoading(true);
 
       const resp = await apiCall({
-        endPoint: `${API_ROUTES.MY_GIGS}?page=${page}&pageSize=10&status=${status}`,
+        endPoint: `${API_ROUTES.MY_GIGS}?page=${page}&pageSize=10&status=${status}&profile_type=${userProfile.data.profile_type}`,
         method: "GET",
       });
 
@@ -70,7 +73,7 @@ const MyGigs = () => {
 
   useEffect(() => {
     fetchGigs(1, "un_started");
-  }, []);
+  }, [userProfile]);
 
   const fetchNextPage = () => {
     if (currentPage < meta.totalPages && !loading) {
