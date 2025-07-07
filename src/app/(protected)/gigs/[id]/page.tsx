@@ -13,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import BidSkeletonList from "@/components/skeleton/bidSkeleton";
 import GigDetailSkeleton from "@/components/skeleton/gigDetailSkeleton";
-import { ArrowLeftIcon, CalendarIcon, CheckCircle, ClockIcon, MessageCircle, TagIcon, Star, Edit } from "lucide-react";
+import { ArrowLeftIcon, CalendarIcon, CheckCircle, ClockIcon, MessageCircle, TagIcon, Star, Edit, Trash } from "lucide-react";
 import { gigBidFields } from "@/config/gigbid.config";
 
 import "slick-carousel/slick/slick.css";
@@ -117,6 +117,20 @@ const GigDetail = () => {
     }
   };
 
+  const handleRejectBid = async (bidId: string) => {
+    try {
+      const response = await apiCall({
+        endPoint: `/bids/reject/${bidId}`,
+        method: "POST",
+      });
+      if (response?.success) {
+        setBids(bids.map((bid) => bid.id === bidId ? { ...bid, updated_at: response.data.updated_at, status: "rejected" } : bid));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     if (tab === "Bids") {
@@ -129,7 +143,7 @@ const GigDetail = () => {
     setIsModalOpen(true);
   };
 
-  const handleRejectBid = async (bidId: string) => {
+  const handleDeleteBid = async (bidId: string) => {
     try {
       const response = await apiCall({
         endPoint: `/bids/delete/${bidId}`,
@@ -319,7 +333,7 @@ const GigDetail = () => {
     <Card key={bid.id} className="gap-0 py-0">
       <CardContent className="p-4">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-0 mb-4">
-          <div className="flex items-start space-x-3 sm:space-x-4">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             {bid.provider.profile ? (
               <img
                 alt="not found"
@@ -343,7 +357,7 @@ const GigDetail = () => {
                   </div>
                 </div>
               </div>
-              <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">{bid.provider.about}</p>
+              {bid.provider.about && <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">{bid.provider.about}</p>}
             </div>
           </div>
           <div className="text-left sm:text-right flex-shrink-0">
@@ -357,24 +371,40 @@ const GigDetail = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
           <span className="text-xs sm:text-sm text-gray-500">Bid placed {formatDate(bid.created_at)}</span>
           {bid.status === "accepted" && (
-            <div  className="bg-green-600 hover:bg-green-600 pt-[2px] text-white flex-1 sm:flex-initial h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5">
+            <div className="w-fit bg-green-600 hover:bg-green-600 pt-[2px] text-white h-8 rounded-md gap-1.5 px-3">
               Accepted
             </div>
           )}
-          {user_id === bid.provider.id && bid.status !== "accepted" && (
+           {bid.status === "rejected" && (
+            <div className="w-fit bg-red-600 hover:bg-red-600 pt-[2px] text-white h-8 rounded-md gap-1.5 px-3">
+              Rejected
+            </div>
+          )}
+          {user_id === bid.provider.id && bid.status === "pending" && (
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <Button
                 size="sm"
                 variant="outline"
-                className="text-white hover:text-white bg-[var(--base)] hover:bg-[var(--base)]"
                 onClick={() => handleEditBid(bid)}
+                className="text-white hover:text-white bg-[var(--base)] hover:bg-[var(--base)]"
               >
                 <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                 Edit
               </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleDeleteBid(bid.id)}
+                className="text-white hover:text-white bg-red-400 hover:bg-red-500"
+              >
+                <Trash
+                  className="w-3 h-3 sm:w-4 sm:h-4 mr-2"
+                />
+                Delete
+              </Button>
             </div>
           )}
-          {user_id === gigDetails.user_id && bid.status !== "accepted" && (
+          {user_id === gigDetails.user_id && bid.status !== "accepted" && bid.status !== "rejected" && (
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <Button size="sm" variant="outline" className="w-full sm:w-auto">
                 <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
@@ -384,6 +414,7 @@ const GigDetail = () => {
                 <Button
                   size="sm"
                   className="bg-red-600 hover:bg-red-700 flex-1 sm:flex-initial"
+                  onClick={() => handleRejectBid(bid.id)}
                 >
                   Reject Bid
                 </Button>
@@ -423,7 +454,6 @@ const GigDetail = () => {
       </div>
     );
   };
-
 
   const renderTabContent = () => {
     switch (activeTab) {

@@ -49,7 +49,7 @@ const completedGigs = [
 const ProviderPortfolioPage = () => {
   const params = useParams();
   const id = typeof params.id === "string" ? params.id : Array.isArray(params.id) ? params.id[0] : "";
-  const { data, isLoading, error } = useGetProviderPublicProfileQuery(id, { skip: !id });
+  const { data, isLoading, error } = useGetProviderPublicProfileQuery(id, { skip: !id, refetchOnMountOrArgChange: true });
   const provider = data?.data;
   // Dummy data for missing fields
   const dummyCoverImage = "/assets/hero.jpg";

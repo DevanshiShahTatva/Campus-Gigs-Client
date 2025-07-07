@@ -26,9 +26,9 @@ import "slick-carousel/slick/slick-theme.css";
 import { toast } from "react-toastify";
 import { apiCall } from "@/utils/apiCall";
 import { API_ROUTES } from "@/utils/constant";
-import { formatTimeDifference } from "./helper";
 import { IPagination, Gigs } from "@/utils/interface";
-import { getAvtarName, renderBaseOnCondition } from "@/utils/helper";
+import { formatTimeDifference} from "./helper";
+import { getAvatarName, renderBaseOnCondition } from "@/utils/helper";
 import moment from "moment";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Loader from "@/components/common/Loader";
@@ -143,7 +143,7 @@ const GigListing = () => {
           <div className="flex items-center space-x-3">
             <Avatar className="w-10 h-10">
               <AvatarImage src={gig.user.profile} />
-              <AvatarFallback>{getAvtarName(gig.user.name)}</AvatarFallback>
+              <AvatarFallback>{getAvatarName(gig.user.name)}</AvatarFallback>
             </Avatar>
             <div>
               <div className="flex items-center space-x-1">

@@ -11,13 +11,16 @@ export const logout = () => {
   sessionStorage?.clear();
 }
 
-export const getAvtarName = (name: string) => {
+export const getAvatarName = (name: string, isCapital: boolean = false) => {
   if (!name) return '';
   const parts = name.split(' ');
+  let initials = '';
   if (parts.length > 1) {
-    return `${parts[0].charAt(0)}${parts[1].charAt(0)}`;
+    initials = `${parts[0].charAt(0)}${parts[1].charAt(0)}`;
+  } else {
+    initials = name.charAt(0);
   }
-  return name.charAt(0);
+  return isCapital ? initials.toUpperCase() : initials;
 };
 
 export const renderBaseOnCondition = (
@@ -27,3 +30,7 @@ export const renderBaseOnCondition = (
 ) => {
   return condition ? trueValue : falseValue;
 };
+
+export function getRoleLabel(role: "user" | "provider") {
+  return role === "user" ? "User" : "Provider";
+}
