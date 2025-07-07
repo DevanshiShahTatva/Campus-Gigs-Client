@@ -181,7 +181,7 @@ export default function Home() {
       <main className="">
         <section
           id="hero"
-          className="relative bg-gradient-to-br from-[var(--bg-dark)]  to-[var(--bg-dark)] text-[color:var(--text-light)] py-20 md:py-40 overflow-hidden"
+          className="relative mt-14 bg-gradient-to-br from-[var(--bg-dark)]  to-[var(--bg-dark)] text-[color:var(--text-light)] py-20 md:py-40 overflow-hidden"
         >
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-40 bg-[url('/hero.jpg')] bg-cover bg-center"></div>
