@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Calendar, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { apiCall } from "@/utils/apiCall";
-import { API_ROUTES } from "@/utils/constant";
+import { API_ROUTES, MY_GIGS_TABS } from "@/utils/constant";
 import { toast } from "react-toastify";
 import { Gigs, IPagination } from "@/utils/interface";
 import { renderBaseOnCondition } from "@/utils/helper";
@@ -43,12 +43,6 @@ const MyGigs = () => {
   const { data: userProfile } = useGetUserProfileQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
-
-  const tabs = [
-    { id: "un_started", label: "Open Gigs" },
-    { id: "in_progress", label: "In Progress" },
-    { id: "completed", label: "Completed" },
-  ];
 
   const fetchGigs = async (page = 1, status = "") => {
     try {
@@ -151,7 +145,7 @@ const MyGigs = () => {
       <div className="mb-8">
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8">
-            {tabs.map((tab) => (
+            {MY_GIGS_TABS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}

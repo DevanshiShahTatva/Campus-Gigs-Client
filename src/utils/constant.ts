@@ -54,6 +54,7 @@ export const API_ROUTES = {
   GIGS: "/gigs",
   MY_GIGS: "/gigs/my-gigs",
   GIG_CATEGORY: "/gig-category",
+  GIG_PIPELINE: "/gigs/gig-pipeline",
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
     AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",
@@ -159,11 +160,17 @@ export const MESSAGES = {
 };
 
 export const GIGS_PIPELINE_TABS = [
-  { id: "requested", label: "Requested"},
+  { id: "pending", label: "Requested"},
   { id: "accepted", label: "Accepted" },
   { id: "in-progress", label: "In Progress"},
   { id: "completed", label: "Completed"},
   { id: "rejected", label: "Rejected" },
+];
+
+export const MY_GIGS_TABS = [
+  { id: "un_started", label: "Open Gigs" },
+  { id: "in_progress", label: "In Progress" },
+  { id: "completed", label: "Completed" },
 ];
 
 // Landing page texts

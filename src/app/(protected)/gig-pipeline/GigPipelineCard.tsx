@@ -10,35 +10,17 @@ import {
   User,
   TrendingUp,
 } from "lucide-react";
+import { Gigs } from "@/utils/interface";
+import moment from "moment";
+import { useMemo } from "react";
 // import type { Gig } from "@/types/gig";
 
-export interface Gig {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  price: number;
-  priceType: "fixed" | "hourly";
-  deadline: string;
-  location?: string;
-  client: string;
-  clientRating?: number;
-  status: "requested" | "accepted" | "in-progress" | "completed" | "rejected";
-  priority?: "high" | "medium" | "low";
-  rating?: number;
-  review?: string;
-  completedDate?: string;
-  bidAmount?: number;
-  bidDate?: string;
-  acceptedDate?: string;
-  startedDate?: string;
-}
-
 interface GigCardProps {
-  gig: Gig;
-  onStartGig?: (id: string) => void;
+  gig: Gigs;
+  onStartGig?: (id: number) => void;
   onCompleteGig?: (id: string) => void;
   onPriorityChange?: (id: string, priority: "high" | "medium" | "low") => void;
+  userId: number;
 }
 
 const GigCard = ({
@@ -46,6 +28,7 @@ const GigCard = ({
   onStartGig,
   onCompleteGig,
   onPriorityChange,
+  userId,
 }: GigCardProps) => {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -60,9 +43,10 @@ const GigCard = ({
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | undefined) => {
+    if (!status) return "";
     switch (status) {
-      case "requested":
+      case "pending":
         return "bg-blue-100 text-blue-800 border-blue-200";
       case "accepted":
         return "bg-teal-100 text-teal-800 border-teal-200";
@@ -77,9 +61,10 @@ const GigCard = ({
     }
   };
 
-  const getStatusText = (status: string) => {
+  const getStatusText = (status: string | undefined) => {
+    if (!status) return "";
     switch (status) {
-      case "requested":
+      case "pending":
         return "Pending Approval";
       case "accepted":
         return "Ready to Start";
@@ -94,6 +79,11 @@ const GigCard = ({
     }
   };
 
+  const bid = useMemo(
+    () => gig.bids.find((bid) => bid.provider_id === userId),
+    [gig]
+  );
+
   return (
     <Card className="mb-4 hover:shadow-lg transition-all duration-200 border-l-4 border-l-[var(--base)]">
       <CardHeader className="pb-3">
@@ -104,11 +94,11 @@ const GigCard = ({
                 {gig.title}
               </h3>
               <Badge
-                className={`${getStatusColor(gig.status)} border font-medium`}
+                className={`${getStatusColor(bid?.status)} border font-medium`}
               >
-                {getStatusText(gig.status)}
+                {getStatusText(bid?.status)}
               </Badge>
-              {gig.priority && (
+              {/* {gig.priority && (
                 <Badge
                   className={`${getPriorityColor(
                     gig.priority
@@ -116,7 +106,7 @@ const GigCard = ({
                 >
                   {gig.priority} priority
                 </Badge>
-              )}
+              )} */}
             </div>
 
             <div className="flex items-center gap-4 mb-3">
@@ -124,19 +114,19 @@ const GigCard = ({
                 variant="secondary"
                 className="bg-teal-50 text-teal-700 border-teal-200"
               >
-                {gig.category}
+                {gig.gig_category.name}
               </Badge>
-              {gig.bidAmount && (
+              {bid?.bid_amount && (
                 <div className="flex items-center gap-1 text-sm text-teal-600 bg-teal-50 px-2 py-1 rounded-md">
                   <TrendingUp className="h-3 w-3" />
                   <span className="font-medium">
-                    Your bid: ${gig.bidAmount.toFixed(2)}
+                    Your bid: ${Number(bid?.bid_amount).toFixed(2)}
                   </span>
                 </div>
               )}
             </div>
 
-            <p className="text-gray-600 text-sm leading-relaxed">
+            <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
               {gig.description}
             </p>
           </div>
@@ -148,37 +138,34 @@ const GigCard = ({
           <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-md">
             <DollarSign className="h-4 w-4 text-teal-600" />
             <span className="font-medium">
-              ${gig.price.toFixed(2)} {gig.priceType}
+              ${Number(gig.price).toFixed(2)}/{gig.payment_type}
             </span>
           </div>
 
           <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-md">
             <Calendar className="h-4 w-4 text-teal-600" />
-            <span>{gig.deadline}</span>
+            <span className="font-semibold">End Date:</span>
+            <span>{moment(gig.start_date_time).format("DD/MM/yyyy")}</span>
           </div>
 
           <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-md">
             <User className="h-4 w-4 text-teal-600" />
-            <span>{gig.client}</span>
-            {gig.clientRating && (
-              <div className="flex items-center gap-1">
-                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                <span className="text-xs font-medium">{gig.clientRating}</span>
-              </div>
-            )}
+            <span>{gig.user.name}</span>
           </div>
 
-          {gig.location && (
+          {bid?.created_at && (
             <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-md">
-              <MapPin className="h-4 w-4 text-teal-600" />
-              <span>{gig.location}</span>
+              <Clock className="h-4 w-4 text-teal-600" />
+              <span>
+                Bid placed: {moment(bid?.created_at).format("DD/MM/yyyy")}
+              </span>
             </div>
           )}
 
-          {gig.bidDate && (
+          {/* {gig.location && (
             <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-md">
-              <Clock className="h-4 w-4 text-teal-600" />
-              <span>Bid placed: {gig.bidDate}</span>
+              <MapPin className="h-4 w-4 text-teal-600" />
+              <span>{gig.location}</span>
             </div>
           )}
 
@@ -189,7 +176,7 @@ const GigCard = ({
                 Accepted: {gig.acceptedDate}
               </span>
             </div>
-          )}
+          )} */}
         </div>
 
         {/* Accepted Gigs - Start Work Button */}
@@ -206,7 +193,7 @@ const GigCard = ({
         )}
 
         {/* In Progress Gigs - Priority & Complete */}
-        {gig.status === "in-progress" && (
+        {/* {gig.status === "in-progress" && (
           <div className="border-t pt-4 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-700">
@@ -239,10 +226,10 @@ const GigCard = ({
               ✅ Mark as Completed
             </Button>
           </div>
-        )}
+        )} */}
 
         {/* Completed Gigs - Review Display */}
-        {gig.status === "completed" && gig.rating && (
+        {/* {gig.status === "completed" && gig.rating && (
           <div className="border-t pt-4 bg-green-50 rounded-lg p-4 mt-4">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-semibold text-green-800">
@@ -278,7 +265,7 @@ const GigCard = ({
               </div>
             )}
           </div>
-        )}
+        )} */}
 
         {/* Rejected Gigs - Info */}
         {gig.status === "rejected" && (
@@ -287,26 +274,29 @@ const GigCard = ({
               <strong>Not selected:</strong> The client chose another provider
               for this gig. Keep applying to more opportunities!
             </p>
-            {gig.bidDate && (
+            {/* {gig.bidDate && (
               <div className="flex items-center gap-2 text-sm text-red-600 mt-2">
                 <Clock className="h-4 w-4" />
                 <span>Bid placed on {gig.bidDate}</span>
               </div>
-            )}
+            )} */}
           </div>
         )}
 
         {/* Requested Gigs - Waiting Status */}
-        {gig.status === "requested" && (
+        {bid?.status === "pending" && (
           <div className="border-t pt-4 bg-blue-50 rounded-lg p-4 mt-4">
             <p className="text-sm text-blue-700">
               <strong>⏳ Waiting for approval:</strong> Your bid is under review
               by the client. You'll be notified once they make a decision.
             </p>
-            {gig.bidDate && (
+            {bid?.created_at && (
               <div className="flex items-center gap-2 text-sm text-blue-600 mt-2">
                 <Clock className="h-4 w-4" />
-                <span>Bid submitted on {gig.bidDate}</span>
+                <span>
+                  Bid submitted on{" "}
+                  {moment(bid?.created_at).format("DD/MM/yyyy")}
+                </span>
               </div>
             )}
           </div>

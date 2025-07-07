@@ -1,147 +1,64 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import GigCard from "./GigPipelineCard";
-import { GIGS_PIPELINE_TABS } from "@/utils/constant";
-
-export interface Gig {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  price: number;
-  priceType: "fixed" | "hourly";
-  deadline: string;
-  location?: string;
-  client: string;
-  clientRating?: number;
-  status: "requested" | "accepted" | "in-progress" | "completed" | "rejected";
-  priority?: "high" | "medium" | "low";
-  rating?: number;
-  review?: string;
-  completedDate?: string;
-  bidAmount?: number;
-  bidDate?: string;
-  acceptedDate?: string;
-  startedDate?: string;
-}
+import { API_ROUTES, GIGS_PIPELINE_TABS } from "@/utils/constant";
+import { apiCall } from "@/utils/apiCall";
+import { Gigs, IPagination } from "@/utils/interface";
+import { toast } from "react-toastify";
+import MyGigSkelton from "@/components/skeleton/MyGigSkelton";
+import { renderBaseOnCondition } from "@/utils/helper";
+import InfiniteScroll from "react-infinite-scroll-component";
+import Loader from "@/components/common/Loader";
+import { useGetUserProfileQuery } from "@/redux/api";
 
 const GigPipeline = () => {
-  const [gigs, setGigs] = useState<Gig[]>([
-    {
-      id: "1",
-      title: "Laundry work",
-      description:
-        "A laundry worker, also known as a laundry attendant, is someone who washes, dries, folds, and irons laundry items like clothes, linens, and towels.",
-      category: "Household",
-      price: 50.0,
-      priceType: "fixed",
-      deadline: "01/08/2025",
-      client: "John Smith",
-      clientRating: 4.5,
-      status: "requested",
-      bidAmount: 45.0,
-      bidDate: "25/07/2025",
-    },
-    {
-      id: "2",
-      title: "Learning Maths Tutoring",
-      description:
-        "Mathematics tutoring for high school student. Need help with algebra and geometry concepts.",
-      category: "Education",
-      price: 25.0,
-      priceType: "hourly",
-      deadline: "1 Week Timeline",
-      client: "Sarah Johnson",
-      clientRating: 4.8,
-      status: "requested",
-      bidAmount: 20.0,
-      bidDate: "26/07/2025",
-    },
-    {
-      id: "3",
-      title: "Web Development Project",
-      description:
-        "Build a responsive e-commerce website with React and Node.js backend.",
-      category: "Tech",
-      price: 120.0,
-      priceType: "fixed",
-      deadline: "15/08/2025",
-      client: "Tech Startup Inc",
-      clientRating: 4.2,
-      status: "accepted",
-      bidAmount: 115.0,
-      acceptedDate: "28/07/2025",
-    },
-    {
-      id: "4",
-      title: "Mobile App UI Design",
-      description:
-        "Design modern and intuitive UI for a fitness tracking mobile application.",
-      category: "Design",
-      price: 80.0,
-      priceType: "fixed",
-      deadline: "10/08/2025",
-      client: "FitLife App",
-      clientRating: 4.6,
-      status: "in-progress",
-      priority: "high",
-      bidAmount: 75.0,
-      startedDate: "30/07/2025",
-    },
-    {
-      id: "5",
-      title: "Data Analysis Report",
-      description:
-        "Analyze sales data and create comprehensive report with insights and recommendations.",
-      category: "Data Science",
-      price: 200.0,
-      priceType: "fixed",
-      deadline: "Completed",
-      client: "Business Analytics Co",
-      clientRating: 4.9,
-      status: "completed",
-      rating: 5,
-      review:
-        "Excellent work! The analysis was thorough and the insights were very valuable for our business decisions.",
-      completedDate: "25/07/2025",
-      bidAmount: 190.0,
-    },
-    {
-      id: "6",
-      title: "Logo Design",
-      description:
-        "Create a modern logo for a new tech company with brand guidelines.",
-      category: "Design",
-      price: 75.0,
-      priceType: "fixed",
-      deadline: "Completed",
-      client: "InnovateTech",
-      clientRating: 4.3,
-      status: "completed",
-      rating: 4,
-      review:
-        "Good work, delivered on time. Would recommend for future projects.",
-      completedDate: "20/07/2025",
-      bidAmount: 70.0,
-    },
-    {
-      id: "7",
-      title: "Content Writing",
-      description:
-        "Write SEO-optimized blog posts for digital marketing website.",
-      category: "Writing",
-      price: 15.0,
-      priceType: "hourly",
-      deadline: "Rejected",
-      client: "Marketing Pro",
-      status: "rejected",
-      bidAmount: 12.0,
-      bidDate: "22/07/2025",
-    },
-  ]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [meta, setMeta] = useState<IPagination>({
+    page: 1,
+    pageSize: 9,
+    totalPages: 0,
+    total: 1,
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [gigs, setGigs] = useState<Gigs[]>([]);
+  const [activeTab, setActiveTab] = useState("requested");
+  const { data: userProfile } = useGetUserProfileQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
 
-  const handleStartGig = (gigId: string) => {};
+  useEffect(() => {
+    fetchGigsPipeline(1, "pending");
+  }, []);
+
+  const fetchGigsPipeline = async (page = 1, status = "") => {
+    try {
+      setLoading(true);
+
+      const resp = await apiCall({
+        endPoint: `${API_ROUTES.GIG_PIPELINE}?page=${page}&pageSize=10&status=${status}`,
+        method: "GET",
+      });
+
+      if (resp?.success) {
+        setGigs((prev) => (page === 1 ? resp.data : [...prev, ...resp.data]));
+        setMeta(resp.meta);
+        setCurrentPage(page);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch gigs");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchNextPage = () => {
+    if (currentPage < meta.totalPages && !loading) {
+      fetchGigsPipeline(currentPage + 1);
+    }
+  };
+
+  const handleStartGig = (gigId: number) => {};
 
   const handleCompleteGig = (gigId: string) => {};
 
@@ -150,27 +67,9 @@ const GigPipeline = () => {
     priority: "high" | "medium" | "low"
   ) => {};
 
-  const getGigsByStatus = (status: string) => {
-    return gigs.filter((gig) => gig.status === status);
-  };
-
-  const [activeTab, setActiveTab] = useState("requested");
-
-  const getTabContent = () => {
-    switch (activeTab) {
-      case "requested":
-        return getGigsByStatus("requested");
-      case "accepted":
-        return getGigsByStatus("accepted");
-      case "in-progress":
-        return getGigsByStatus("in-progress");
-      case "completed":
-        return getGigsByStatus("completed");
-      case "rejected":
-        return getGigsByStatus("rejected");
-      default:
-        return [];
-    }
+  const handleTabChange = (id: string) => {
+    setActiveTab(id);
+    fetchGigsPipeline(1, id);
   };
 
   const getEmptyState = () => {
@@ -182,7 +81,7 @@ const GigPipeline = () => {
     )} gigs at the moment.`;
 
     switch (activeTab) {
-      case "requested":
+      case "pending":
         icon = "📋";
         title = "No pending gigs";
         description = "Gigs you've bid on will appear here";
@@ -237,7 +136,7 @@ const GigPipeline = () => {
             {GIGS_PIPELINE_TABS.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                   activeTab === tab.id
                     ? "border-teal-500 text-teal-600"
@@ -253,30 +152,52 @@ const GigPipeline = () => {
         </div>
       </div>
 
-      {/* Tab Content */}
-      <div className="mt-6">
-        {getTabContent().length === 0 ? (
-          getEmptyState()
-        ) : (
-          <div className="space-y-6">
-            {getTabContent().map((gig) => (
-              <GigCard
-                key={gig.id}
-                gig={gig}
-                onStartGig={
-                  activeTab === "accepted" ? handleStartGig : undefined
-                }
-                onPriorityChange={
-                  activeTab === "in-progress" ? handlePriorityChange : undefined
-                }
-                onCompleteGig={
-                  activeTab === "in-progress" ? handleCompleteGig : undefined
-                }
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      {renderBaseOnCondition(
+        loading,
+        <MyGigSkelton cardNum={3} />,
+        <>
+          {renderBaseOnCondition(
+            gigs.length === 0,
+            getEmptyState(),
+            <InfiniteScroll
+              dataLength={gigs.length}
+              next={fetchNextPage}
+              hasMore={currentPage < meta.totalPages}
+              loader={
+                <div className="h-20 mt-14 w-full text-center">
+                  <Loader size={50} />
+                </div>
+              }
+              scrollThreshold={0.9}
+              scrollableTarget="scrollableDiv"
+              className="py-4"
+            >
+              <div className="space-y-6">
+                {gigs.map((gig) => (
+                  <GigCard
+                    key={gig.id}
+                    gig={gig}
+                    userId={userProfile.data.id}
+                    onStartGig={
+                      activeTab === "accepted" ? handleStartGig : undefined
+                    }
+                    onPriorityChange={
+                      activeTab === "in-progress"
+                        ? handlePriorityChange
+                        : undefined
+                    }
+                    onCompleteGig={
+                      activeTab === "in-progress"
+                        ? handleCompleteGig
+                        : undefined
+                    }
+                  />
+                ))}
+              </div>
+            </InfiniteScroll>
+          )}
+        </>
+      )}
     </div>
   );
 };

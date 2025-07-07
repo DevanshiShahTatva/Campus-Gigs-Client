@@ -88,7 +88,7 @@ const UserProviderSidebar = ({ open, setOpen }: { open: boolean; setOpen: (open:
           <FaTimes className="w-5 h-5" />
         </button>
         <nav className="flex-1 space-y-2 py-6 px-2 w-full text-base md:text-base">
-          {sidebarItems.filter((barItem) => barItem.access.includes(userProfile.data.profile_type)).map((item) => (
+          {sidebarItems.filter((barItem) => barItem.access.includes(userProfile?.data?.profile_type)).map((item) => (
             <Link
               key={item.id}
               href={item.route}
