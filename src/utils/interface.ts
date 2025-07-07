@@ -92,10 +92,7 @@ export interface GigCategory {
   id: number;
   name: string;
   tire_id: number;
-  tire: {
-    id: number;
-    name: string;
-  };
+  tire: Tire;
 }
 
 export interface ISubscriptionCurrentPlanApiResponse {
@@ -114,4 +111,50 @@ export interface ISubscriptionCurrentPlanApiResponse {
     is_deleted: boolean;
     subscription_plan: ISubscriptionPlan;
   };
+}
+
+export interface Tire {
+  id: number;
+  name: string;
+}
+
+export interface Skill {
+  id: number;
+  name: string;
+}
+
+export interface User {
+  id: number;
+  email: string;
+  name: string;
+  role: string;
+  profile: string;
+  professional_interests: string | null;
+  extracurriculars: string | null;
+  certifications: string | null;
+  education: string;
+  skills: Skill[];
+}
+
+export interface Gigs {
+  id: number;
+  user_id: number;
+  provider_id: number | null;
+  title: string;
+  images: string[];
+  description: string;
+  gig_category_id: number;
+  payment_type: "hourly" | "fixed";
+  price: string;
+  certifications: string[];
+  profile_type: string;
+  status: string;
+  start_date_time: Date;
+  end_date_time: Date;
+  created_at: Date;
+  updated_at: Date;
+  is_deleted: boolean;
+  user: User;
+  skills: Skill[];
+  gig_category: GigCategory;
 }

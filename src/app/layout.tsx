@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ToastContainer } from "react-toastify";
 import { ClientLayoutWrapper } from "@/components/Wrapper/ClientLayoutWrapper";
-import ReduxProvider from '@/provider/ReduxProvider';
+import ReduxProvider from "@/provider/ReduxProvider";
 
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
@@ -22,8 +22,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`antialiased`}>
+        <ToastContainer style={{ zIndex: 999999999 }} />
         <ReduxProvider>
-          <ToastContainer />
           <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
         </ReduxProvider>
       </body>

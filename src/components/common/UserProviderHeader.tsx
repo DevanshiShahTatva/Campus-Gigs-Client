@@ -1,14 +1,51 @@
 "use client";
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { FaBell, FaChevronDown, FaExchangeAlt, FaUser, FaCog, FaSignOutAlt, FaCheckCircle, FaInfoCircle, FaBars, FaStar } from "react-icons/fa";
 import { RoleContext } from "@/context/role-context";
-import { useGetUserProfileQuery } from "@/redux/api";
+import { useGetUserProfileQuery, useUpdateUserProfileMutation } from "@/redux/api";
 import { useDispatch } from "react-redux";
 import { logout } from "@/redux/slices/userSlice";
+import { getRoleLabel, getAvatarName } from "@/utils/helper";
 
-const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean; setSidebarOpen: (open: boolean) => void }) => {
+// Types
+interface UserProviderHeaderProps {
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+}
+
+type RoleType = "user" | "provider";
+
+// Custom hook for optimistic role switching
+function useOptimisticRole(role: RoleType, setRole: (r: RoleType) => void, updateUserProfile: any) {
+  const [optimisticRole, setOptimisticRole] = useState<RoleType | undefined>();
+  const handleRoleSwitch = useCallback(async () => {
+    const newRole: RoleType = role === "user" ? "provider" : "user";
+    setOptimisticRole(newRole);
+    setRole(newRole);
+    try {
+      const response = await updateUserProfile({ profile_type: newRole }).unwrap();
+      if (response?.data?.profile_type === newRole || response?.profile_type === newRole) {
+        setOptimisticRole(undefined);
+      } else {
+        setRole(role);
+        setOptimisticRole(undefined);
+      }
+    } catch (error) {
+      setRole(role);
+      setOptimisticRole(undefined);
+    }
+  }, [role, setRole, updateUserProfile]);
+  return { optimisticRole, handleRoleSwitch };
+}
+
+// Local helper for role icon
+function getRoleIcon(role: RoleType) {
+  return role === "user" ? <FaUser className="w-3.5 h-3.5" /> : <FaStar className="w-3.5 h-3.5" />;
+}
+
+const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const { role, setRole } = useContext(RoleContext);
@@ -18,14 +55,10 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
     refetchOnMountOrArgChange: true,
   });
   const user = data?.data;
-  const initials = user?.name
-    ? user.name
-        .split(" ")
-        .map((n: string) => n[0])
-        .join("")
-        .toUpperCase()
-    : "";
   const dispatch = useDispatch();
+  const [updateUserProfile] = useUpdateUserProfileMutation();
+  const { optimisticRole, handleRoleSwitch } = useOptimisticRole(role, setRole, updateUserProfile);
+  const currentRole: RoleType = optimisticRole ?? role;
 
   // Placeholder notifications
   const notifications = [
@@ -34,10 +67,10 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
     { id: 3, type: "info", message: "New message from Alice.", read: true },
   ];
 
-  const handleRoleSwitch = () => {
-    setRole(role === "user" ? "provider" : "user");
-  };
+  // Get user initials for avatar fallback
+  const initials = getAvatarName(user?.name || "", true);
 
+  // Handle logout
   const handleLogout = () => {
     if (typeof window !== "undefined") {
       if ((window as any).__PERSISTOR) {
@@ -59,8 +92,19 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  // Sync context with backend profile_type on mount or when user changes
+  React.useEffect(() => {
+    if (user?.profile_type && user?.profile_type !== role) {
+      setRole(user.profile_type);
+    }
+    // eslint-disable-next-line
+  }, [user?.profile_type]);
+
+  // Determine if toggle should be shown based on subscription plan  
+  const showRoleToggle = !!(user?.subscription && user.subscription.subscription_plan && user.subscription.subscription_plan.price > 0);
+
   return (
-    <header className="w-full h-16 flex items-center justify-between border-b border-[var(--base)]/10 shadow bg-white sticky top-0 z-[99997]">
+    <header className="w-full h-16 flex items-center justify-between border-b border-[var(--base)]/10 shadow bg-white sticky top-0 z-[40]">
       <div className="w-full mx-auto flex flex-wrap items-center justify-between max-w-8xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 md:gap-6 min-w-0">
           {/* Hamburger menu icon (always visible, themed) */}
@@ -71,7 +115,7 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
           >
             <FaBars className="w-6 h-6 text-[var(--base)]" />
           </button>
-          <span className="flex items-center cursor-pointer min-w-0" onClick={() => router.push("/")}>
+          <span className="flex items-center cursor-pointer min-w-0" onClick={() => router.push("/user/dashboard")}>
             <img
               src="/logo.svg"
               alt="CampusGig Logo"
@@ -122,23 +166,25 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
             </div>
           </div>
           {/* User/Provider toggle for md+ (header, outside dropdown) */}
+          {showRoleToggle && (
           <div className="hidden md:flex items-center gap-2 ml-2 bg-white border border-gray-200 rounded-full px-2 py-1 shadow-sm">
             <span
               className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold select-none w-20
-              ${role === "user" ? "bg-gray-100 text-gray-700" : "bg-[var(--base)]/10 text-[var(--base)]"}`}
+                ${currentRole === "user" ? "bg-gray-100 text-gray-700" : "bg-[var(--base)]/10 text-[var(--base)]"}`}
             >
-              {role === "user" ? <FaUser className="w-3.5 h-3.5" /> : <FaStar className="w-3.5 h-3.5" />}
-              {role === "user" ? "User" : "Provider"}
+                {getRoleIcon(currentRole)}
+                {getRoleLabel(currentRole)}
             </span>
             <button
               className="p-2 rounded-full hover:bg-[var(--base)]/10 transition-colors text-[var(--base)]"
               onClick={handleRoleSwitch}
-              title={`Switch to ${role === "user" ? "Provider" : "User"}`}
-              aria-label={`Switch to ${role === "user" ? "Provider" : "User"}`}
+                title={`Switch to ${currentRole === "user" ? "Provider" : "User"}`}
+                aria-label={`Switch to ${currentRole === "user" ? "Provider" : "User"}`}
             >
               <FaExchangeAlt className="w-4 h-4" />
             </button>
           </div>
+          )}
           {/* Profile always visible, toggle in dropdown for mobile */}
           <div className="relative">
             <button
@@ -177,7 +223,7 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
                 <div>
                   {user?.name && <div className="font-semibold text-gray-900 text-base">{user.name}</div>}
                   {user?.email && <div className="text-xs text-gray-500 truncate max-w-xs">{user.email}</div>}
-                  <div className="text-xs text-gray-500">{role === "user" ? "User" : "Provider"} Mode</div>
+                  <div className="text-xs text-gray-500">{getRoleLabel(currentRole)} Mode</div>
                 </div>
               </div>
               <Link
@@ -190,23 +236,25 @@ const UserProviderHeader = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: bool
                 <FaCog className="text-[var(--base)]" /> Settings
               </Link>
               {/* User/Provider toggle for mobile (only visible on small screens) */}
+              {showRoleToggle && (
               <div className="flex md:hidden items-center gap-2 px-5 py-3 border-t border-gray-100">
                 <span
                   className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold select-none w-20
-                  ${role === "user" ? "bg-gray-100 text-gray-700" : "bg-[var(--base)]/10 text-[var(--base)]"}`}
+                    ${currentRole === "user" ? "bg-gray-100 text-gray-700" : "bg-[var(--base)]/10 text-[var(--base)]"}`}
                 >
-                  {role === "user" ? <FaUser className="w-3.5 h-3.5" /> : <FaStar className="w-3.5 h-3.5" />}
-                  {role === "user" ? "User" : "Provider"}
+                    {getRoleIcon(currentRole)}
+                    {getRoleLabel(currentRole)}
                 </span>
                 <button
                   className="p-2 rounded-full hover:bg-[var(--base)]/10 transition-colors text-[var(--base)]"
                   onClick={handleRoleSwitch}
-                  title={`Switch to ${role === "user" ? "Provider" : "User"}`}
-                  aria-label={`Switch to ${role === "user" ? "Provider" : "User"}`}
+                    title={`Switch to ${currentRole === "user" ? "Provider" : "User"}`}
+                    aria-label={`Switch to ${currentRole === "user" ? "Provider" : "User"}`}
                 >
                   <FaExchangeAlt className="w-4 h-4" />
                 </button>
               </div>
+              )}
               <button
                 className="flex items-center gap-3 w-full text-left px-5 py-3 text-red-600 hover:bg-red-50 transition text-sm font-medium border-t border-gray-100"
                 onClick={handleLogout}

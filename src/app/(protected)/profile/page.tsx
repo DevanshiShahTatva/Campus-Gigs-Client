@@ -3,11 +3,15 @@ import React, { useState, useRef, useContext, useMemo } from "react";
 import { FiUpload, FiCamera, FiTrash2 } from "react-icons/fi";
 import DynamicForm from "@/components/common/form/DynamicForm";
 import { apiCall } from "@/utils/apiCall";
-import { RoleContext } from '@/context/role-context';
+import { RoleContext } from "@/context/role-context";
 import { getInitials, profileFormConfig } from "./helper";
 import { USER_PROFILE } from "@/utils/constant";
 import ProfileSkeleton from "@/components/skeleton/ProfileSkeleton";
 import { toast } from "react-toastify";
+import {
+  useGetUserProfileQuery,
+  useUpdateUserProfileMutation,
+} from "@/redux/api";
 
 // Custom Profile Photo Component
 const ProfilePhotoUpload = ({
@@ -155,7 +159,10 @@ const Profile = () => {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const profileInputRef = useRef<HTMLInputElement>(null);
   const { role: profileMode } = useContext(RoleContext);
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const { data, isLoading } = useGetUserProfileQuery(undefined, { refetchOnMountOrArgChange: true });
+  const userProfile = data?.data;
+  const [updateUserProfile, { isLoading: isUpdating }] =
+    useUpdateUserProfileMutation();
 
   // Merge userProfile into initialValues for the form
   const formInitialValues = useMemo(() => {
@@ -176,33 +183,10 @@ const Profile = () => {
     };
   }, [userProfile]);
 
-  React.useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const data = await apiCall({
-          endPoint: '/user/profile',
-          method: 'GET',
-          withToken: true,
-        });
-        console.log(data, "DATA");
-        setUserProfile(data?.data);
-      } catch (error) {
-        console.error('Failed to fetch profile:', error);
-      }
-    };
-    fetchProfile();
-  }, []);
-
   // Function to handle profile update API call
   const handleProfileUpdate = async (values: any) => {
     try {
-      const response = await apiCall({
-        endPoint: '/user/profile',
-        method: 'PUT',
-        body: values,
-        withToken: true,
-      });
-      setUserProfile(response.data || values);
+      await updateUserProfile(values).unwrap();
       toast.success("Profile updated successfully");
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2000);
@@ -212,7 +196,7 @@ const Profile = () => {
     }
   };
 
-  if (!userProfile) {
+  if (isLoading || !userProfile) {
     return <ProfileSkeleton />;
   }
   return (
@@ -289,8 +273,13 @@ const Profile = () => {
               onClick={() => {}}
             >
               {!profileImage ? (
-                <div className="w-full h-full flex items-center justify-center rounded-full" style={{ background: 'var(--base)' }}>
-                  <span className="text-white text-3xl font-bold">{getInitials(userProfile?.name)}</span>
+                <div
+                  className="w-full h-full flex items-center justify-center rounded-full"
+                  style={{ background: "var(--base)" }}
+                >
+                  <span className="text-white text-3xl font-bold">
+                    {getInitials(userProfile?.name)}
+                  </span>
                 </div>
               ) : (
                 <img
@@ -300,13 +289,23 @@ const Profile = () => {
                 />
               )}
               {/* Animated Hover Overlay with Camera and Trash Icon */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-400 ease-in-out" style={{ background: 'linear-gradient(135deg, rgba(30,41,59,0.85) 60%, rgba(30,41,59,0.7) 100%)', backdropFilter: 'blur(2px)' }}>
+              <div
+                className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-400 ease-in-out"
+                style={{
+                  background:
+                    "linear-gradient(135deg, rgba(30,41,59,0.85) 60%, rgba(30,41,59,0.7) 100%)",
+                  backdropFilter: "blur(2px)",
+                }}
+              >
                 {profileImage ? (
                   <div className="flex flex-row gap-8 w-full justify-between px-6">
                     {/* Camera Icon - slides in from left with fade */}
                     <button
                       className="flex items-center justify-center w-10 h-10 rounded-full shadow-lg transition-all duration-400 ease-in-out transform opacity-0 -translate-x-12 group-hover:opacity-100 group-hover:translate-x-0 focus:outline-none"
-                      style={{ transitionProperty: 'transform, opacity, box-shadow, background' }}
+                      style={{
+                        transitionProperty:
+                          "transform, opacity, box-shadow, background",
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         profileInputRef.current?.click();
@@ -319,7 +318,10 @@ const Profile = () => {
                     {/* Trash Icon - slides in from right with fade */}
                     <button
                       className="flex items-center justify-center w-10 h-10 rounded-full shadow-lg transition-all duration-400 ease-in-out transform opacity-0 translate-x-12 group-hover:opacity-100 group-hover:translate-x-0 focus:outline-none"
-                      style={{ transitionProperty: 'transform, opacity, box-shadow, background' }}
+                      style={{
+                        transitionProperty:
+                          "transform, opacity, box-shadow, background",
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setProfileImage(null);
@@ -367,31 +369,33 @@ const Profile = () => {
           <div className="flex flex-col sm:flex-row mt-20 px-6 pb-4 border-b border-gray-200 items-start sm:items-center justify-between">
             <div className="flex justify-between w-full">
               <div>
-
-              <h2 className="text-2xl font-bold text-gray-900">{userProfile?.name}</h2>
-              <div className="text-gray-600 mt-1">
-                {userProfile?.headline}
-              </div>
-              <div className="text-sm text-gray-400 mt-1">
-                {userProfile?.email}
-              </div>
-              <div className="text-base text-gray-700 mt-2 max-w-2xl">
-                {userProfile?.bio}
-              </div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {userProfile?.name}
+                </h2>
+                <div className="text-gray-600 mt-1">
+                  {userProfile?.headline}
+                </div>
+                <div className="text-sm text-gray-400 mt-1">
+                  {userProfile?.email}
+                </div>
+                <div className="text-base text-gray-700 mt-2 max-w-2xl">
+                  {userProfile?.bio}
+                </div>
               </div>
               {/* Preview Portfolio Button for Providers */}
-              {/* {profileMode !== 'provider' && userProfile?._id && ( */}
-              <div className="flex">
-
-                <button
-                  className="mt-auto px-4 py-2 bg-[var(--base)] text-white rounded shadow hover:bg-[var(--base-hover)] transition"
-                  onClick={() => window.open(`/provider/${userProfile.id}`, '_blank')}
-                  type="button"
+              {userProfile.profile_type == "provider" && (
+                <div className="flex">
+                  <button
+                    className="mt-auto px-4 py-2 bg-[var(--base)] text-white rounded shadow hover:bg-[var(--base-hover)] transition"
+                    onClick={() =>
+                      window.open(`/provider/${userProfile.id}`, "_blank")
+                    }
+                    type="button"
                   >
-                  Preview Portfolio
-                </button>
-                  </div>
-              {/* )} */}
+                    Preview Portfolio
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           {/* Tabs Navigation - responsive and scrollable */}
@@ -400,42 +404,66 @@ const Profile = () => {
             <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent z-10 hidden sm:block" />
             <div className="flex border-b mb-6 flex-nowrap overflow-x-auto whitespace-nowrap scrollbar-hide relative z-20 gap-x-2">
               <button
-                className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${activeTab === 'profile' ? 'border-[var(--base)] text-[var(--base)]' : 'border-transparent text-gray-500 hover:text-[var(--base)]'}`}
-                onClick={() => setActiveTab('profile')}
+                className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${
+                  activeTab === "profile"
+                    ? "border-[var(--base)] text-[var(--base)]"
+                    : "border-transparent text-gray-500 hover:text-[var(--base)]"
+                }`}
+                onClick={() => setActiveTab("profile")}
               >
                 Profile Details
               </button>
-              {profileMode === 'provider' && (
+              {profileMode === "provider" && (
                 <>
                   <button
-                    className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${activeTab === 'gigs' ? 'border-[var(--base)] text-[var(--base)]' : 'border-transparent text-gray-500 hover:text-[var(--base)]'}`}
-                    onClick={() => setActiveTab('gigs')}
+                    className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${
+                      activeTab === "gigs"
+                        ? "border-[var(--base)] text-[var(--base)]"
+                        : "border-transparent text-gray-500 hover:text-[var(--base)]"
+                    }`}
+                    onClick={() => setActiveTab("gigs")}
                   >
                     My Gigs
                   </button>
                   <button
-                    className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${activeTab === 'history' ? 'border-[var(--base)] text-[var(--base)]' : 'border-transparent text-gray-500 hover:text-[var(--base)]'}`}
-                    onClick={() => setActiveTab('history')}
+                    className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${
+                      activeTab === "history"
+                        ? "border-[var(--base)] text-[var(--base)]"
+                        : "border-transparent text-gray-500 hover:text-[var(--base)]"
+                    }`}
+                    onClick={() => setActiveTab("history")}
                   >
                     Gig History
                   </button>
                 </>
               )}
               <button
-                className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${activeTab === 'support' ? 'border-[var(--base)] text-[var(--base)]' : 'border-transparent text-gray-500 hover:text-[var(--base)]'}`}
-                onClick={() => setActiveTab('support')}
+                className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${
+                  activeTab === "support"
+                    ? "border-[var(--base)] text-[var(--base)]"
+                    : "border-transparent text-gray-500 hover:text-[var(--base)]"
+                }`}
+                onClick={() => setActiveTab("support")}
               >
                 Support Requests
               </button>
               <button
-                className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${activeTab === 'subscription' ? 'border-[var(--base)] text-[var(--base)]' : 'border-transparent text-gray-500 hover:text-[var(--base)]'}`}
-                onClick={() => setActiveTab('subscription')}
+                className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${
+                  activeTab === "subscription"
+                    ? "border-[var(--base)] text-[var(--base)]"
+                    : "border-transparent text-gray-500 hover:text-[var(--base)]"
+                }`}
+                onClick={() => setActiveTab("subscription")}
               >
                 Subscription Plan
               </button>
               <button
-                className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${activeTab === 'settings' ? 'border-[var(--base)] text-[var(--base)]' : 'border-transparent text-gray-500 hover:text-[var(--base)]'}`}
-                onClick={() => setActiveTab('settings')}
+                className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${
+                  activeTab === "settings"
+                    ? "border-[var(--base)] text-[var(--base)]"
+                    : "border-transparent text-gray-500 hover:text-[var(--base)]"
+                }`}
+                onClick={() => setActiveTab("settings")}
               >
                 Settings
               </button>
@@ -449,9 +477,10 @@ const Profile = () => {
                   formConfig={profileFormConfig as any}
                   initialValues={formInitialValues}
                   onSubmit={handleProfileUpdate}
+                  enableReinitialize
                 />
               )}
-              {profileMode === 'provider' && activeTab === "gigs" && (
+              {profileMode === "provider" && activeTab === "gigs" && (
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-[var(--base)]">
@@ -494,7 +523,7 @@ const Profile = () => {
                   </div>
                 </div>
               )}
-              {profileMode === 'provider' && activeTab === "history" && (
+              {profileMode === "provider" && activeTab === "history" && (
                 <div>
                   <h3 className="text-lg font-semibold text-[var(--base)] mb-4">
                     Gig History

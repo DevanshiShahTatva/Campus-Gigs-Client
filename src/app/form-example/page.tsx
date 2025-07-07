@@ -224,6 +224,7 @@ const CreateGigPage = () => {
           formConfig={formConfig}
           onSubmit={handleSubmit}
           initialValues={initialValues}
+          onCancel={() => {}}
         />
       </div>
     </div>

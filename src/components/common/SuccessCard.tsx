@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardContent } from "../ui/card";
 import IconMap from "./IconMap";
+import { Button } from "./ui/Button";
 
 interface Props {
   successTitle: string;
@@ -18,12 +19,7 @@ const SuccessCard = (props: Props) => {
           {successTitle}
         </h3>
         <p className="text-[var(--text-semi-dark)] mb-6">{successPara}</p>
-        <button
-          className="mt-2 px-6 py-3 rounded-lg bg-[var(--base)] text-white font-semibold hover:bg-[var(--base-hover)] transition"
-          onClick={onClickButton}
-        >
-          Create more gig
-        </button>
+        <Button onClick={onClickButton}>Create more gig</Button>
       </CardContent>
     </Card>
   );
