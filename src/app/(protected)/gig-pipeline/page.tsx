@@ -302,11 +302,6 @@ const GigPipeline = () => {
 
       {/* Tab Content */}
       <div className="mt-6">
-        <div className={`px-4 py-2 rounded-lg mb-6 ${getTabHeadingColor()}`}>
-          <h3 className="text-xl font-semibold text-white">{getTabTitle()}</h3>
-          <p className="text-white">{getTabDescription()}</p>
-        </div>
-
         {getTabContent().length === 0 ? (
           getEmptyState()
         ) : (

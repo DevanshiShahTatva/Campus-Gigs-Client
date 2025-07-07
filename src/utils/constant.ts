@@ -25,6 +25,7 @@ export const ROUTES = {
   RESET_PASSWORD: "/reset-password",
   GIGS: "/gigs",
   MY_GIGS: "/my-gigs",
+  GIGS_PIPELINE: "/gig-pipeline",
   ADMIN: {
     DASHBOARD: "/admin/dashboard",
     SUBSCRIPTION: "/admin/subscription-plan",
@@ -82,6 +83,19 @@ export enum PROFILE_TYPE {
 export enum PAYMENT_TYPE {
   HOURLY = "hourly",
   FIXED = "fixed",
+}
+
+export enum GIG_STATUS {
+  UNSTARTED = "un_started",
+  INPROGRESS = "in_progress",
+  COMPLETED = "completed",
+  REJECTED = "rejected"
+}
+
+export enum BID_STATUS {
+  PENDING = 'pending',
+  ACCEPTED = 'accepted',
+  REJECTED = 'rejected'
 }
 
 export const USER_SIDEBAR_ITEMS = [

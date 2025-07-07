@@ -3,17 +3,22 @@ import React from "react";
 import { FaComments, FaTasks, FaCog, FaHome, FaTimes, FaCreditCard } from "react-icons/fa";
 import Link from "next/link";
 import { ROUTES } from "@/utils/constant";
+import { useGetUserProfileQuery } from "@/redux/api";
 
 const sidebarItems = [
-  { id: 1, title: "Dashboard", icon: <FaHome />, route: "/user/dashboard" },
-  { id: 2, title: "Chat", icon: <FaComments />, route: "/chat" },
-  { id: 3, title: "Gigs", icon: <FaTasks />, route: "/gigs" },
-  { id: 5, title: "Subscription Plans", icon: <FaCreditCard />, route: "/user/buy-subscription" },
-  { id: 4, title: "Settings", icon: <FaCog />, route: "#" },
-  { id: 6, title: "My Gigs", icon: <FaCog />, route: ROUTES.MY_GIGS },
+  { id: 1, title: "Dashboard", icon: <FaHome />, route: "/user/dashboard", access: ["user", "provider"] },
+  { id: 2, title: "Chat", icon: <FaComments />, route: "/chat", access: ["user", "provider"] },
+  { id: 3, title: "Gigs", icon: <FaTasks />, route: "/gigs", access: ["user", "provider"] },
+  { id: 5, title: "Subscription Plans", icon: <FaCreditCard />, route: "/user/buy-subscription", access: ["user", "provider"] },
+  { id: 4, title: "Settings", icon: <FaCog />, route: "#", access: ["user", "provider"] },
+  { id: 6, title: "My Gigs", icon: <FaCog />, route: ROUTES.MY_GIGS, access: ["user", "provider"] },
+  { id: 7, title: "Gigs Pipeline", icon: <FaCog />, route: ROUTES.GIGS_PIPELINE, access: ["provider"] },
 ];
 
 const UserProviderSidebar = ({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) => {
+  const { data: userProfile } = useGetUserProfileQuery(undefined, {
+      refetchOnMountOrArgChange: true,
+    });
   return (
     <>
       {/* Sidebar Drawer (fixed left, white, 20rem wide) */}
@@ -83,7 +88,7 @@ const UserProviderSidebar = ({ open, setOpen }: { open: boolean; setOpen: (open:
           <FaTimes className="w-5 h-5" />
         </button>
         <nav className="flex-1 space-y-2 py-6 px-2 w-full text-base md:text-base">
-          {sidebarItems.map((item) => (
+          {sidebarItems.filter((barItem) => barItem.access.includes(userProfile.data.profile_type)).map((item) => (
             <Link
               key={item.id}
               href={item.route}
