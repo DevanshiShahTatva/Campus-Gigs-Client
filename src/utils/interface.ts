@@ -180,4 +180,7 @@ export interface Gigs {
   priority?: string;
   rating?: number;
   review?: string;
+  _count?: {
+    bids: number;
+  }
 }
