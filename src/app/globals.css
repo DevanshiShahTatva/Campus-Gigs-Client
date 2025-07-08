@@ -374,6 +374,9 @@ button{
 .border-destructive {
   border-color: red !important;
 }
+.slider .slick-slider {
+  height: 100%;
+}
 
 .slider .slick-dots {
   bottom: 20px;
