@@ -86,7 +86,7 @@ const UserProviderSidebar = ({
       .filter((item) => item.access.includes(userProfile.data.profile_type))
       .map((item) => item.route);
 
-    const changeRoutes = [...allowedRoutes, ROUTES.PROFILE];
+    const changeRoutes = [...allowedRoutes, ROUTES.PROFILE, ROUTES.PREVIEW_PROFILE];
 
     const isCurrentRouteAllowed = changeRoutes.some((route) =>
       pathname.startsWith(route)
