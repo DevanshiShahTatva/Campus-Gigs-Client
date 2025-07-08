@@ -27,7 +27,7 @@ import { toast } from "react-toastify";
 import { apiCall } from "@/utils/apiCall";
 import { API_ROUTES } from "@/utils/constant";
 import { IPagination, Gigs } from "@/utils/interface";
-import { formatTimeDifference} from "./helper";
+import { formatTimeDifference } from "./helper";
 import { getAvatarName, renderBaseOnCondition } from "@/utils/helper";
 import moment from "moment";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -124,7 +124,7 @@ const GigListing = () => {
               <Users className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <div className="font-semibold text-gray-900">0 bids</div>
+              <div className="font-semibold text-gray-900">{gig._count?.bids ?? 0} bids</div>
               <div className="text-sm text-gray-500">Received</div>
             </div>
           </div>
