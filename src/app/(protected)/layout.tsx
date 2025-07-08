@@ -4,12 +4,12 @@ import UserProviderHeader from "@/components/common/UserProviderHeader";
 import UserProviderSidebar from "@/components/common/UserProviderSidebar";
 import { RoleProvider } from "@/context/role-context";
 import "react-toastify/dist/ReactToastify.css";
-
+ 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <RoleProvider>
-      <div className="flex flex-col">
+      <div className="flex flex-col h-full">
         <UserProviderHeader sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <div className="flex flex-1 flex-col overflow-auto">
           <UserProviderSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
@@ -21,5 +21,5 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     </RoleProvider>
   );
 };
-
+ 
 export default Layout;
