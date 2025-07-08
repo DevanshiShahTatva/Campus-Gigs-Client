@@ -330,7 +330,7 @@ const GigDetail = () => {
           <div className="text-xs sm:text-sm text-gray-500">in {gigDetails.payment_type === "fixed" ? "Fixed Price" : "Range"}</div>
         </div>
       </div>
-      {gigDetails?.profile_type === "provider" && userProfile?.data?.profile_type === "user" ? (
+      {(gigDetails?.user_id !== user_id && gigDetails?.profile_type === "provider" && userProfile?.data?.profile_type === "user") ? (
         <Button
           className="px-3 py-2 sm:px-4 sm:py-6 text-sm sm:text-md rounded-lg font-semibold"
         >
@@ -420,15 +420,17 @@ const GigDetail = () => {
       <CardContent className="p-4">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-0 mb-4">
           <div className="flex items-center space-x-3 sm:space-x-4">
-            <AvatarWithFallback
-              src={bid.provider.profile}
-              alt="Provider avatar"
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0"
-              name={bid.provider.name}
-            />
+            <Link href={`/provider/${bid.provider.id}`} target="_blank">
+              <AvatarWithFallback
+                src={bid.provider.profile}
+                alt="Provider avatar"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0"
+                name={bid.provider.name}
+              />
+            </Link>
             <div className="min-w-0 flex-1">
               <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
-                <Link href={`/users/${bid.provider.id}`}>
+                <Link href={`/provider/${bid.provider.id}`} target="_blank">
                   <h4 className="font-semibold text-base sm:text-lg truncate">{bid.provider.name}</h4>
                 </Link>
                 <span className="hidden sm:inline">•</span>

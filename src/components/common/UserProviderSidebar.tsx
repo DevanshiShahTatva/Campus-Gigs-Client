@@ -11,7 +11,7 @@ import {
   FaCreditCard,
 } from "react-icons/fa";
 import Link from "next/link";
-import { API_ROUTES, ROUTES } from "@/utils/constant";
+import { ROUTES } from "@/utils/constant";
 import { useGetUserProfileQuery } from "@/redux/api";
 
 const sidebarItems = [
@@ -86,12 +86,14 @@ const UserProviderSidebar = ({
       .filter((item) => item.access.includes(userProfile.data.profile_type))
       .map((item) => item.route);
 
-    const isCurrentRouteAllowed = allowedRoutes.some((route) =>
+    const changeRoutes = [...allowedRoutes, ROUTES.PROFILE];
+
+    const isCurrentRouteAllowed = changeRoutes.some((route) =>
       pathname.startsWith(route)
     );
 
     if (!isCurrentRouteAllowed) {
-      const fallbackRoute = allowedRoutes[0] || API_ROUTES.GIGS;
+      const fallbackRoute = changeRoutes[0] || ROUTES.GIGS;
       router.push(fallbackRoute);
     }
   }, [userProfile?.data?.profile_type, pathname]);
