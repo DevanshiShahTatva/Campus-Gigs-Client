@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { apiCall } from '@/utils/apiCall';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { IDropdownOption } from '@/utils/interface';
 
 function NoDataMsg() {
     return (
@@ -16,132 +17,209 @@ function NoDataMsg() {
             <Component className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p>No categories created yet. Create tiers first to organize categories.</p>
         </div>
-    )
+    );
 }
 
+interface IForm {
+    name: string;
+    description: string;
+    tire_id: string;
+    skillIds: string[];
+}
+
+const initialValues: IForm = {
+    name: '',
+    description: '',
+    tire_id: '',
+    skillIds: [],
+};
 
 function CategoryManagement() {
-    const [categoriesData, setCategoriesData] = useState<any[]>([])
-    const [categoriesDataLoading, setCategoriesDataLoading] = useState(false)
-
-    const [isModalOpen, SetIsModalOpen] = useState<boolean>(false)
-    const [isTableLoading, setIsTableLoading] = useState<boolean>(false)
+    const [categoriesData, setCategoriesData] = useState<any[]>([]);
+    const [categoriesDataLoading, setCategoriesDataLoading] = useState(false);
+    const [isModalOpen, SetIsModalOpen] = useState<boolean>(false);
+    const [tierDropdown, setTierDropdown] = useState<IDropdownOption[]>([]);
+    const [skillsDropdown, setSkillsDropdown] = useState<IDropdownOption[]>([]);
+    const [editCategory, setEditCategory] = useState<any | null>(null);
 
     const handleToggleModal = (value: boolean) => {
-        SetIsModalOpen(value)
-    }
+        if (!value) setEditCategory(null);
+        SetIsModalOpen(value);
+    };
 
-    const formConfig: FormFieldConfig[] = [
+    const getInitialValues = (): IForm => {
+        if (editCategory) {
+            const editValue = {
+                name: editCategory.name || '',
+                description: editCategory.description || '',
+                tire_id: editCategory.tire_id || '',
+                skillIds: editCategory.skills?.map((s: any) => String(s.id)) || [],
+            }
+            console.log(editValue)
+            return editValue
+        }
+        return initialValues;
+    };
+
+    const getFormConfig = (): FormFieldConfig[] => [
         {
-            title: "",
-            description: "",
+            title: '',
+            description: '',
             groupSize: 1,
             section: false,
-            subfields: [{
-                id: "name",
-                name: "name",
-                label: "Category Name",
-                type: "text",
-                required: true,
-                placeholder: "Enter Category Name",
-            },
-            {
-                id: "description",
-                name: "description",
-                label: "Description",
-                type: "textarea",
-                required: false,
-                placeholder: "Enter Description here...",
-            },
-            {
-                id: "tire_id",
-                name: "tire_id",
-                label: "Tier",
-                type: "select",
-                required: true,
-                placeholder: "Select Tier",
-            },
-            {
-                id: "skillIds",
-                name: "skillIds",
-                label: "Skills",
-                type: "multiselect",
-                required: true,
-                placeholder: "Select multiple skills",
-            },
+            subfields: [
+                {
+                    id: 'name',
+                    name: 'name',
+                    label: 'Category Name',
+                    type: 'text',
+                    required: true,
+                    placeholder: 'Enter Category Name',
+                },
+                {
+                    id: 'description',
+                    name: 'description',
+                    label: 'Description',
+                    type: 'textarea',
+                    required: false,
+                    placeholder: 'Enter Description here...',
+                },
+                {
+                    id: 'tire_id',
+                    name: 'tire_id',
+                    label: 'Tier',
+                    type: 'select',
+                    required: true,
+                    placeholder: 'Select Tier',
+                    options: tierDropdown,
+                },
+                {
+                    id: 'skillIds',
+                    name: 'skillIds',
+                    label: 'Skills',
+                    type: 'multiselect',
+                    required: true,
+                    placeholder: 'Select multiple skills',
+                    options: skillsDropdown,
+                },
             ],
+        },
+    ];
+
+    const handleSubmit = async (values: IForm) => {
+        console.log("SUBMIT_VALUES", values)
+        try {
+            const endpoint = editCategory ? `/gig-category/${editCategory.id}` : `/gig-category`;
+            const method = editCategory ? 'PUT' : 'POST';
+
+            const payload = {
+                ...values,
+                tire_id: Number(values.tire_id),
+                skillIds: values.skillIds.map(Number),
+            };
+
+            const res = await apiCall({ endPoint: endpoint, method, body: payload });
+
+            if (res.success) {
+                toast.success(res.message || (editCategory ? 'Category updated' : 'Category added'));
+                fetchCategories();
+                SetIsModalOpen(false);
+                setEditCategory(null);
+            } else {
+                toast.error(res.message);
+            }
+
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to save category';
+            toast.error(errorMessage);
         }
-    ]
-
-    const initialValues = {
-        name: "",
-        description: "",
-        tire_id: "",
-        skillIds: []
-    }
-
-    const handleSubmit = (values: any) => {
-        console.log("VALUESSs", values)
-    }
+    };
 
     const AddModal = () => {
-        return isModalOpen &&
-            <CustomModal
-                onClose={() => handleToggleModal(false)}
-                title='Modal'
-            >
-                <DynamicForm
-                    formConfig={formConfig}
-                    onSubmit={handleSubmit}
-                    initialValues={initialValues}
-                />
-            </CustomModal>
-    }
+        return (
+            isModalOpen && (
+                <CustomModal
+                    onClose={() => handleToggleModal(false)}
+                    title={editCategory ? 'Edit Category' : 'Add Category'}
+                >
+                    <DynamicForm
+                        formConfig={getFormConfig()}
+                        onSubmit={handleSubmit}
+                        initialValues={getInitialValues()}
+                    />
+                </CustomModal>
+            )
+        );
+    };
 
-
-
-    const fetchCategories = useCallback(async () => {
-        setCategoriesDataLoading(true)
+    const fetchTierDropdown = useCallback(async () => {
         try {
-            const res = await apiCall({ endPoint: '/gig-category', method: 'GET' })
+            const res = await apiCall({ endPoint: '/tire/dropdown', method: 'GET' });
             if (res?.data?.length) {
-                setCategoriesData(res.data || [])
+                setTierDropdown(res.data || []);
             }
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch skills'
-            toast.error(errorMessage)
-        } finally {
-            setCategoriesDataLoading(false)
+            toast.error('Failed to fetch tier list');
         }
-    }, [])
+    }, []);
+
+    const fetchSkillsDropdown = useCallback(async () => {
+        try {
+            const res = await apiCall({ endPoint: '/skills/dropdown', method: 'GET' });
+            if (res?.data?.length) {
+                setSkillsDropdown(res.data || []);
+            }
+        } catch (error) {
+            toast.error('Failed to fetch skills list');
+        }
+    }, []);
+
+    const fetchCategories = useCallback(async () => {
+        setCategoriesDataLoading(true);
+        try {
+            const res = await apiCall({ endPoint: '/gig-category', method: 'GET' });
+            if (res?.data?.length) {
+                setCategoriesData(res.data || []);
+            }
+        } catch (error) {
+            toast.error('Failed to fetch categories');
+        } finally {
+            setCategoriesDataLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
-        fetchCategories()
-    }, [fetchCategories])
+        fetchCategories();
+        fetchTierDropdown();
+        fetchSkillsDropdown();
+    }, [fetchCategories]);
 
     const groupByTier = () => {
-        const tierMap: { [tierId: number]: { tier: any; categories: any[] } } = {}
+        const tierMap: { [tierId: number]: { tier: any; categories: any[] } } = {};
         categoriesData.forEach((category) => {
-            const tierId = category.tire_id
+            const tierId = category.tire_id;
             if (!tierMap[tierId]) {
-                tierMap[tierId] = { tier: category.tire, categories: [] }
+                tierMap[tierId] = { tier: category.tire, categories: [] };
             }
-            tierMap[tierId].categories.push(category)
-        })
-        return Object.values(tierMap)
-    }
+            tierMap[tierId].categories.push(category);
+        });
+        return Object.values(tierMap);
+    };
 
-    const grouped = groupByTier()
+    const grouped = groupByTier();
+
     return (
-        <Card className='p-0'>
-            <div className="bg-gradient-to-r from-blue-400 to-blue-800 text-white rounded-t-lg p-6">
+        <Card className="p-0">
+            <div className="bg-gradient-to-r from-blue-800 to-blue-300 text-white rounded-t-lg p-6">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                         <Component className="w-6 h-6" />
                         <CardTitle className="text-xl">Category Management</CardTitle>
                     </div>
 
-                    <Button variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100"
+                    <Button
+                        variant="secondary"
+                        className="bg-white text-blue-600 hover:bg-gray-100"
                         onClick={() => handleToggleModal(true)}
                     >
                         <Plus className="w-4 h-4 mr-2" />
@@ -149,7 +227,6 @@ function CategoryManagement() {
                     </Button>
                 </div>
             </div>
-
 
             <div className="grid gap-4 px-6 pb-6">
                 {categoriesDataLoading ? (
@@ -168,7 +245,10 @@ function CategoryManagement() {
                     <NoDataMsg />
                 ) : (
                     grouped.map((group, index) => (
-                        <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                        <div
+                            key={index}
+                            className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                        >
                             <div className="mb-4">
                                 <Badge>{group.tier?.name}</Badge>
                             </div>
@@ -177,7 +257,14 @@ function CategoryManagement() {
                                     <div className="flex justify-between items-center mb-2">
                                         <p className="font-medium">{category.name}</p>
                                         <div className="flex space-x-2">
-                                            <Button variant="outline" size="sm">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setEditCategory(category);
+                                                    handleToggleModal(true);
+                                                }}
+                                            >
                                                 <Edit className="w-4 h-4" />
                                             </Button>
                                             <Button variant="outline" size="sm">
@@ -199,9 +286,10 @@ function CategoryManagement() {
                     ))
                 )}
             </div>
+
             {AddModal()}
         </Card>
-    )
+    );
 }
 
-export default CategoryManagement
+export default CategoryManagement;
