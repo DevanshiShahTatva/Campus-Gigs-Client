@@ -1,4 +1,4 @@
-import { BID_STATUS } from "./constant";
+import { BID_STATUS, PRIORITY } from "./constant";
 
 export type SortOrder = "asc" | "desc";
 
@@ -177,7 +177,7 @@ export interface Gigs {
   skills: Skill[];
   gig_category: GigCategory;
   bids: Array<Bid>;
-  priority?: string;
+  priority: PRIORITY;
   rating?: number;
   review?: string;
   _count?: {
