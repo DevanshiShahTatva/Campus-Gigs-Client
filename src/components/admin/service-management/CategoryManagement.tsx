@@ -1,13 +1,14 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Card, CardTitle } from '@/components/ui/card';
-import { Component, Plus, ChevronRight, Edit, Trash2 } from 'lucide-react';
+import { Component, Plus, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CustomModal } from '@/components/common/CustomModal';
 import DynamicForm, { FormFieldConfig } from '@/components/common/form/DynamicForm';
 import { toast } from "react-toastify";
 import { apiCall } from '@/utils/apiCall';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function NoDataMsg() {
     return (
@@ -53,16 +54,16 @@ function CategoryManagement() {
                 placeholder: "Enter Description here...",
             },
             {
-                id: "tier",
-                name: "tier",
+                id: "tire_id",
+                name: "tire_id",
                 label: "Tier",
                 type: "select",
                 required: true,
                 placeholder: "Select Tier",
             },
             {
-                id: "skills",
-                name: "skills",
+                id: "skillIds",
+                name: "skillIds",
                 label: "Skills",
                 type: "multiselect",
                 required: true,
@@ -73,8 +74,10 @@ function CategoryManagement() {
     ]
 
     const initialValues = {
-        title: "",
-        description: ""
+        name: "",
+        description: "",
+        tire_id: "",
+        skillIds: []
     }
 
     const handleSubmit = (values: any) => {
@@ -116,9 +119,22 @@ function CategoryManagement() {
         fetchCategories()
     }, [fetchCategories])
 
+    const groupByTier = () => {
+        const tierMap: { [tierId: number]: { tier: any; categories: any[] } } = {}
+        categoriesData.forEach((category) => {
+            const tierId = category.tire_id
+            if (!tierMap[tierId]) {
+                tierMap[tierId] = { tier: category.tire, categories: [] }
+            }
+            tierMap[tierId].categories.push(category)
+        })
+        return Object.values(tierMap)
+    }
+
+    const grouped = groupByTier()
     return (
         <Card className='p-0'>
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg p-6">
+            <div className="bg-gradient-to-r from-blue-400 to-blue-800 text-white rounded-t-lg p-6">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                         <Component className="w-6 h-6" />
@@ -133,54 +149,55 @@ function CategoryManagement() {
                     </Button>
                 </div>
             </div>
-            <div className="grid gap-4 px-6 pb-6">
-                {NoDataMsg()}
 
-                {[1].map((tier, index) => {
-                    const tierCategories: any[] = [];
-                    return (
-                        <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                            <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                    <div className="flex items-center space-x-3 mb-2">
-                                        <Badge>
-                                            tier.name
-                                        </Badge>
-                                    </div>
-                                    <p className="text-gray-600 mb-3">tier.description</p>
-                                    <div className="flex items-center space-x-2 text-sm text-gray-500">
-                                        <span>{tierCategories.length} categories</span>
-                                        {tierCategories.length > 0 && (
-                                            <>
-                                                <ChevronRight className="w-4 h-4" />
-                                                <div className="flex flex-wrap gap-1">
-                                                    {tierCategories.slice(0, 3).map(category => (
-                                                        <Badge key={category.id} variant="outline" className="text-xs">
-                                                            {category.name}
-                                                        </Badge>
-                                                    ))}
-                                                    {tierCategories.length > 3 && (
-                                                        <Badge variant="outline" className="text-xs">
-                                                            +{tierCategories.length - 3} more
-                                                        </Badge>
-                                                    )}
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="flex space-x-2">
-                                    <Button variant="outline" size="sm" >
-                                        <Edit className="w-4 h-4" />
-                                    </Button>
-                                    <Button variant="outline" size="sm">
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </div>
+
+            <div className="grid gap-4 px-6 pb-6">
+                {categoriesDataLoading ? (
+                    [...Array(3)].map((_, i) => (
+                        <Card key={i} className="p-6">
+                            <Skeleton className="h-6 w-1/3 mb-2" />
+                            <Skeleton className="h-4 w-1/2 mb-4" />
+                            <div className="flex flex-wrap gap-2">
+                                {[...Array(3)].map((_, j) => (
+                                    <Skeleton key={j} className="h-6 w-20 rounded-full" />
+                                ))}
                             </div>
+                        </Card>
+                    ))
+                ) : categoriesData.length === 0 ? (
+                    <NoDataMsg />
+                ) : (
+                    grouped.map((group, index) => (
+                        <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                            <div className="mb-4">
+                                <Badge>{group.tier?.name}</Badge>
+                            </div>
+                            {group.categories.map((category) => (
+                                <div key={category.id} className="mb-4 border p-4 rounded-lg">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <p className="font-medium">{category.name}</p>
+                                        <div className="flex space-x-2">
+                                            <Button variant="outline" size="sm">
+                                                <Edit className="w-4 h-4" />
+                                            </Button>
+                                            <Button variant="outline" size="sm">
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 items-center text-sm text-gray-600">
+                                        <span className="font-medium">Skills:</span>
+                                        {category.skills?.map((skill: any) => (
+                                            <Badge key={skill.id} variant="secondary">
+                                                {skill.name}
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    );
-                })}
+                    ))
+                )}
             </div>
             {AddModal()}
         </Card>
