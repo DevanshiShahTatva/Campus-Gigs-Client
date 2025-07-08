@@ -1,3 +1,5 @@
+import { BID_STATUS } from "./constant";
+
 export type SortOrder = "asc" | "desc";
 
 export interface ColumnConfig<T> {
@@ -19,7 +21,12 @@ export interface DynamicTableProps<T extends { id: number }> {
   currentPage: number;
 
   // Optional search/sort handlers
-  onSearchSort?: (search: string, sortKey: keyof T, sortOrder: SortOrder, page: number) => void;
+  onSearchSort?: (
+    search: string,
+    sortKey: keyof T,
+    sortOrder: SortOrder,
+    page: number
+  ) => void;
 
   // Optional overrides
   defaultSortKey?: keyof T;
@@ -136,6 +143,18 @@ export interface User {
   skills: Skill[];
 }
 
+export interface Bid {
+  id: number;
+  provider_id: number;
+  gig_id: number;
+  status: BID_STATUS;
+  description: string;
+  payment_type: "hourly" | "fixed";
+  bid_amount: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
 export interface Gigs {
   id: number;
   user_id: number;
@@ -157,6 +176,10 @@ export interface Gigs {
   user: User;
   skills: Skill[];
   gig_category: GigCategory;
+  bids: Array<Bid>;
+  priority?: string;
+  rating?: number;
+  review?: string;
   _count?: {
     bids: number;
   }
