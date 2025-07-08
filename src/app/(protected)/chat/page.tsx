@@ -1,50 +1,86 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useSelector } from "react-redux";
 
 import ChatSidebar from "./components/ChatSidebar";
 import ChatWindow from "./components/ChatWindow";
+import { RootState } from "@/redux";
+import { getSocket } from "@/utils/socket";
 
-export default function ChatPage() {
-  const [selectedChat, setSelectedChat] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+const MOBILE_BREAKPOINT = 768;
+
+function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const el = document.getElementById("scrollableDiv");
-    if (el) {
-      el.classList.add("overflow-hidden");
-    }
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
     };
+
+    handleResize(); // initial check
     window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return isMobile;
+}
+
+export default function ChatPage() {
+  const { token } = useSelector((state: RootState) => state.user);
+
+  const [selectedChat, setSelectedChat] = useState<number>(0);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const isMobile = useIsMobile();
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Manage socket
+  const socket = useMemo(() => (token ? getSocket("chat", token) : null), [token]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onSocketRegistered = (message: any) => {
+      console.log("Socket registered:", message);
+    };
+
+    socket.on("socketRegistered", onSocketRegistered);
     return () => {
-      window.removeEventListener("resize", handleResize);
-      const el = document.getElementById("scrollableDiv");
-      if (el) {
-        el.classList.remove("overflow-hidden");
-      }
+      socket.off("socketRegistered", onSocketRegistered);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    scrollRef.current?.classList.add("overflow-hidden");
+    return () => {
+      scrollRef.current?.classList.remove("overflow-hidden");
     };
   }, []);
 
-  
-
-  const handleSelectChat = (chatId: string) => {
+  const handleSelectChat = (chatId: number, user: any) => {
     setSelectedChat(chatId);
+    setSelectedUser(user);
   };
 
+  const showSidebar = !isMobile || (isMobile && !selectedChat);
+  const showChatWindow = !isMobile || (isMobile && selectedChat !== 0);
+
   return (
-    <div className="flex h-full bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <div
-        className={`${selectedChat && isMobile ? "hidden border-r-0" : "flex border-r"} w-full ${
-          isMobile ? "w-full" : "max-w-[300px]"
-        } border-gray-200`}
-      >
-        <ChatSidebar onSelectChat={handleSelectChat} selectedChat={selectedChat} />
-      </div>
-      <div className={`${!selectedChat && isMobile ? "hidden" : "flex"} flex-col flex-1`}>
-        <ChatWindow selectedChat={selectedChat} onBack={() => setSelectedChat(null)} />
-      </div>
+    <div
+      className="flex h-full bg-white rounded-lg border border-gray-200 overflow-hidden"
+      ref={scrollRef}
+    >
+      {showSidebar && (
+        <div className={`flex border-r w-full ${isMobile ? "w-full" : "max-w-[300px]"} border-gray-200`}>
+          <ChatSidebar onSelectChat={handleSelectChat} selectedChat={selectedChat} />
+        </div>
+      )}
+      {showChatWindow && (
+        <div className="flex flex-col flex-1">
+          <ChatWindow selectedChat={selectedChat} selectedUser={selectedUser} onBack={() => setSelectedChat(0)} socket={socket} />
+        </div>
+      )}
     </div>
   );
 }

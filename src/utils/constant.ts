@@ -45,6 +45,7 @@ export const ROUTES = {
     GIGS: "/gigs",
     GIGS_CREATE: "/gigs/create",
     PROVIDER: "/provider",
+    CHAT: "/chat",
   },
 };
 
@@ -194,7 +195,8 @@ export const LANDING_PAGE_TEXTS = {
   ],
   TAGLINE: "Connecting UMich Students",
   GET_HELP: "Get Help or Earn on Campus",
-  FIND_OR_OFFER: "Find or offer gigs — from tutoring to food pickup, right within the UMich student network.",
+  FIND_OR_OFFER:
+    "Find or offer gigs — from tutoring to food pickup, right within the UMich student network.",
   HOW_IT_WORKS: {
     TITLE: "How It Works",
     DESCRIPTION:
@@ -202,7 +204,8 @@ export const LANDING_PAGE_TEXTS = {
     STEPS: [
       {
         title: "Post or Browse Gigs",
-        description: "Create your own gig or find opportunities that match your skills",
+        description:
+          "Create your own gig or find opportunities that match your skills",
         details: [
           "Create a detailed profile highlighting your skills",
           "Browse through available gigs in your area",
@@ -237,29 +240,34 @@ export const LANDING_PAGE_TEXTS = {
   },
   CALL_TO_ACTION: {
     TITLE: "Ready to Get Started?",
-    SUBTITLE: " Join thousands of UMich students who are already using CampusGig to find help or earn money on campus.",
+    SUBTITLE:
+      " Join thousands of UMich students who are already using CampusGig to find help or earn money on campus.",
   },
 };
 
 export const CAMP_GIG_BENEFITS = [
   {
     title: "Verified UMich Community",
-    description: "Every user is verified through their UMich email, ensuring a safe and trusted environment for all transactions.",
+    description:
+      "Every user is verified through their UMich email, ensuring a safe and trusted environment for all transactions.",
     icon: "verified_umich",
   },
   {
     title: "Flexible Work and Help",
-    description: "Set your own schedule, choose your services, and work at your own pace. Perfect for balancing academics and earning.",
+    description:
+      "Set your own schedule, choose your services, and work at your own pace. Perfect for balancing academics and earning.",
     icon: "flexible_work",
   },
   {
     title: "Secure Payment System",
-    description: "Our escrow system ensures safe transactions. Funds are only released when both parties are satisfied with the service.",
+    description:
+      "Our escrow system ensures safe transactions. Funds are only released when both parties are satisfied with the service.",
     icon: "secure_payment_system",
   },
   {
     title: "Reviews and Tier-based Ratings",
-    description: "Build your reputation through our review system. Higher tiers unlock more opportunities and premium services.",
+    description:
+      "Build your reputation through our review system. Higher tiers unlock more opportunities and premium services.",
     icon: "reviews_tiers",
   },
 ];
@@ -282,17 +290,33 @@ export const SERVICE_TIERS = [
   {
     id: "tier1",
     label: "Tier 1",
-    services: ["Campus delivery", "Laundry pickup", "Basic errands", "Simple tasks"],
+    services: [
+      "Campus delivery",
+      "Laundry pickup",
+      "Basic errands",
+      "Simple tasks",
+    ],
   },
   {
     id: "tier2",
     label: "Tier 2",
-    services: ["Study tips", "Course selection", "Job search help", "Campus navigation", "Tutoring"],
+    services: [
+      "Study tips",
+      "Course selection",
+      "Job search help",
+      "Campus navigation",
+      "Tutoring",
+    ],
   },
   {
     id: "tier3",
     label: "Tier 3",
-    services: ["Subject tutoring", "Resume review", "Interview prep", "Project help"],
+    services: [
+      "Subject tutoring",
+      "Resume review",
+      "Interview prep",
+      "Project help",
+    ],
   },
 ];
 
@@ -302,7 +326,12 @@ export const SERVICE_TIER_CONTENT = [
     tier: "Tier 1",
     title: "Basic Tasks",
     description: "Laundry, delivery, and other simple services",
-    examples: ["Campus delivery", "Laundry pickup", "Basic errands", "Simple tasks"],
+    examples: [
+      "Campus delivery",
+      "Laundry pickup",
+      "Basic errands",
+      "Simple tasks",
+    ],
     price: "Starting at $10",
     image: "/tier1.jpg",
   },
@@ -311,7 +340,13 @@ export const SERVICE_TIER_CONTENT = [
     tier: "Tier 2",
     title: "Advice",
     description: "Class help, job search assistance, and guidance",
-    examples: ["Study tips", "Course selection", "Job search help", "Campus navigation", "Tutoring"],
+    examples: [
+      "Study tips",
+      "Course selection",
+      "Job search help",
+      "Campus navigation",
+      "Tutoring",
+    ],
     price: "Starting at $20",
     image: "/tier2.jpg",
   },
@@ -320,7 +355,12 @@ export const SERVICE_TIER_CONTENT = [
     tier: "Tier 3",
     title: "Expert Help",
     description: "Tutoring, resume review, and specialized services",
-    examples: ["Subject tutoring", "Resume review", "Interview prep", "Project help"],
+    examples: [
+      "Subject tutoring",
+      "Resume review",
+      "Interview prep",
+      "Project help",
+    ],
     price: "Starting at $30",
     image: "/tier3.jpg",
   },
@@ -404,7 +444,11 @@ export const FEATURED_GIGS = [
 export const SUBSCRIPTION_PLAN_CATEGORIES = [
   {
     title: "Security & Support",
-    features: ["Secure payment processing", "24/7 customer support", "UMich student verification"],
+    features: [
+      "Secure payment processing",
+      "24/7 customer support",
+      "UMich student verification",
+    ],
     icon: "🛡️",
   },
   {
@@ -414,7 +458,11 @@ export const SUBSCRIPTION_PLAN_CATEGORIES = [
   },
   {
     title: "Community Benefits",
-    features: ["Access to student network", "Campus events", "Resource sharing"],
+    features: [
+      "Access to student network",
+      "Campus events",
+      "Resource sharing",
+    ],
     icon: "🤝",
   },
 ];
@@ -455,7 +503,8 @@ export const FOOTER_COPYRIGHT = "© 2025 CampusGig. All rights reserved.";
 
 export const FOOTER_BRAND = {
   title: "CampusGig",
-  description: "Connecting UMich students for campus services, tutoring, and more. Join our community to find help or earn money on campus.",
+  description:
+    "Connecting UMich students for campus services, tutoring, and more. Join our community to find help or earn money on campus.",
 };
 
 export const FOOTER_QUICK_LINKS = [
@@ -468,13 +517,15 @@ export const FOOTER_QUICK_LINKS = [
 
 export const FAQ_TEXT = {
   TITLE: "Frequently Asked Questions",
-  SUBTITLE: "Find answers to common questions about using CampusGig. Can't find what you're looking for? Contact our support team.",
+  SUBTITLE:
+    "Find answers to common questions about using CampusGig. Can't find what you're looking for? Contact our support team.",
   HELP: "Can't find the answer you're looking for? Our support team is here to help.",
   NO_FAQ: "No FAQs available at the moment.",
 };
 export const CONTACT_US_TEXT = {
   TITLE: "Contact Us",
-  SUBTITLE: "Have a question, feedback, or need support? Fill out the form below and our team will get back to you as soon as possible.",
+  SUBTITLE:
+    "Have a question, feedback, or need support? Fill out the form below and our team will get back to you as soon as possible.",
   PHONE: "(734) 123-4567",
   ADDRESS: "University of Michigan Ann Arbor, MI 48109",
   THANK_YOU: "Thank you!",

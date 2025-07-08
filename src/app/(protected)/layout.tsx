@@ -9,7 +9,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <RoleProvider>
-      <div className="flex flex-col">
+      <div className="flex flex-col h-full">
         <UserProviderHeader sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <div className="flex flex-1 flex-col overflow-auto">
           <UserProviderSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
