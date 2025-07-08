@@ -10,6 +10,7 @@ import { apiCall } from '@/utils/apiCall';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { IDropdownOption } from '@/utils/interface';
+import ModalLayout from '@/components/common/Modals/CommonModalLayout';
 
 function NoDataMsg() {
     return (
@@ -41,6 +42,9 @@ function CategoryManagement() {
     const [tierDropdown, setTierDropdown] = useState<IDropdownOption[]>([]);
     const [skillsDropdown, setSkillsDropdown] = useState<IDropdownOption[]>([]);
     const [editCategory, setEditCategory] = useState<any | null>(null);
+    const [deleteCategory, setDeleteCategory] = useState<Number | null>(null)
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [deleteLoading, setDeleteLoading] = useState(false)
 
     const handleToggleModal = (value: boolean) => {
         if (!value) setEditCategory(null);
@@ -208,6 +212,40 @@ function CategoryManagement() {
 
     const grouped = groupByTier();
 
+    const handleDelete = useCallback((categoryId: Number) => {
+        setDeleteCategory(categoryId)
+        setIsDeleteModalOpen(true)
+    }, [])
+
+    const handleCancelDelete = () => {
+        setDeleteCategory(null)
+        setIsDeleteModalOpen(false)
+    }
+
+    const handleConfirmDelete = useCallback(async () => {
+        if (!deleteCategory) return
+        try {
+            setDeleteLoading(true)
+            const res = await apiCall({
+                endPoint: `/gig-category/${deleteCategory}`,
+                method: 'DELETE',
+            })
+
+            if (res.success) {
+                toast.success('Category deleted successfully')
+                setIsDeleteModalOpen(false)
+                fetchCategories()
+            } else {
+                toast.error(res.message ?? "Something went wrong");
+            }
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to delete skill'
+            toast.error(errorMessage)
+        } finally {
+            setDeleteLoading(false)
+        }
+    }, [deleteCategory, fetchCategories])
+
     return (
         <Card className="p-0">
             <div className="bg-gradient-to-r from-blue-800 to-blue-300 text-white rounded-t-lg p-6">
@@ -267,7 +305,7 @@ function CategoryManagement() {
                                             >
                                                 <Edit className="w-4 h-4" />
                                             </Button>
-                                            <Button variant="outline" size="sm">
+                                            <Button variant="outline" size="sm" onClick={() => handleDelete(category.id)}>
                                                 <Trash2 className="w-4 h-4" />
                                             </Button>
                                         </div>
@@ -286,6 +324,30 @@ function CategoryManagement() {
                     ))
                 )}
             </div>
+
+            {isDeleteModalOpen && (
+                <ModalLayout
+                    onClose={handleCancelDelete}
+                    modalTitle="Delete Skill"
+                    footerActions={[
+                        {
+                            label: 'Cancel',
+                            variant: 'secondary',
+                            onClick: handleCancelDelete,
+                        },
+                        {
+                            label: 'Delete',
+                            variant: 'delete',
+                            onClick: handleConfirmDelete,
+                            disabled: deleteLoading
+                        },
+                    ]}
+                >
+                    <div className="py-6 text-center text-[var(--text-dark)] text-lg">
+                        Are you sure you want to delete this category?
+                    </div>
+                </ModalLayout>
+            )}
 
             {AddModal()}
         </Card>
