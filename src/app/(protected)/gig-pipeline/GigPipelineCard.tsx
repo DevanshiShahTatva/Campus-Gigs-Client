@@ -12,13 +12,13 @@ import {
 import { Gigs } from "@/utils/interface";
 import moment from "moment";
 import { useMemo } from "react";
-import { BID_STATUS, GIG_STATUS } from "@/utils/constant";
+import { BID_STATUS, GIG_STATUS, PRIORITY } from "@/utils/constant";
 
 interface GigCardProps {
   gig: Gigs;
   onStartGig?: (id: number, status: string) => void;
   onCompleteGig?: (id: number, status: string) => void;
-  onPriorityChange?: (id: number, priority: "high" | "medium" | "low") => void;
+  onPriorityChange?: (id: number, priority: PRIORITY) => void;
   userId: number;
 }
 
@@ -127,7 +127,7 @@ const GigCard = ({
               >
                 {getStatusText(pipelineStage)}
               </Badge>
-              {/* {gig.priority && (
+              {(gig.priority && pipelineStage === "in_progress") && (
                 <Badge
                   className={`${getPriorityColor(
                     gig.priority
@@ -135,7 +135,7 @@ const GigCard = ({
                 >
                   {gig.priority} priority
                 </Badge>
-              )} */}
+              )}
             </div>
 
             <div className="flex items-center gap-4 mb-3">
@@ -211,7 +211,7 @@ const GigCard = ({
                 Set Priority:
               </span>
               <div className="flex gap-1">
-                {["high", "medium", "low"].map((priority) => (
+                {["low", "medium", "high"].map((priority) => (
                   <Button
                     key={priority}
                     size="sm"

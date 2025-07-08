@@ -57,6 +57,7 @@ export const API_ROUTES = {
   GIG_CATEGORY: "/gig-category",
   GIG_PIPELINE: "/gigs/gig-pipeline",
   GIG_STATUS_CHANGE: "/gigs/change-status",
+  GIG_PRIORITY: "/gigs/priority",
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
     AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",
@@ -100,6 +101,12 @@ export enum BID_STATUS {
   ACCEPTED = 'accepted',
   REJECTED = 'rejected'
 }
+
+  export enum PRIORITY {
+    HIGH = 'high',
+    MEDIUM = 'medium',
+    LOW = 'low'
+  }
 
 export const USER_SIDEBAR_ITEMS = [
   {
