@@ -66,12 +66,13 @@ const ResetPasswordPage = () => {
       body: {
         otp: values.otp.toString(),
         password: values.confirmPassword,
-        email: values.email,
+        email: localStorage.getItem("resetPassEmail") ?? "",
       },
     });
 
     if (response.success) {
       toast.success(response.data?.message ?? "Password reset successfully. You can now log in.");
+      localStorage.removeItem("resetPassEmail");
       router.push("/login");
     } else if (response.message === "Invalid otp") {
       setOtpError("Invalid OTP!");
