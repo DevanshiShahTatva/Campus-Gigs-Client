@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import GigCard from "./GigPipelineCard";
-import { API_ROUTES, GIGS_PIPELINE_TABS } from "@/utils/constant";
+import { API_ROUTES, GIGS_PIPELINE_TABS, PRIORITY } from "@/utils/constant";
 import { apiCall } from "@/utils/apiCall";
 import { Gigs, IPagination } from "@/utils/interface";
 import { toast } from "react-toastify";
@@ -14,6 +14,7 @@ import { useGetUserProfileQuery } from "@/redux/api";
 
 const GigPipeline = () => {
   const [loading, setLoading] = useState<boolean>(true);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [meta, setMeta] = useState<IPagination>({
     page: 1,
     pageSize: 9,
@@ -93,10 +94,25 @@ const GigPipeline = () => {
     }
   };
 
-  const handlePriorityChange = (
-    gigId: number,
-    priority: "high" | "medium" | "low"
-  ) => {};
+  const handlePriorityChange = async (gigId: number, priority: PRIORITY) => {
+    try {
+      setIsSubmitting(true);
+      const resp = await apiCall({
+        endPoint: `${API_ROUTES.GIG_PRIORITY}/${gigId}`,
+        method: "PUT",
+        body: { priority: priority },
+      });
+
+      if (resp?.success) {
+        toast.success(resp.data.message ?? "Gig priority update successfully");
+        fetchGigsPipeline(1, activeTab);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch gigs");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleTabChange = (id: string) => {
     setActiveTab(id);
@@ -152,6 +168,11 @@ const GigPipeline = () => {
 
   return (
     <div>
+      {isSubmitting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <Loader size={48} colorClass="text-[var(--base)]" />
+        </div>
+      )}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           My Gig Pipeline
