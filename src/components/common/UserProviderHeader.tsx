@@ -18,6 +18,13 @@ interface UserProviderHeaderProps {
 
 type RoleType = "user" | "provider";
 
+type Notification = {
+  id: number;
+  type: "info" | "success";
+  message: string;
+  read: boolean;
+};
+
 // Custom hook for optimistic role switching
 function useOptimisticRole(role: RoleType, setRole: (r: RoleType) => void, updateUserProfile: any) {
   const [optimisticRole, setOptimisticRole] = useState<RoleType | undefined>();
@@ -61,10 +68,8 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
   const { optimisticRole, handleRoleSwitch } = useOptimisticRole(role, setRole, updateUserProfile);
   const currentRole: RoleType = optimisticRole ?? role;
   const userId = useSelector((state: any) => state.user?.user_id || state.user?.user?.id);
-  const [notifications, setNotifications] = useState([
-    { id: 1, type: "info", message: "Your gig was approved!", read: true },
-    { id: 2, type: "success", message: "Payment received for completed gig.", read: true },
-    { id: 3, type: "info", message: "New message from Alice.", read: true },
+  const [notifications, setNotifications] = useState<Notification[]>([
+    // Start with no notifications so the bell is not red by default
   ]);
   const socket = useSocket(userId);
 
@@ -107,6 +112,16 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
   // Calculate if there are unread notifications
   const hasUnread = notifications.some((notif) => !notif.read);
 
+  // Mark all notifications as read when dropdown is opened
+  const handleNotifOpen = () => {
+    setNotifOpen((open) => {
+      if (!open) {
+        setNotifications((prev) => prev.map((notif) => ({ ...notif, read: true })));
+      }
+      return !open;
+    });
+  };
+
   React.useEffect(() => {
     if (!socket) return;
     const handleProfileUpdate = (data: any) => {
@@ -114,13 +129,37 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
         { id: Date.now(), type: "info", message: data.message || "Your profile was updated.", read: false },
         ...prev,
       ]);
-      // Do NOT open the notification dropdown automatically
     };
     socket.on("profileUpdate", handleProfileUpdate);
     return () => {
       socket.off("profileUpdate", handleProfileUpdate);
     };
   }, [socket]);
+
+  // Update this function to trigger a browser notification directly
+  const triggerTestNotification = () => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission === "granted") {
+        new Notification("Test Notification", {
+          body: "This is a test push notification.",
+        });
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then((permission) => {
+          if (permission === "granted") {
+            new Notification("Test Notification", {
+              body: "This is a test push notification.",
+            });
+          } else {
+            alert("Notification permission denied.");
+          }
+        });
+      } else {
+        alert("Notification permission denied.");
+      }
+    } else {
+      alert("This browser does not support notifications.");
+    }
+  };
 
   return (
     <header className="w-full h-16 flex items-center justify-between border-b border-[var(--base)]/10 shadow bg-white sticky top-0 z-[40]">
@@ -143,12 +182,20 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
           </span>
         </div>
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          {/* TEMP: Button to trigger test push notification */}
+          <button
+            onClick={triggerTestNotification}
+            style={{ background: '#f59e42', color: 'white', borderRadius: 4, padding: '4px 12px', marginRight: 8 }}
+            title="Trigger Test Notification"
+          >
+            Test Notification
+          </button>
           {/* Notifications always visible */}
           <div className="relative">
             <button
               className="relative p-2 rounded-full hover:bg-[var(--base)]/10 transition-colors focus:outline-none"
               title="Notifications"
-              onClick={() => setNotifOpen((open) => !open)}
+              onClick={handleNotifOpen}
             >
               <FaBell className="text-xl text-[var(--base)]" />
               {hasUnread && (
@@ -292,4 +339,5 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
     </header>
   );
 };
+
 export default UserProviderHeader;
