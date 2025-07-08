@@ -192,7 +192,7 @@ function TierManagement() {
 
     return (
         <Card className='p-0'>
-            <div className="bg-gradient-to-r from-purple-400 to-purple-800 text-white rounded-t-lg p-6">
+            <div className="bg-gradient-to-r from-purple-800 to-purple-300 text-white rounded-t-lg p-6">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                         <Award className="w-6 h-6" />

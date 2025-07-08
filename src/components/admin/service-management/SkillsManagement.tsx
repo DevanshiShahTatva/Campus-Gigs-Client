@@ -185,7 +185,7 @@ const SkillsManagement = () => {
 
     return (
         <Card className="p-0">
-            <div className="bg-gradient-to-r from-green-400 to-green-800 text-white rounded-t-lg p-6">
+            <div className="bg-gradient-to-r from-green-800 to-green-300 text-white rounded-t-lg p-6">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                         <Database className="w-6 h-6" />
