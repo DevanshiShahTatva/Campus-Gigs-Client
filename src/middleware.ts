@@ -11,7 +11,6 @@ const publicRoutes = [
   ROUTES.SIGN_UP,
   ROUTES.FORGOT_PASSWORD,
   ROUTES.RESET_PASSWORD,
-  ROUTES.GIGS,
 ];
 
 const adminRoutes = [
@@ -39,13 +38,18 @@ const userRoutes = [
 ];
 
 export async function middleware(request: NextRequest) {
+  console.log("request", request.cookies.getAll());
   const currentPath = request.nextUrl.pathname;
+  console.log("currentPath", currentPath);
+  console.log("publicRoutes", publicRoutes);
   const isPublicRoute = publicRoutes.includes(currentPath);
+  console.log("isPublicRoute", isPublicRoute);
   if (isPublicRoute) {
     return NextResponse.next();
   }
 
   const token = request.cookies.get("token")?.value;
+  console.log("token", token);
   if (!token) {
     if (!isPublicRoute) {
       return NextResponse.redirect(new URL(ROUTES.LOGIN, request.url));

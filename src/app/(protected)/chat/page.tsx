@@ -33,8 +33,6 @@ export default function ChatPage() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const isMobile = useIsMobile();
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-
   // Manage socket
   const socket = useMemo(() => (token ? getSocket("chat", token) : null), [token]);
 
@@ -52,9 +50,12 @@ export default function ChatPage() {
   }, [socket]);
 
   useEffect(() => {
-    scrollRef.current?.classList.add("overflow-hidden");
+    const el = document.getElementById("scrollableDiv");
+    if (el) {
+      el.classList.add("overflow-hidden");
+    }
     return () => {
-      scrollRef.current?.classList.remove("overflow-hidden");
+      el?.classList.remove("overflow-hidden");
     };
   }, []);
 
@@ -69,7 +70,6 @@ export default function ChatPage() {
   return (
     <div
       className="flex h-full bg-white rounded-lg border border-gray-200 overflow-hidden"
-      ref={scrollRef}
     >
       {showSidebar && (
         <div className={`flex border-r w-full ${isMobile ? "w-full" : "max-w-[300px]"} border-gray-200`}>

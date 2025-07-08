@@ -57,33 +57,29 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat = 0, selectedUser,
   const fetchMessages = async (pageToFetch = 1) => {
     if (!selectedChat) return;
     setLoading(true);
-    try {
-      const response = await apiCall({
-        endPoint: `/chats/${selectedChat}/messages?page=${pageToFetch}`,
-        method: "GET",
-      });
-      if (response?.data) {
-        const newMessages = response.data.map((msg: any) => ({
-          id: msg.id,
-          text: msg.message,
-          sender: msg.sender_id === currentUserId ? "me" : "them",
-          time: new Date(msg.created_at || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          status: "sent",
-          timestamp: new Date(msg.created_at || Date.now()),
-          attachments: [],
-        }));
-        if (pageToFetch === 1) {
-          setMessages(newMessages);
-        } else {
-          setMessages((prev) => [...newMessages, ...prev]);
-        }
-        setHasMore(response.meta && response.meta.page < response.meta.totalPages);
-        setPage(pageToFetch);
+    const response = await apiCall({
+      endPoint: `/chats/${selectedChat}/messages?page=${pageToFetch}`,
+      method: "GET",
+    });
+    if (response?.data) {
+      const newMessages = response.data.map((msg: any) => ({
+        id: msg.id,
+        text: msg.message,
+        sender: msg.sender_id === currentUserId ? "me" : "them",
+        time: new Date(msg.created_at || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        status: "sent",
+        timestamp: new Date(msg.created_at || Date.now()),
+        attachments: [],
+      }));
+      if (pageToFetch === 1) {
+        setMessages(newMessages);
+        setTimeout(() => scrollToBottom(true), 100); // Scroll only on first page load
       } else {
-        setHasMore(false);
+        setMessages((prev) => [...newMessages, ...prev]);
       }
-    } catch (error) {
-      console.error("Error fetching messages:", error);
+      setHasMore(response.meta && response.meta.page < response.meta.totalPages);
+      setPage(pageToFetch);
+    } else {
       setHasMore(false);
     }
     setLoading(false);
@@ -246,21 +242,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat = 0, selectedUser,
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const scrollToBottom = (force = false) => {
-      const container = chatContainerRef.current;
-      if (!container) return;
-      // Only scroll if scrollbar is present and user is near the bottom or force is true
-      const { scrollHeight, clientHeight, scrollTop } = container;
-      const isScrolledToBottom = scrollHeight - clientHeight - scrollTop < 100;
-      if (force || isScrolledToBottom) {
-        container.scrollTop = container.scrollHeight;
-      }
-    };
-    scrollToBottom();
-    const timer = setTimeout(() => scrollToBottom(), 100);
-    return () => clearTimeout(timer);
-  }, [messages]);
+  const scrollToBottom = (force = false) => {
+    const container = chatContainerRef.current;
+    if (!container) return;
+    const { scrollHeight, clientHeight, scrollTop } = container;
+    const isScrolledToBottom = scrollHeight - clientHeight - scrollTop < 100;
+    if (force || isScrolledToBottom) {
+      container.scrollTop = container.scrollHeight;
+    }
+  };
 
   if (!selectedChat) {
     return (

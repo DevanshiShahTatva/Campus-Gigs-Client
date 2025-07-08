@@ -145,7 +145,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat })
                   className={`flex items-center gap-3 p-3 cursor-pointer transition-colors ${selectedChat === chat.id ? "bg-[var(--base)]/10" : "hover:bg-gray-100"
                     }`}
                 >
-                  <div className="relative mr-3">
+                  <div className="relative">
                     {chat.avatar && chat.avatar !== '/default-avatar.png' ? (
                       <div className="h-12 w-12 rounded-full bg-gray-200 overflow-hidden">
                         <Image src={chat.avatar} alt={chat.name} width={48} height={48} className="h-full w-full object-cover" />
