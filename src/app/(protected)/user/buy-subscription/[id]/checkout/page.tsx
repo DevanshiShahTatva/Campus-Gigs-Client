@@ -58,7 +58,7 @@ const Checkout = ({ params }: PageProps) => {
           <CreditCard className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Complete Your <span className="bg-gradient-to-r from-[var(--base)] to-[var(--base-hover)] bg-clip-text text-transparent">Payment</span>
+          Complete Your <span className="text-[var(--base)]">Payment</span>
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           You're just one step away from unlocking premium features. Secure, fast, and trusted by millions worldwide.

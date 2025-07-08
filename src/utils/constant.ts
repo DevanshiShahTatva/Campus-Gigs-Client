@@ -37,6 +37,7 @@ export const ROUTES = {
     PRIVACY_POLICY: "/admin/privacy-policy",
     TERMS_CONDITIONS: "/admin/terms-and-conditions",
     TIRE: "/admin/tire",
+    SERVICE_MANAGEMENT: "/admin/service-management",
   },
   USER: {
     DASHBOARD: "/user/dashboard",
@@ -57,6 +58,7 @@ export const API_ROUTES = {
   GIG_CATEGORY: "/gig-category",
   GIG_PIPELINE: "/gigs/gig-pipeline",
   GIG_STATUS_CHANGE: "/gigs/change-status",
+  GIG_PRIORITY: "/gigs/priority",
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
     AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",
@@ -101,6 +103,12 @@ export enum BID_STATUS {
   REJECTED = 'rejected'
 }
 
+  export enum PRIORITY {
+    HIGH = 'high',
+    MEDIUM = 'medium',
+    LOW = 'low'
+  }
+
 export const USER_SIDEBAR_ITEMS = [
   {
     id: 1,
@@ -116,35 +124,40 @@ export const USER_SIDEBAR_ITEMS = [
   },
   {
     id: 3,
-    title: "Service Tire",
-    route: ROUTES.ADMIN.TIRE,
+    title: "Service Management",
+    route: ROUTES.ADMIN.SERVICE_MANAGEMENT,
     icon: "/assets/services.svg",
   },
+  // {
+  //   id: 4,
+  //   title: "Gig Category",
+  //   route: ROUTES.ADMIN.GIGCATEGORY,
+  //   icon: "/assets/gigcategory.svg",
+  // },
   {
     id: 4,
-    title: "Gig Category",
-    route: ROUTES.ADMIN.GIGCATEGORY,
-    icon: "/assets/gigcategory.svg",
-  },
-  {
-    id: 5,
     title: "Support Requests",
     route: ROUTES.ADMIN.SUPPORT_REQUESTS,
     icon: "/assets/support.svg",
   },
   {
-    id: 6,
+    id: 5,
     title: "Terms & Conditions",
     route: ROUTES.ADMIN.TERMS_CONDITIONS,
     icon: "/assets/terms.svg",
   },
   {
-    id: 7,
+    id: 6,
     title: "Privacy Policy",
     route: ROUTES.ADMIN.PRIVACY_POLICY,
     icon: "/assets/policy.svg",
   },
-  { id: 8, title: "FAQs", route: ROUTES.ADMIN.FAQS, icon: "/assets/faqs.svg" },
+  {
+    id: 7,
+    title: "FAQs",
+    route: ROUTES.ADMIN.FAQS,
+    icon: "/assets/faqs.svg"
+  },
 ];
 
 export const MESSAGES = {
@@ -162,10 +175,10 @@ export const MESSAGES = {
 };
 
 export const GIGS_PIPELINE_TABS = [
-  { id: "pending", label: "Requested"},
+  { id: "pending", label: "Requested" },
   { id: "accepted", label: "Accepted" },
-  { id: "in_progress", label: "In Progress"},
-  { id: "completed", label: "Completed"},
+  { id: "in_progress", label: "In Progress" },
+  { id: "completed", label: "Completed" },
   { id: "rejected", label: "Rejected" },
 ];
 

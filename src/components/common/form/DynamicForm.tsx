@@ -294,7 +294,7 @@ const InnerForm = ({
               </label>
             )}
             <Select
-              value={value}
+              value={String(value)}
               onValueChange={(val) => wrappedSetFieldValue(field.name, val)}
               disabled={isDisabled}
             >
