@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,10 +10,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Calendar } from "lucide-react";
+import { Edit, Trash2, Calendar, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { apiCall } from "@/utils/apiCall";
-import { API_ROUTES } from "@/utils/constant";
+import { API_ROUTES, MY_GIGS_TABS } from "@/utils/constant";
 import { toast } from "react-toastify";
 import { Gigs, IPagination } from "@/utils/interface";
 import { renderBaseOnCondition } from "@/utils/helper";
@@ -44,13 +44,8 @@ const MyGigs = () => {
     refetchOnMountOrArgChange: true,
   });
 
-  const tabs = [
-    { id: "un_started", label: "Open Gigs" },
-    { id: "in_progress", label: "In Progress" },
-    { id: "completed", label: "Completed" },
-  ];
-
   const fetchGigs = async (page = 1, status = "") => {
+    setActiveTab(status);
     try {
       setLoading(true);
 
@@ -86,7 +81,8 @@ const MyGigs = () => {
     fetchGigs(1, id);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (event: React.SyntheticEvent, id: number) => {
+    event.stopPropagation();
     setGigIdForDelete(id);
     setDeleteDialogOpen(true);
   };
@@ -122,10 +118,15 @@ const MyGigs = () => {
     }
   };
 
-  const handleNavigateToEdit = (id: number) => {
+  const handleNavigateToEdit = (event: React.SyntheticEvent, id: number) => {
+    event.stopPropagation();
     const newQuery = { gigId: String(id) };
     const newUrl = `gigs/create?${new URLSearchParams(newQuery).toString()}`;
     router.push(newUrl);
+  };
+
+  const handleNavigateToView = (id: number) => {
+    router.push(`gigs/${id}`);
   };
 
   return (
@@ -145,7 +146,7 @@ const MyGigs = () => {
       <div className="mb-8">
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8">
-            {tabs.map((tab) => (
+            {MY_GIGS_TABS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
@@ -197,7 +198,8 @@ const MyGigs = () => {
                   return (
                     <Card
                       key={gig.id}
-                      className="hover:shadow-lg transition-shadow border-l-4 border-l-[var(--base)]"
+                      className="hover:shadow-lg transition-shadow border-l-4 border-l-[var(--base)] cursor-pointer"
+                      onClick={() => handleNavigateToView(gig.id)}
                     >
                       <CardHeader className="pb-3">
                         <div className="flex justify-between items-start">
@@ -211,69 +213,62 @@ const MyGigs = () => {
                                 {gig.gig_category.name}
                               </Badge>
                             </CardTitle>
-                            <CardDescription className="text-gray-600 mb-3 line-clamp-2 leading-relaxed">
-                              {gig.description}
-                            </CardDescription>
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              {gig.skills.map((data) => {
+                                return (
+                                  <Badge
+                                    key={data.id}
+                                    variant="secondary"
+                                    className="bg-teal-50 text-teal-700 border-teal-200"
+                                  >
+                                    {data.name}
+                                  </Badge>
+                                );
+                              })}
+                            </div>
                           </div>
                           {activeTab === "un_started" && (
                             <div className="flex gap-2 ml-4">
                               <Edit
-                                onClick={() => handleNavigateToEdit(gig.id)}
+                                onClick={(event) =>
+                                  handleNavigateToEdit(event, gig.id)
+                                }
                                 className="cursor-pointer h-5 w-5 text-teal-600 hover:text-teal-600"
                               />
                               <Trash2
-                                onClick={() => handleDelete(gig.id)}
+                                onClick={(event) => handleDelete(event, gig.id)}
                                 className="cursor-pointer h-5 w-5 text-red-600 hover:text-red-600"
                               />
                             </div>
                           )}
                         </div>
 
-                        <div className="flex flex-wrap gap-2 mb-3">
-                          {gig.skills.map((data) => {
-                            return (
-                              <Badge
-                                key={data.id}
-                                variant="secondary"
-                                className="bg-teal-50 text-teal-700 border-teal-200"
-                              >
-                                {data.name}
-                              </Badge>
-                            );
-                          })}
-                        </div>
+                        <CardDescription className="text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                          {gig.description}
+                        </CardDescription>
                       </CardHeader>
 
                       <CardContent className="pt-0">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <span className="capitalize">
-                              {gig.payment_type}:{" "}
-                            </span>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                          <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-md">
+                            <DollarSign className="h-4 w-4 text-teal-600" />
                             <span className="font-medium">
-                              ${Number(gig.price).toFixed(2)}
+                              {Number(gig.price).toFixed(2)}/{gig.payment_type}
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <span>Bids: </span>
-                            <span className="font-medium">0</span>
+                          <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-md">
+                            <span className="font-semibold">Bids: </span>
+                            <span className="font-medium">
+                              {gig.bids.length}
+                            </span>
                           </div>
 
-                          <div className="flex items-center gap-2 text-gray-600">
+                          <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-md">
                             <Calendar className="h-4 w-4 text-teal-600" />
+                            <span className="font-semibold">End Date:</span>
                             <span>
-                              {activeTab === "completed"
-                                ? moment(gig.start_date_time).format(
-                                    "DD/MM/yyyy"
-                                  )
-                                : activeTab === "progress"
-                                ? `Due ${moment(gig.end_date_time).format(
-                                    "DD/MM/yyyy"
-                                  )}`
-                                : moment(gig.end_date_time).format(
-                                    "DD/MM/yyyy"
-                                  )}
+                              {moment(gig.start_date_time).format("DD/MM/yyyy")}
                             </span>
                           </div>
                         </div>

@@ -11,6 +11,7 @@ import {
   DollarSign,
   Star,
   CheckCircle,
+  Image as ImageIcon,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,7 @@ import { toast } from "react-toastify";
 import { apiCall } from "@/utils/apiCall";
 import { API_ROUTES } from "@/utils/constant";
 import { IPagination, Gigs } from "@/utils/interface";
-import { formatTimeDifference} from "./helper";
+import { formatTimeDifference } from "./helper";
 import { getAvatarName, renderBaseOnCondition } from "@/utils/helper";
 import moment from "moment";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -49,6 +50,51 @@ const GigListing = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const debounceSearch = useDebounce(searchQuery, 700);
+
+  const PlaceholderImage = () => (
+    <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+      <div className="text-center">
+        <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+        <p className="text-gray-500 text-sm">No Image</p>
+      </div>
+    </div>
+  );
+
+  const ImageWithFallback = ({ src, alt, className }: { src: string; alt: string; className: string }) => {
+    const [hasError, setHasError] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const handleError = () => {
+      setHasError(true);
+      setIsLoading(false);
+    };
+
+    const handleLoad = () => {
+      setIsLoading(false);
+    };
+
+    if (hasError || !src) {
+      return <PlaceholderImage />;
+    }
+
+    return (
+      <div className="relative w-full h-full">
+        {isLoading && (
+          <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-gray-300 border-t-gray-500 rounded-full animate-spin"></div>
+          </div>
+        )}
+        <img
+          src={src}
+          alt={alt}
+          className={className}
+          onError={handleError}
+          onLoad={handleLoad}
+          style={{ display: isLoading ? 'none' : 'block' }}
+        />
+      </div>
+    );
+  };
 
   const fetchGigs = async (page = 1, search = "") => {
     try {
@@ -124,7 +170,7 @@ const GigListing = () => {
               <Users className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <div className="font-semibold text-gray-900">0 bids</div>
+              <div className="font-semibold text-gray-900">{gig._count?.bids ?? 0} bids</div>
               <div className="text-sm text-gray-500">Received</div>
             </div>
           </div>
@@ -259,14 +305,21 @@ const GigListing = () => {
                                 <div className="w-[7px] h-[7px] bg-gray-400 rounded-full transition" />
                               )}
                             >
-                              {gig.images.map((image: string, i: number) => (
-                                <img
-                                  key={`${i + 1}`}
-                                  src={image}
-                                  alt={gig.title}
-                                  className="w-full h-full object-cover"
-                                />
-                              ))}
+                              {gig.images && gig.images.length > 0 ? (
+                                gig.images.map((image: string, i: number) => (
+                                  <div key={`${i + 1}`} className="h-[200px]">
+                                    <ImageWithFallback
+                                      src={image}
+                                      alt={gig.title}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="h-[200px]">
+                                  <PlaceholderImage />
+                                </div>
+                              )}
                             </Slider>
                           </div>
                           <CardContent className="content"></CardContent>

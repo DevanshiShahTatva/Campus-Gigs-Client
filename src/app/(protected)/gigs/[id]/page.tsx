@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import moment from "moment";
 import Slider from "react-slick";
 import { useSelector } from "react-redux";
@@ -13,11 +14,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import BidSkeletonList from "@/components/skeleton/bidSkeleton";
 import GigDetailSkeleton from "@/components/skeleton/gigDetailSkeleton";
-import { ArrowLeftIcon, CalendarIcon, CheckCircle, ClockIcon, MessageCircle, TagIcon, Star, Edit, Trash } from "lucide-react";
+import { ArrowLeftIcon, CalendarIcon, CheckCircle, ClockIcon, MessageCircle, TagIcon, Star, Edit, Trash, Image as ImageIcon } from "lucide-react";
 import { gigBidFields } from "@/config/gigbid.config";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useGetUserProfileQuery } from "@/redux/api";
 
 interface IBid {
   id: string;
@@ -48,6 +50,79 @@ const GigDetail = () => {
   const [editBid, setEditBid] = useState<IBid | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bidLoading, setBidLoading] = useState(false);
+  const { data: userProfile } = useGetUserProfileQuery(undefined, { refetchOnMountOrArgChange: true, });
+
+  const PlaceholderImage = () => (
+    <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+      <div className="text-center">
+        <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+        <p className="text-gray-500 text-sm">No Image</p>
+      </div>
+    </div>
+  );
+
+  const ImageWithFallback = ({ src, alt }: { src: string; alt: string }) => {
+    const [hasError, setHasError] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const handleError = () => {
+      setHasError(true);
+      setIsLoading(false);
+    };
+
+    const handleLoad = () => {
+      setIsLoading(false);
+    };
+
+    if (hasError || !src) {
+      return <PlaceholderImage />;
+    }
+
+    return (
+      <div className="relative w-full h-full">
+        {isLoading && (
+          <div className="h-[210px] lg:h-[400px] w-full object-cover">
+            <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+              <div className="w-8 h-8 border-4 border-gray-300 border-t-gray-500 rounded-full animate-spin"></div>
+            </div>
+          </div>
+        )}
+        <img
+          src={src}
+          alt={alt}
+          onError={handleError}
+          onLoad={handleLoad}
+          style={{ display: isLoading ? 'none' : 'block' }}
+          className="max-h-[210px] lg:max-h-[400px] w-full h-full object-cover"
+        />
+      </div>
+    );
+  };
+
+  const AvatarWithFallback = ({ src, alt, className, name }: { src?: string; alt: string; className: string; name: string }) => {
+    const [hasError, setHasError] = useState(false);
+
+    const handleError = () => {
+      setHasError(true);
+    };
+
+    if (hasError || !src) {
+      return (
+        <div className={`${className} bg-[var(--base)] text-white rounded-full flex items-center justify-center font-semibold text-lg sm:text-2xl flex-shrink-0`}>
+          {name.charAt(0).toUpperCase()}
+        </div>
+      );
+    }
+
+    return (
+      <img
+        src={src}
+        alt={alt}
+        className={className}
+        onError={handleError}
+      />
+    );
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -191,20 +266,25 @@ const GigDetail = () => {
             <Slider
               speed={3000}
               autoplay={true}
-              dots={gigDetails.images.length > 1}
-              infinite={gigDetails.images.length > 1}
+              dots={gigDetails.images && gigDetails.images.length > 1}
+              infinite={gigDetails.images && gigDetails.images.length > 1}
               customPaging={() => (
                 <div className="w-[7px] h-[7px] bg-gray-400 rounded-full transition" />
               )}
             >
-              {gigDetails.images.map((image: string, i: number) => (
-                <img
-                  key={`${i + 1}`}
-                  src={image}
-                  alt={gigDetails.title}
-                  className="max-h-[210px] lg:max-h-[400px] w-full h-full object-cover"
-                />
-              ))}
+              {gigDetails.images && gigDetails.images.length > 0 ? (
+                gigDetails.images.map((image: string, i: number) => (
+                  <ImageWithFallback
+                    key={`${i + 1}`}
+                    src={image}
+                    alt={gigDetails.title}
+                  />
+                ))
+              ) : (
+                <div className="h-[210px] lg:h-[400px]">
+                  <PlaceholderImage />
+                </div>
+              )}
             </Slider>
           </div>
         </div>
@@ -250,7 +330,13 @@ const GigDetail = () => {
           <div className="text-xs sm:text-sm text-gray-500">in {gigDetails.payment_type === "fixed" ? "Fixed Price" : "Range"}</div>
         </div>
       </div>
-      {(gigDetails?.user_id !== user_id && gigDetails.hasBid === false) && (
+      {gigDetails?.profile_type === "provider" && userProfile?.data?.profile_type === "user" ? (
+        <Button
+          className="px-3 py-2 sm:px-4 sm:py-6 text-sm sm:text-md rounded-lg font-semibold"
+        >
+          Pay Now
+        </Button>
+      ) : (gigDetails?.user_id !== user_id && !gigDetails.hasBid && gigDetails?.profile_type === "user" && userProfile?.data?.profile_type === "provider") && (
         <Button
           onClick={() => setIsModalOpen(true)}
           className="px-3 py-2 sm:px-4 sm:py-6 text-sm sm:text-md rounded-lg font-semibold"
@@ -334,20 +420,17 @@ const GigDetail = () => {
       <CardContent className="p-4">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-0 mb-4">
           <div className="flex items-center space-x-3 sm:space-x-4">
-            {bid.provider.profile ? (
-              <img
-                alt="not found"
-                src={bid.provider.profile}
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0"
-              />
-            ) : (
-              <div className="w-12 h-12 sm:w-12 sm:h-12 bg-[var(--base)] text-white rounded-full flex items-center justify-center font-semibold text-lg sm:text-2xl flex-shrink-0">
-                {bid.provider.name.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <AvatarWithFallback
+              src={bid.provider.profile}
+              alt="Provider avatar"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0"
+              name={bid.provider.name}
+            />
             <div className="min-w-0 flex-1">
               <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
-                <h4 className="font-semibold text-base sm:text-lg truncate">{bid.provider.name}</h4>
+                <Link href={`/users/${bid.provider.id}`}>
+                  <h4 className="font-semibold text-base sm:text-lg truncate">{bid.provider.name}</h4>
+                </Link>
                 <span className="hidden sm:inline">•</span>
                 <div className="flex items-center space-x-1 text-xs sm:text-sm text-gray-500">
                   <div className="flex items-center space-x-1">
@@ -375,7 +458,7 @@ const GigDetail = () => {
               Accepted
             </div>
           )}
-           {bid.status === "rejected" && (
+          {bid.status === "rejected" && (
             <div className="w-fit bg-red-600 hover:bg-red-600 pt-[2px] text-white h-8 rounded-md gap-1.5 px-3">
               Rejected
             </div>

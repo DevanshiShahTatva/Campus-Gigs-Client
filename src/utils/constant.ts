@@ -25,6 +25,7 @@ export const ROUTES = {
   RESET_PASSWORD: "/reset-password",
   GIGS: "/gigs",
   MY_GIGS: "/my-gigs",
+  GIGS_PIPELINE: "/gig-pipeline",
   ADMIN: {
     DASHBOARD: "/admin/dashboard",
     SUBSCRIPTION: "/admin/subscription-plan",
@@ -53,6 +54,9 @@ export const API_ROUTES = {
   GIGS: "/gigs",
   MY_GIGS: "/gigs/my-gigs",
   GIG_CATEGORY: "/gig-category",
+  GIG_PIPELINE: "/gigs/gig-pipeline",
+  GIG_STATUS_CHANGE: "/gigs/change-status",
+  GIG_PRIORITY: "/gigs/priority",
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
     AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",
@@ -83,6 +87,25 @@ export enum PAYMENT_TYPE {
   HOURLY = "hourly",
   FIXED = "fixed",
 }
+
+export enum GIG_STATUS {
+  UNSTARTED = "un_started",
+  INPROGRESS = "in_progress",
+  COMPLETED = "completed",
+  REJECTED = "rejected"
+}
+
+export enum BID_STATUS {
+  PENDING = 'pending',
+  ACCEPTED = 'accepted',
+  REJECTED = 'rejected'
+}
+
+  export enum PRIORITY {
+    HIGH = 'high',
+    MEDIUM = 'medium',
+    LOW = 'low'
+  }
 
 export const USER_SIDEBAR_ITEMS = [
   {
@@ -143,6 +166,20 @@ export const MESSAGES = {
   FAQ_DELETE_CONFIRMATION: "Are you sure you want to delete this FAQ?",
   FAQ_DELETE_SUCCESS: "FAQ deleted successfully",
 };
+
+export const GIGS_PIPELINE_TABS = [
+  { id: "pending", label: "Requested"},
+  { id: "accepted", label: "Accepted" },
+  { id: "in_progress", label: "In Progress"},
+  { id: "completed", label: "Completed"},
+  { id: "rejected", label: "Rejected" },
+];
+
+export const MY_GIGS_TABS = [
+  { id: "un_started", label: "Open Gigs" },
+  { id: "in_progress", label: "In Progress" },
+  { id: "completed", label: "Completed" },
+];
 
 // Landing page texts
 
