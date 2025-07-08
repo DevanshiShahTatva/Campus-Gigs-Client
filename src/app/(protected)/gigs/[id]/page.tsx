@@ -18,6 +18,7 @@ import { gigBidFields } from "@/config/gigbid.config";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useGetUserProfileQuery } from "@/redux/api";
 
 interface IBid {
   id: string;
@@ -48,6 +49,7 @@ const GigDetail = () => {
   const [editBid, setEditBid] = useState<IBid | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bidLoading, setBidLoading] = useState(false);
+  const { data: userProfile } = useGetUserProfileQuery(undefined, { refetchOnMountOrArgChange: true, });
 
   useEffect(() => {
     if (!id) return;
@@ -250,7 +252,13 @@ const GigDetail = () => {
           <div className="text-xs sm:text-sm text-gray-500">in {gigDetails.payment_type === "fixed" ? "Fixed Price" : "Range"}</div>
         </div>
       </div>
-      {(gigDetails?.user_id !== user_id && gigDetails.hasBid === false) && (
+      {gigDetails?.profile_type === "provider" && userProfile?.data?.profile_type === "user" ? (
+        <Button
+          className="px-3 py-2 sm:px-4 sm:py-6 text-sm sm:text-md rounded-lg font-semibold"
+        >
+          Pay Now
+        </Button>
+      ) : (gigDetails?.user_id !== user_id && !gigDetails.hasBid && gigDetails?.profile_type === "user" && userProfile?.data?.profile_type === "provider") && (
         <Button
           onClick={() => setIsModalOpen(true)}
           className="px-3 py-2 sm:px-4 sm:py-6 text-sm sm:text-md rounded-lg font-semibold"
@@ -375,7 +383,7 @@ const GigDetail = () => {
               Accepted
             </div>
           )}
-           {bid.status === "rejected" && (
+          {bid.status === "rejected" && (
             <div className="w-fit bg-red-600 hover:bg-red-600 pt-[2px] text-white h-8 rounded-md gap-1.5 px-3">
               Rejected
             </div>

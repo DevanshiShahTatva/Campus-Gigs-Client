@@ -157,4 +157,7 @@ export interface Gigs {
   user: User;
   skills: Skill[];
   gig_category: GigCategory;
+  _count?: {
+    bids: number;
+  }
 }
