@@ -23,6 +23,7 @@ export const ROUTES = {
   SIGN_UP: "/sign-up",
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
+  PROFILE: "/profile",
   GIGS: "/gigs",
   MY_GIGS: "/my-gigs",
   GIGS_PIPELINE: "/gig-pipeline",

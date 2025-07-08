@@ -1,9 +1,10 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { FaComments, FaTasks, FaCog, FaHome, FaTimes, FaCreditCard } from "react-icons/fa";
 import Link from "next/link";
 import { ROUTES } from "@/utils/constant";
 import { useGetUserProfileQuery } from "@/redux/api";
+import { usePathname, useRouter } from "next/navigation";
 
 const sidebarItems = [
   { id: 1, title: "Dashboard", icon: <FaHome />, route: "/user/dashboard", access: ["user", "provider"] },
@@ -16,9 +17,31 @@ const sidebarItems = [
 ];
 
 const UserProviderSidebar = ({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) => {
+  const router = useRouter();
+  const pathname = usePathname();
   const { data: userProfile } = useGetUserProfileQuery(undefined, {
       refetchOnMountOrArgChange: true,
-    });
+  });
+
+  useEffect(() => {
+    if (!userProfile?.data?.profile_type) return;
+
+    const allowedRoutes = sidebarItems
+      .filter((item) => item.access.includes(userProfile.data.profile_type))
+      .map((item) => item.route);
+
+    const changeRoutes = [...allowedRoutes, ROUTES.PROFILE];
+
+    const isCurrentRouteAllowed = changeRoutes.some((route) =>
+      pathname.startsWith(route)
+    );
+
+    if (!isCurrentRouteAllowed) {
+      const fallbackRoute = changeRoutes[0] || ROUTES.GIGS;
+      router.push(fallbackRoute);
+    }
+  }, [userProfile?.data?.profile_type, pathname]);
+
   return (
     <>
       {/* Sidebar Drawer (fixed left, white, 20rem wide) */}
