@@ -102,6 +102,8 @@ function TierManagement() {
                     toast.success(`Tier ${isEdit ? 'updated' : 'created'} successfully`)
                     setIsModalOpen(false)
                     fetchTiers()
+                } else {
+                    toast.error(res.message ?? "Something went wrong");
                 }
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Failed to save skill'
@@ -144,6 +146,8 @@ function TierManagement() {
                 toast.success('Skill deleted successfully')
                 setIsDeleteModalOpen(false)
                 fetchTiers()
+            } else {
+                toast.error(res.message ?? "Something went wrong");
             }
 
         } catch (error) {

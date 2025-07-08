@@ -127,13 +127,18 @@ const SkillsManagement = () => {
         if (!deleteSkill) return
         try {
             setDeleteLoading(true)
-            await apiCall({
+            const res = await apiCall({
                 endPoint: `/skills/${deleteSkill.id}`,
                 method: 'DELETE',
             })
-            toast.success('Skill deleted successfully')
-            setIsDeleteModalOpen(false)
-            fetchSkills()
+
+            if (res.success) {
+                toast.success('Skill deleted successfully')
+                setIsDeleteModalOpen(false)
+                fetchSkills()
+            } else {
+                toast.error(res.message ?? "Something went wrong");
+            }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to delete skill'
             toast.error(errorMessage)
