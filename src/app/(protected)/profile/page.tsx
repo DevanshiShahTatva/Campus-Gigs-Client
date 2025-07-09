@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useContext, useMemo } from "react";
+import React, { useState, useRef, useContext, useMemo, useCallback, useEffect } from "react";
 import { FiUpload, FiCamera, FiTrash2 } from "react-icons/fi";
 import DynamicForm from "@/components/common/form/DynamicForm";
 import { apiCall } from "@/utils/apiCall";
@@ -12,6 +12,7 @@ import {
   useGetUserProfileQuery,
   useUpdateUserProfileMutation,
 } from "@/redux/api";
+import { IDropdownOption } from "@/utils/interface";
 
 // Custom Profile Photo Component
 const ProfilePhotoUpload = ({
@@ -164,6 +165,23 @@ const Profile = () => {
   const [updateUserProfile, { isLoading: isUpdating }] =
     useUpdateUserProfileMutation();
 
+  const [skillsDropdown, setSkillsDropdown] = useState<IDropdownOption[]>([]);
+
+  const fetchSkillsDropdown = useCallback(async () => {
+    try {
+      const res = await apiCall({ endPoint: '/skills/dropdown', method: 'GET' });
+      if (res?.data?.length) {
+        setSkillsDropdown(res.data || []);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch skills list');
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSkillsDropdown();
+  }, [fetchSkillsDropdown]);
+
   // Merge userProfile into initialValues for the form
   const formInitialValues = useMemo(() => {
     if (!userProfile) return undefined;
@@ -177,7 +195,7 @@ const Profile = () => {
       professionalInterests: userProfile.professional_interests || "",
       extracurriculars: userProfile.extracurriculars || "",
       certifications: userProfile.certifications || "",
-      skills: Array.isArray(userProfile.skills) ? userProfile.skills : [],
+      skills: Array.isArray(userProfile.skills) ? userProfile.skills.map((item:any) => String(item.id)) : [],
       headline: userProfile.headline || "",
       bio: userProfile.bio || "",
     };
@@ -474,7 +492,7 @@ const Profile = () => {
             <div className="min-w-[340px] min-h-[420px] transition-all duration-300">
               {activeTab === "profile" && formInitialValues && (
                 <DynamicForm
-                  formConfig={profileFormConfig as any}
+                  formConfig={profileFormConfig(skillsDropdown) as any}
                   initialValues={formInitialValues}
                   onSubmit={handleProfileUpdate}
                   enableReinitialize
