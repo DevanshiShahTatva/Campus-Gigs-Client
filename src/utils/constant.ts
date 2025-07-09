@@ -26,6 +26,7 @@ export const ROUTES = {
   PROFILE: "/profile",
   PREVIEW_PROFILE: "/provider",
   GIGS: "/gigs",
+  GIGS_CREATE: "/gigs/create",
   MY_GIGS: "/my-gigs",
   GIGS_PIPELINE: "/gig-pipeline",
   ADMIN: {

@@ -9,6 +9,9 @@ import {
   FaHome,
   FaTimes,
   FaCreditCard,
+  FaListAlt,
+  FaClipboardList,
+  FaProjectDiagram,
 } from "react-icons/fa";
 import Link from "next/link";
 import { ROUTES } from "@/utils/constant";
@@ -25,21 +28,21 @@ const sidebarItems = [
   {
     id: 3,
     title: "Gigs",
-    icon: <FaTasks />,
+    icon: <FaListAlt />,
     route: "/gigs",
     access: ["user", "provider"],
   },
   {
     id: 6,
     title: "My Gigs",
-    icon: <FaCog />,
+    icon: <FaClipboardList />,
     route: ROUTES.MY_GIGS,
     access: ["user", "provider"],
   },
   {
     id: 7,
     title: "Gigs Pipeline",
-    icon: <FaTasks />,
+    icon: <FaProjectDiagram />,
     route: ROUTES.GIGS_PIPELINE,
     access: ["provider"],
   },
