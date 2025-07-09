@@ -131,7 +131,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
               title="Notifications"
               onClick={() => setNotifOpen((open) => !open)}
             >
-              <FaBell className="text-xl text-[var(--base)]" />
+              <FaBell className="text-xl text-gray-400" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
             </button>
             {/* Notifications Dropdown */}
@@ -166,22 +166,21 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
           </div>
           {/* User/Provider toggle for md+ (header, outside dropdown) */}
           {showRoleToggle && (
-            <div className="hidden md:flex items-center gap-2 ml-2 bg-white border border-gray-200 rounded-full px-2 py-1 shadow-sm">
-              <span
-                className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold select-none w-20
-                ${currentRole === "user" ? "bg-gray-100 text-gray-700" : "bg-[var(--base)]/10 text-[var(--base)]"}`}
-              >
-                {getRoleIcon(currentRole)}
-                {getRoleLabel(currentRole)}
-              </span>
-              <button
-                className="p-2 rounded-full hover:bg-[var(--base)]/10 transition-colors text-[var(--base)]"
-                onClick={handleRoleSwitch}
-                title={`Switch to ${currentRole === "user" ? "Provider" : "User"}`}
-                aria-label={`Switch to ${currentRole === "user" ? "Provider" : "User"}`}
-              >
-                <FaExchangeAlt className="w-4 h-4" />
-              </button>
+            <div className="hidden md:flex items-center gap-3 ml-2">
+              <label className="relative inline-flex items-center cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={role === "provider"}
+                  onChange={handleRoleSwitch}
+                  aria-label="Toggle user/provider role"
+                />
+                <div className="w-24 h-8 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[var(--base)] rounded-full peer peer-checked:bg-[var(--base)] transition-all duration-200 flex items-center justify-between relative px-2">
+                  <span className={`text-sm text-white font-semibold transition-all duration-200 ${role === "provider" ? "opacity-100" : "opacity-0"}`}>Provider</span>
+                  <span className={`text-sm font-semibold transition-all duration-200 ${role === "provider" ? "opacity-0" : "opacity-100"} -translate-x-4`}>User</span>
+                  <div className={`absolute top-1 left-1 w-6 h-6 rounded-full shadow-md bg-white transition-all duration-200 ${role === "provider" ? "translate-x-16" : "translate-x-0"}`}></div>
+                </div>
+              </label>
             </div>
           )}
           {/* Profile always visible, toggle in dropdown for mobile */}
@@ -193,8 +192,8 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
             >
               {isLoading ? (
                 <span className="w-9 h-9 rounded-full bg-gray-200 animate-pulse" />
-              ) : user?.avatar ? (
-                <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover border-2 border-[var(--base)] shadow-sm" />
+              ) : user?.profile ? (
+                <img src={user.profile} alt={user.name} className="w-9 h-9 rounded-full object-cover border-2 border-[var(--base)] shadow-sm" />
               ) : (
                 <span className="w-9 h-9 rounded-full bg-[var(--base)] text-white flex items-center justify-center font-bold text-md border-2 border-[var(--base)] shadow-sm">
                   {initials}
@@ -211,8 +210,8 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
               <div className="px-5 py-4 flex items-center gap-3 border-b border-gray-100 bg-[var(--base)]/5">
                 {isLoading ? (
                   <span className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
-                ) : user?.avatar ? (
-                  <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover border-2 border-[var(--base)]" />
+                ) : user?.profile ? (
+                  <img src={user.profile} alt={user.name} className="w-10 h-10 rounded-full object-cover border-2 border-[var(--base)]" />
                 ) : (
                   <span className="w-10 min-w-10 h-10 rounded-full bg-[var(--base)] text-white flex items-center justify-center font-bold text-xl border-2 border-[var(--base)]">
                     {initials}
