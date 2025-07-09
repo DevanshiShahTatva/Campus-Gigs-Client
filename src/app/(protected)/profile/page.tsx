@@ -272,7 +272,7 @@ const Profile = () => {
               className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gray-200 overflow-hidden flex items-center justify-center relative group cursor-pointer"
               onClick={() => {}}
             >
-              {!profileImage ? (
+              {!userProfile.profile ? (
                 <div
                   className="w-full h-full flex items-center justify-center rounded-full"
                   style={{ background: "var(--base)" }}
@@ -283,7 +283,7 @@ const Profile = () => {
                 </div>
               ) : (
                 <img
-                  src={profileImage}
+                  src={userProfile.profile}
                   alt="Profile"
                   className="w-full h-full object-cover rounded-full"
                 />

@@ -193,8 +193,8 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
             >
               {isLoading ? (
                 <span className="w-9 h-9 rounded-full bg-gray-200 animate-pulse" />
-              ) : user?.avatar ? (
-                <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover border-2 border-[var(--base)] shadow-sm" />
+              ) : user?.profile ? (
+                <img src={user.profile} alt={user.name} className="w-9 h-9 rounded-full object-cover border-2 border-[var(--base)] shadow-sm" />
               ) : (
                 <span className="w-9 h-9 rounded-full bg-[var(--base)] text-white flex items-center justify-center font-bold text-md border-2 border-[var(--base)] shadow-sm">
                   {initials}
@@ -211,8 +211,8 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
               <div className="px-5 py-4 flex items-center gap-3 border-b border-gray-100 bg-[var(--base)]/5">
                 {isLoading ? (
                   <span className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
-                ) : user?.avatar ? (
-                  <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover border-2 border-[var(--base)]" />
+                ) : user?.profile ? (
+                  <img src={user.profile} alt={user.name} className="w-10 h-10 rounded-full object-cover border-2 border-[var(--base)]" />
                 ) : (
                   <span className="w-10 min-w-10 h-10 rounded-full bg-[var(--base)] text-white flex items-center justify-center font-bold text-xl border-2 border-[var(--base)]">
                     {initials}
