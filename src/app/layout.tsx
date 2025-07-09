@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ToastContainer } from "react-toastify";
 import { ClientLayoutWrapper } from "@/components/Wrapper/ClientLayoutWrapper";
 import ReduxProvider from "@/provider/ReduxProvider";
+import ScrollToTop from "@/components/common/ScrollToTop";
 
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
@@ -23,6 +24,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`antialiased`}>
         <ToastContainer style={{ zIndex: 999999999 }} />
+        <ScrollToTop />
         <ReduxProvider>
           <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
         </ReduxProvider>
