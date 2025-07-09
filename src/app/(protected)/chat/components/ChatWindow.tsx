@@ -15,6 +15,18 @@ const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
   loading: () => <p>Loading...</p>,
 });
 
+interface Chat {
+  id: number;
+  name: string;
+  lastMessage: string;
+  otherUserId: number;
+  time: string;
+  unread: number;
+  avatar: string;
+  status: string;
+  lastSeen?: string;
+}
+
 interface Attachment {
   id: string;
   name: string;
@@ -34,13 +46,12 @@ interface Message {
 }
 
 interface ChatWindowProps {
-  selectedChat?: number;
-  selectedUser?: any;
+  selectedChat?: Chat | null;
   onBack?: () => void;
   socket?: any;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat = 0, selectedUser, onBack, socket }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket }) => {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [attachments, setAttachments] = useState<Array<File | Attachment>>([]);
@@ -67,7 +78,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat = 0, selectedUser,
     setLoading(true);
     try {
       const response = await apiCall({
-        endPoint: `/chats/${selectedChat}/messages?page=${pageToFetch}`,
+        endPoint: `/chats/${selectedChat.id}/messages?page=${pageToFetch}`,
         method: "GET",
       });
       if (response?.data) {
@@ -106,7 +117,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat = 0, selectedUser,
     if (selectedChat) {
       fetchMessages(1);
     }
-  }, [selectedChat, selectedUser]);
+  }, [selectedChat]);
 
   const fetchMoreMessages = () => {
     if (!loading && hasMore) {
@@ -186,22 +197,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat = 0, selectedUser,
 
     if (attachments.length === 0 && selectedChat && message.trim()) {
       const messageToSend = message.trim();
-      const tempId = `temp-${Date.now()}`;
-
-      const optimisticMessage: Message = {
-        id: tempId,
-        text: messageToSend,
-        sender: "me",
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        status: "sent",
-        timestamp: new Date(),
-        attachments: [],
-      };
-
-      setMessages((prev) => [...prev, optimisticMessage]);
-      scrollToBottom();
       setMessage("");
-
       try {
         const response = await apiCall({
           endPoint: `/chats/${selectedChat}/messages`,
@@ -214,8 +210,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat = 0, selectedUser,
         }
       } catch (err) {
         console.error("Send message failed", err);
-        setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
-        setMessage(messageToSend);
         toast.error("Failed to send message");
       }
     }
@@ -247,19 +241,19 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat = 0, selectedUser,
             <FiChevronLeft className="h-5 w-5 text-gray-600" />
           </button>
           <div className="relative mr-3">
-            {selectedUser?.avatar && selectedUser.avatar !== '/default-avatar.png' ? (
+            {selectedChat?.avatar && selectedChat.avatar !== '/default-avatar.png' ? (
               <div className="h-10 w-10 rounded-full bg-gray-200 overflow-hidden">
-                <Image src={selectedUser.avatar} alt={selectedUser.name} width={40} height={40} className="h-full w-full object-cover" />
+                <Image src={selectedChat.avatar} alt={selectedChat.name} width={40} height={40} className="h-full w-full object-cover" />
               </div>
             ) : (
               <div className="h-10 w-10 rounded-full flex items-center justify-center bg-[var(--base)] text-white text-lg font-bold border-2 border-[var(--base)]">
-                {selectedUser?.name ? (selectedUser.name.trim().split(' ').length === 1 ? selectedUser.name[0].toUpperCase() : (selectedUser.name[0].toUpperCase() + (selectedUser.name.split(' ')[1][0] || '').toUpperCase())) : ''}
+                {selectedChat?.name ? (selectedChat.name.trim().split(' ').length === 1 ? selectedChat.name[0].toUpperCase() : (selectedChat.name[0].toUpperCase() + (selectedChat.name.split(' ')[1][0] || '').toUpperCase())) : ''}
               </div>
             )}
-            {selectedUser?.isOnline && <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></div>}
+            {selectedChat?.status === "online" && <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></div>}
           </div>
           <div>
-            <h3 className="font-medium text-gray-900">{selectedUser?.name || 'User'}</h3>
+            <h3 className="font-medium text-gray-900">{selectedChat?.name || 'User'}</h3>
           </div>
         </div>
       </div>

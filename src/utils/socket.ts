@@ -13,17 +13,20 @@ try {
 
 let socket: InstanceType<typeof Socket> | null = null;
 
-export const getSocket = (url: string, token: string) => {
-  if (!socket) {
-    const wsUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace("http", "ws");
-    const normalizedNamespace = url.startsWith("/") ? url : url;
+export const getSocket = (
+  namespace: string,
+  token: string
+): InstanceType<typeof Socket> => {
+  const wsUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace("http", "ws");
+  const normalizedNamespace = namespace.startsWith("/") ? namespace : namespace;
 
-    socket = io(`${wsUrl}${normalizedNamespace}`, {
-      transports: ["websocket"],
-      auth: { token },
-      withCredentials: true,
-    });
-  }
+  // Always create a new socket if disconnected
+  socket = io(`${wsUrl}${normalizedNamespace}`, {
+    transports: ["websocket"],
+    auth: { token },
+    withCredentials: true,
+  });
+
   return socket;
 };
 
