@@ -4,7 +4,7 @@ import UserProviderHeader from "@/components/common/UserProviderHeader";
 import UserProviderSidebar from "@/components/common/UserProviderSidebar";
 import { RoleProvider } from "@/context/role-context";
 import "react-toastify/dist/ReactToastify.css";
-
+ 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
@@ -21,5 +21,5 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     </RoleProvider>
   );
 };
-
+ 
 export default Layout;

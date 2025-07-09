@@ -215,13 +215,13 @@ const SubscriptionPlan = () => {
         onClickCreateButton={handleCreatePlan}
         isCreateButtonDisabled={plans.length >= 3}
         actions={(plan) => (
-          <div className="flex items-center justify-center gap-x-3">
-            <Button size={"icon"} onClick={() => router.push(`/admin/subscription-plan/${plan.id}`)}>
+          <div className="flex items-center justify-center gap-x-2">
+            <button title="edit" className="text-[var(--base)] hover:text-[var(--base-hover)]" onClick={() => router.push(`/admin/subscription-plan/${plan.id}`)}>
               <Edit size={16} />
-            </Button>
-            <Button className="bg-red-500 hover:bg-red-500" size={"icon"} onClick={() => handleDeleteClick(plan.id)}>
+            </button>
+            <button title="delete" className="text-red-500 hover:text-red-700" onClick={() => handleDeleteClick(plan.id)}>
               <Trash size={16} />
-            </Button>
+            </button>
           </div>
         )}
       />

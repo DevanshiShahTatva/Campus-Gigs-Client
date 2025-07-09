@@ -115,7 +115,7 @@ const BuySubscription = () => {
               <div
                 key={index}
                 className={`relative bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-500 transform hover:-translate-y-2 sm:hover:-translate-y-4 hover:shadow-2xl group ${plan.most_popular ? "ring-2 ring-[var(--base)] lg:scale-105" : ""
-                  } ${hoveredPlan === index ? "ring-2 ring-[var(--base)]/50" : ""}`}
+                  } ${hoveredPlan === index ? "ring-2 ring-[var(--base)]" : ""}`}
                 onMouseEnter={() => setHoveredPlan(index)}
                 onMouseLeave={() => setHoveredPlan(null)}
               >
