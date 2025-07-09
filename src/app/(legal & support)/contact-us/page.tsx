@@ -1,20 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useGetUserProfileQuery } from "@/redux/api";
 import { getAuthToken } from "@/utils/helper";
 import { apiCall } from "@/utils/apiCall";
 import { API_ROUTES, MESSAGES, FOOTER_SOCIAL_LINKS, CONTACT_US_TEXT } from "@/utils/constant";
 import IconMap from "@/components/common/IconMap";
 
-// Helper to decode JWT (no external lib)
-function parseJwt(token: string) {
-  try {
-    return JSON.parse(atob(token.split(".")[1]));
-  } catch (e) {
-    return null;
-  }
-}
-
 const ContactUs = () => {
+  const { data, isLoading } = useGetUserProfileQuery(undefined, { refetchOnMountOrArgChange: true });
+  const user = data?.data;
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -27,19 +21,15 @@ const ContactUs = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const token = getAuthToken();
-    if (token) {
-      const decoded = parseJwt(token);
-      if (decoded && (decoded.name || decoded.email)) {
-        setForm((prev) => ({
-          ...prev,
-          name: decoded.name || "",
-          email: decoded.email || "",
-        }));
-        setUserLocked(true);
-      }
+    if (user && (user.name || user.email)) {
+      setForm((prev) => ({
+        ...prev,
+        name: user.name || "",
+        email: user.email || "",
+      }));
+      setUserLocked(true);
     }
-  }, []);
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (userLocked && (e.target.name === "name" || e.target.name === "email")) return;
@@ -82,7 +72,7 @@ const ContactUs = () => {
   };
 
   return (
-    <section className="bg-[var(--bg-light)] py-12 min-h-[70vh]">
+    <section className="bg-[var(--bg-light)] pt-20 pb-12 min-h-[70vh]">
       <div className="max-w-8xl  mx-auto px-4 sm:px-8 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4 text-[var(--text-dark)]">{CONTACT_US_TEXT.TITLE}</h2>

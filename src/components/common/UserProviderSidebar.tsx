@@ -119,52 +119,9 @@ const UserProviderSidebar = ({
           />
         </div>
         {/* Mobile-only nav tabs */}
-        <nav className="flex flex-col space-y-2 py-2 px-2 w-full text-base md:hidden">
-          <Link
-            href="#"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[var(--base)]/10 hover:text-[var(--base)] transition"
-          >
-            <span className="text-lg text-[var(--base)]">
-              <FaHome />
-            </span>
-            <span className="truncate">Dashboard</span>
-          </Link>
-          <Link
-            href="#"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[var(--base)]/10 hover:text-[var(--base)] transition"
-          >
-            <span className="text-lg text-[var(--base)]">
-              <FaTasks />
-            </span>
-            <span className="truncate">Gigs</span>
-          </Link>
-          <Link
-            href="#"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[var(--base)]/10 hover:text-[var(--base)] transition"
-          >
-            <span className="text-lg text-[var(--base)]">
-              <FaComments />
-            </span>
-            <span className="truncate">Chat</span>
-          </Link>
-          <Link
-            href="/user/buy-subscription"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[var(--base)]/10 hover:text-[var(--base)] transition"
-          >
-            <span className="text-lg text-[var(--base)]">
-              <FaCreditCard />
-            </span>
-            <span className="truncate">Subscription Plans</span>
-          </Link>
-        </nav>
+        
         {/* User/Provider toggle and profile (mobile only) */}
-        <div className="md:hidden px-4 py-4 border-t border-gray-100">
-          {/* User/Provider toggle and profile dropdown code from header goes here */}
-        </div>
+       
         {/* Close button */}
         <button
           className="absolute top-4 right-4 p-2 rounded-full text-[var(--base)] hover:bg-[var(--base)]/10 transition-colors z-10"
@@ -173,7 +130,7 @@ const UserProviderSidebar = ({
         >
           <FaTimes className="w-5 h-5" />
         </button>
-        <nav className="flex-1 space-y-2 py-6 px-2 w-full text-base md:text-base">
+        <nav className="flex-1 space-y-2 pb-6 px-2 w-full text-base md:text-base">
           {sidebarItems
             .filter((barItem) =>
               barItem.access.includes(userProfile?.data?.profile_type)
