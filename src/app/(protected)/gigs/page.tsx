@@ -12,6 +12,7 @@ import {
   Star,
   CheckCircle,
   Image as ImageIcon,
+  CalendarRange,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -135,11 +136,18 @@ const GigListing = () => {
     console.log(data);
   };
 
+  const capitalize = (str: string) => {
+    return str?.charAt(0)?.toUpperCase() + str?.slice(1);
+  };
+
   if (!gigs.length && loading) {
     return <GigListingSkeleton />;
   }
 
   const projectCardUI = (gig: Gigs) => {
+    const visibleSkills = gig.skills.slice(0, 3);
+    const remainingCount = gig.skills.length - 3;
+
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
@@ -151,7 +159,27 @@ const GigListing = () => {
               <div className="font-semibold text-gray-900">
                 ${Number(gig.price).toFixed(2)}
               </div>
-              <div className="text-sm text-gray-500">{gig.payment_type}</div>
+              <div className="text-sm text-gray-500">{capitalize(gig.payment_type)}</div>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <div className="bg-blue-100 p-2 rounded-lg">
+              <Users className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <div className="font-semibold text-gray-900">{gig._count?.bids ?? 0} bids</div>
+              <div className="text-sm text-gray-500">Received</div>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <div className="bg-teal-100 p-2 rounded-lg">
+              <CalendarRange className="w-5 h-5 text-teal-600" />
+            </div>
+            <div>
+              <div className="font-semibold text-gray-900">
+                {moment(gig.start_date_time).format("DD MMM YYYY")}
+              </div>
+              <div className="text-sm text-gray-500">Start Date</div>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -165,18 +193,9 @@ const GigListing = () => {
               <div className="text-sm text-gray-500">Timeline</div>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
-            <div className="bg-blue-100 p-2 rounded-lg">
-              <Users className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <div className="font-semibold text-gray-900">{gig._count?.bids ?? 0} bids</div>
-              <div className="text-sm text-gray-500">Received</div>
-            </div>
-          </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {gig.skills.slice(0, 3).map((skill: { name: string }, i: number) => (
+          {visibleSkills.map((skill: { name: string }, i: number) => (
             <span
               key={`${i + 1}`}
               className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
@@ -184,6 +203,11 @@ const GigListing = () => {
               {skill.name}
             </span>
           ))}
+          {remainingCount > 0 && (
+            <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+              +{remainingCount} more
+            </span>
+          )}
         </div>
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           <div className="flex items-center space-x-3">
@@ -236,7 +260,7 @@ const GigListing = () => {
               <Button
                 size="lg"
                 onClick={() => setIsFilterOpen(true)}
-                className="px-6 h-12"
+                className="px-6 h-12 bg-teal-800 hover:bg-teal-900"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -325,16 +349,16 @@ const GigListing = () => {
                           <CardContent className="content"></CardContent>
                           <div className="w-fit absolute bottom-4 left-4 right-4">
                             <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 shadow-lg font-medium">
-                              {gig.gig_category.name}
+                              {capitalize(gig.gig_category.name)}
                             </Badge>
                           </div>
                         </div>
                         <CardContent className="p-6 flex-1 flex flex-col">
                           <div className="mb-4">
-                            <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-[var(--base)] transition-colors line-clamp-2 leading-tight">
+                            <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-[var(--base)] transition-colors line-clamp-1 leading-tight">
                               {gig.title}
                             </h3>
-                            <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
+                            <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed h-[45px]">
                               {gig.description}
                             </p>
                           </div>
