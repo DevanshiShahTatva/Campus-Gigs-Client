@@ -40,7 +40,7 @@ const FAQs = () => {
   };
 
   return (
-    <section className="bg-[var(--bg-light)] py-12">
+    <section className="bg-[var(--bg-light)] pt-20 pb-12">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4 text-[var(--text-dark)]">{FAQ_TEXT.TITLE}</h2>
