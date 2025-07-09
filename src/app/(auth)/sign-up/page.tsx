@@ -127,6 +127,9 @@ const SignUpPage: React.FC = () => {
         endPoint: "/auth/register",
         method: "POST",
         body: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
         isFormData: true,
       });
 
@@ -312,7 +315,7 @@ const SignUpPage: React.FC = () => {
 
         <div className="space-y-4">
           <h4 className="text-lg font-semibold text-gray-900 mb-1 flex items-center space-x-2">
-            <span>Education (Optional)</span>
+            <span>Education</span>
           </h4>
           <Select value={values.educationLevel} onValueChange={(val) => handleEducationChange(val, setFieldValue)}>
             <SelectTrigger className="h-9 sm:h-10 text-sm sm:text-base">

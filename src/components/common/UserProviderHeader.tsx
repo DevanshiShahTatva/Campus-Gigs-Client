@@ -136,9 +136,8 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
             </button>
             {/* Notifications Dropdown */}
             <div
-              className={`notif-dropdown absolute right-0 mt-2 w-80 bg-white border border-[var(--base)]/20 rounded-xl shadow-2xl transition-all duration-200 z-40 overflow-hidden ${
-                notifOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
-              }`}
+              className={`notif-dropdown absolute right-0 mt-2 w-80 bg-white border border-[var(--base)]/20 rounded-xl shadow-2xl transition-all duration-200 z-40 overflow-hidden ${notifOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
+                }`}
               onMouseLeave={() => setNotifOpen(false)}
             >
               <div className="px-5 py-4 border-b border-gray-100 bg-[var(--base)]/5 font-semibold text-gray-900 text-base">Notifications</div>
@@ -167,23 +166,23 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
           </div>
           {/* User/Provider toggle for md+ (header, outside dropdown) */}
           {showRoleToggle && (
-          <div className="hidden md:flex items-center gap-2 ml-2 bg-white border border-gray-200 rounded-full px-2 py-1 shadow-sm">
-            <span
-              className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold select-none w-20
+            <div className="hidden md:flex items-center gap-2 ml-2 bg-white border border-gray-200 rounded-full px-2 py-1 shadow-sm">
+              <span
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold select-none w-20
                 ${currentRole === "user" ? "bg-gray-100 text-gray-700" : "bg-[var(--base)]/10 text-[var(--base)]"}`}
-            >
+              >
                 {getRoleIcon(currentRole)}
                 {getRoleLabel(currentRole)}
-            </span>
-            <button
-              className="p-2 rounded-full hover:bg-[var(--base)]/10 transition-colors text-[var(--base)]"
-              onClick={handleRoleSwitch}
+              </span>
+              <button
+                className="p-2 rounded-full hover:bg-[var(--base)]/10 transition-colors text-[var(--base)]"
+                onClick={handleRoleSwitch}
                 title={`Switch to ${currentRole === "user" ? "Provider" : "User"}`}
                 aria-label={`Switch to ${currentRole === "user" ? "Provider" : "User"}`}
-            >
-              <FaExchangeAlt className="w-4 h-4" />
-            </button>
-          </div>
+              >
+                <FaExchangeAlt className="w-4 h-4" />
+              </button>
+            </div>
           )}
           {/* Profile always visible, toggle in dropdown for mobile */}
           <div className="relative">
@@ -205,9 +204,8 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
             </button>
             {/* Profile Dropdown */}
             <div
-              className={`profile-dropdown absolute right-0 mt-2 w-56 bg-white border border-[var(--base)]/20 rounded-xl shadow-2xl transition-all duration-200 z-40 overflow-hidden ${
-                dropdownOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
-              }`}
+              className={`profile-dropdown absolute right-0 mt-2 w-56 bg-white border border-[var(--base)]/20 rounded-xl shadow-2xl transition-all duration-200 z-40 overflow-hidden ${dropdownOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
+                }`}
               onMouseLeave={() => setDropdownOpen(false)}
             >
               <div className="px-5 py-4 flex items-center gap-3 border-b border-gray-100 bg-[var(--base)]/5">
@@ -216,7 +214,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
                 ) : user?.avatar ? (
                   <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover border-2 border-[var(--base)]" />
                 ) : (
-                  <span className="w-10 h-10 rounded-full bg-[var(--base)] text-white flex items-center justify-center font-bold text-xl border-2 border-[var(--base)]">
+                  <span className="w-10 min-w-10 h-10 rounded-full bg-[var(--base)] text-white flex items-center justify-center font-bold text-xl border-2 border-[var(--base)]">
                     {initials}
                   </span>
                 )}
@@ -237,23 +235,23 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
               </Link>
               {/* User/Provider toggle for mobile (only visible on small screens) */}
               {showRoleToggle && (
-              <div className="flex md:hidden items-center gap-2 px-5 py-3 border-t border-gray-100">
-                <span
-                  className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold select-none w-20
+                <div className="flex md:hidden items-center gap-2 px-5 py-3 border-t border-gray-100">
+                  <span
+                    className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold select-none w-20
                     ${currentRole === "user" ? "bg-gray-100 text-gray-700" : "bg-[var(--base)]/10 text-[var(--base)]"}`}
-                >
+                  >
                     {getRoleIcon(currentRole)}
                     {getRoleLabel(currentRole)}
-                </span>
-                <button
-                  className="p-2 rounded-full hover:bg-[var(--base)]/10 transition-colors text-[var(--base)]"
-                  onClick={handleRoleSwitch}
+                  </span>
+                  <button
+                    className="p-2 rounded-full hover:bg-[var(--base)]/10 transition-colors text-[var(--base)]"
+                    onClick={handleRoleSwitch}
                     title={`Switch to ${currentRole === "user" ? "Provider" : "User"}`}
                     aria-label={`Switch to ${currentRole === "user" ? "Provider" : "User"}`}
-                >
-                  <FaExchangeAlt className="w-4 h-4" />
-                </button>
-              </div>
+                  >
+                    <FaExchangeAlt className="w-4 h-4" />
+                  </button>
+                </div>
               )}
               <button
                 className="flex items-center gap-3 w-full text-left px-5 py-3 text-red-600 hover:bg-red-50 transition text-sm font-medium border-t border-gray-100"

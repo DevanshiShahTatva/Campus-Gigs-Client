@@ -456,7 +456,7 @@ export const FOOTER_BOTTOM_LINKS = [
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Terms & Conditions", href: "/terms-conditions" },
   { label: "Contact Us", href: "/contact-us" },
-  { label: "FAQs", href: "/faqs" },
+  { label: "FAQs", href: "/FAQs" },
 ];
 
 export const FOOTER_COPYRIGHT = "© 2025 CampusGig. All rights reserved.";
