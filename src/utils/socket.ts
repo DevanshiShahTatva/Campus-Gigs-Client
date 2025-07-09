@@ -15,7 +15,10 @@ let socket: InstanceType<typeof Socket> | null = null;
 
 export const getSocket = (url: string, token: string) => {
   if (!socket) {
-    socket = io(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${url}`, {
+    const wsUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace("http", "ws");
+    const normalizedNamespace = url.startsWith("/") ? url : url;
+
+    socket = io(`${wsUrl}${normalizedNamespace}`, {
       transports: ["websocket"],
       auth: { token },
       withCredentials: true,
