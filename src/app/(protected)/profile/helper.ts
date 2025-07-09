@@ -1,7 +1,7 @@
 // Profile page helpers and config
 import { educationOptions as rawEducationOptions } from "@/app/(auth)/sign-up/helper";
-import { FiUpload, FiCamera, FiTrash2 } from "react-icons/fi";
-import React, { useState, useRef } from "react";
+import React from "react";
+import { IDropdownOption } from "@/utils/interface";
 
 // Map educationOptions to { id, label } for DynamicForm compatibility
 export const educationOptions = rawEducationOptions.map(opt => ({ id: opt.id, label: opt.label }));
@@ -53,7 +53,7 @@ export const getInitials = (name: string = "User") => {
     .slice(0, 2);
 };
 
-export const profileFormConfig = [
+export const profileFormConfig =(skillDropdown:IDropdownOption[]) => [
   {
     title: "Personal Information",
     groupSize: 2 as 2,
@@ -90,7 +90,7 @@ export const profileFormConfig = [
     groupSize: 1 as 1,
     section: true,
     subfields: [
-      { id: "skills", name: "skills", label: "Skills", type: "tags" as const, required: true, errorMessage: "At least one skill is required", placeholder: "e.g., React, JavaScript", minItems: 1, maxItems: 10 },
+      { id: "skills", name: "skills", label: "Skills", type: "multiselect", required: true, options: skillDropdown, errorMessage: "At least one skill is required", placeholder: "e.g., React, JavaScript", minItems: 1, maxItems: 10 },
     ],
   },
   {

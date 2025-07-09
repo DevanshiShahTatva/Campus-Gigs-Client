@@ -1,17 +1,17 @@
 "use client";
-import React, { useState, useRef, useContext, useMemo, useEffect } from "react";
+import React, { useState, useRef, useContext, useMemo, useCallback, useEffect } from "react";
 import { FiUpload, FiCamera, FiTrash2 } from "react-icons/fi";
 import DynamicForm from "@/components/common/form/DynamicForm";
 import { apiCall } from "@/utils/apiCall";
 import { RoleContext } from "@/context/role-context";
 import { getInitials, profileFormConfig, educationOptions } from "./helper";
-import { USER_PROFILE } from "@/utils/constant";
 import ProfileSkeleton from "@/components/skeleton/ProfileSkeleton";
 import { toast } from "react-toastify";
 import {
   useGetUserProfileQuery,
   useUpdateUserProfileMutation,
 } from "@/redux/api";
+import { IDropdownOption } from "@/utils/interface";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import Link from "next/link";
@@ -202,6 +202,23 @@ const Profile = () => {
     }
   }, [activeTab]);
 
+  const [skillsDropdown, setSkillsDropdown] = useState<IDropdownOption[]>([]);
+
+  const fetchSkillsDropdown = useCallback(async () => {
+    try {
+      const res = await apiCall({ endPoint: '/skills/dropdown', method: 'GET' });
+      if (res?.data?.length) {
+        setSkillsDropdown(res.data || []);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch skills list');
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSkillsDropdown();
+  }, [fetchSkillsDropdown]);
+
   // Merge userProfile into initialValues for the form
   const formInitialValues = useMemo(() => {
     if (!userProfile) return undefined;
@@ -220,7 +237,7 @@ const Profile = () => {
       professional_interests: userProfile.professional_interests || "",
       extracurriculars: userProfile.extracurriculars || "",
       certifications: userProfile.certifications || "",
-      skills: Array.isArray(userProfile.skills) ? userProfile.skills : [],
+      skills: Array.isArray(userProfile.skills) ? userProfile.skills.map((item:any) => String(item.id)) : [],
       headline: userProfile.headline || "",
       bio: userProfile.bio || "",
     };
@@ -549,7 +566,7 @@ const Profile = () => {
             <div className="min-h-[420px] transition-all duration-300 w-full">
               {activeTab === "profile" && formInitialValues && (
                 <DynamicForm
-                  formConfig={profileFormConfig as any}
+                  formConfig={profileFormConfig(skillsDropdown) as any}
                   initialValues={formInitialValues}
                   onSubmit={handleProfileUpdate}
                   enableReinitialize
