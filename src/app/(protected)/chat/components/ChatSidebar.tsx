@@ -68,15 +68,18 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat })
       method: "GET",
     });
     if (response?.success) {
-      const mappedChats = (response.data || []).map((item: any) => ({
-        id: item.id,
-        name: item.otherUser?.name || 'Unknown',
-        lastMessage: item.lastMessage?.content || 'No messages yet',
-        time: formatTimeAgo(item.updatedAt),
-        unread: item.unreadCount || 0,
-        avatar: item.otherUser?.profile || '/default-avatar.png',
-        isOnline: false,
-      }));
+      const mappedChats = (response.data || []).map((item: any) => {
+        console.log(item, item.lastMessage?.message && item.lastMessage?.messageType === 'text' ? item.lastMessage?.message : '');
+        return ({
+          id: item.id,
+          name: item.otherUser?.name,
+          lastMessage: item.lastMessage?.message && item.lastMessage?.messageType === 'text' ? item.lastMessage?.message : '',
+          time: formatTimeAgo(item.updatedAt),
+          unread: item.unreadCount || 0,
+          avatar: item.otherUser?.profile,
+          isOnline: false,
+        })
+      });
       if (pageToFetch === 1) {
         setChats(mappedChats);
       } else {

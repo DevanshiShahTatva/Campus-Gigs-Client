@@ -127,26 +127,27 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat = 0, selectedUser,
   }, [socket, selectedChat, currentUserId]);
 
   const handleNewMessage = (data: any) => {
-    if (!data || data.chat_id !== selectedChat) return;
+    if (!data.message || data.message.chat_id !== selectedChat) return;
 
     const newMessage: Message = {
-      id: data.id,
-      text: data.message,
-      sender: data.sender_id === currentUserId ? "me" : "them",
-      time: new Date(data.created_at || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      id: data.message.id,
+      text: data.message.message,
+      sender: data.message.sender_id === currentUserId ? "me" : "them",
+      time: new Date(data.message.created_at || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       status: "sent",
-      timestamp: new Date(data.created_at || Date.now()),
+      timestamp: new Date(data.message.created_at || Date.now()),
       attachments: [],
     };
+
 
     setMessages((prev) => {
 
       return [...prev, newMessage];
     });
-    if (data.sender_id === currentUserId) {
+    if (data.message.sender_id === currentUserId) {
       setTimeout(() => scrollToBottom(), 100);
     }
-    if (data.sender_id !== currentUserId) {
+    if (data.message.sender_id !== currentUserId) {
       toast.success("New message received");
     }
   };
@@ -209,18 +210,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat = 0, selectedUser,
         });
 
         if (response?.data) {
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === tempId
-                ? {
-                  ...msg,
-                  id: response.data.id,
-                  time: new Date(response.data.createdAt || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-                  timestamp: new Date(response.data.createdAt || Date.now()),
-                }
-                : msg
-            )
-          );
+          toast.success("Message sent successfully");
         }
       } catch (err) {
         console.error("Send message failed", err);
