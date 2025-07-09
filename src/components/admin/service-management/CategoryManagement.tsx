@@ -1,24 +1,44 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
-import { Card, CardTitle } from '@/components/ui/card';
-import { Component, Plus, Edit, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Component, Edit, Trash } from 'lucide-react';
 import { CustomModal } from '@/components/common/CustomModal';
 import DynamicForm, { FormFieldConfig } from '@/components/common/form/DynamicForm';
 import { toast } from "react-toastify";
 import { apiCall } from '@/utils/apiCall';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { IDropdownOption } from '@/utils/interface';
 import ModalLayout from '@/components/common/Modals/CommonModalLayout';
+import TableSkeleton from '@/components/skeleton/TableSkeleton';
+import { CustomTable } from '@/components/common/CustomTable';
+import { Badge } from '@/components/ui/badge';
 
-function NoDataMsg() {
-    return (
-        <div className="text-center py-8 text-gray-500">
-            <Component className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>No categories created yet. Create tiers first to organize categories.</p>
-        </div>
-    );
+interface ICategory {
+    id: number
+    name: string
+    description: string
+    tire_id: number
+    created_at: string
+    updated_at: string
+    is_deleted: boolean
+    tire: ITier
+    skills: ISkill[]
+}
+
+interface ITier {
+    id: number
+    name: string
+    description: string
+    created_at: string
+    updated_at: string
+    is_deleted: boolean
+}
+
+interface ISkill {
+    id: number
+    name: string
+    categoryId: number
+    created_at: string
+    updated_at: string
+    is_deleted: boolean
 }
 
 interface IForm {
@@ -28,6 +48,14 @@ interface IForm {
     skillIds: string[];
 }
 
+type Column<T> = {
+    key: keyof T
+    label: string
+    sortable?: boolean
+    textAlign?: 'left' | 'center' | 'right'
+    render?: (value: any, row: T, index: number) => React.ReactNode
+}
+
 const initialValues: IForm = {
     name: '',
     description: '',
@@ -35,13 +63,21 @@ const initialValues: IForm = {
     skillIds: [],
 };
 
+function NoDataMsg() {
+    return (
+        <div className="text-center py-8 text-gray-500">
+            <Component className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>No categories created yet. Create tiers first to organize categories.</p>
+        </div>
+    );
+}
 function CategoryManagement() {
-    const [categoriesData, setCategoriesData] = useState<any[]>([]);
+    const [categoriesData, setCategoriesData] = useState<ICategory[]>([]);
     const [categoriesDataLoading, setCategoriesDataLoading] = useState(false);
     const [isModalOpen, SetIsModalOpen] = useState<boolean>(false);
     const [tierDropdown, setTierDropdown] = useState<IDropdownOption[]>([]);
     const [skillsDropdown, setSkillsDropdown] = useState<IDropdownOption[]>([]);
-    const [editCategory, setEditCategory] = useState<any | null>(null);
+    const [editCategory, setEditCategory] = useState<ICategory | null>(null);
     const [deleteCategory, setDeleteCategory] = useState<Number | null>(null)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [deleteLoading, setDeleteLoading] = useState(false)
@@ -56,10 +92,9 @@ function CategoryManagement() {
             const editValue = {
                 name: editCategory.name || '',
                 description: editCategory.description || '',
-                tire_id: editCategory.tire_id || '',
+                tire_id: String(editCategory.tire_id) || '',
                 skillIds: editCategory.skills?.map((s: any) => String(s.id)) || [],
             }
-            console.log(editValue)
             return editValue
         }
         return initialValues;
@@ -111,7 +146,6 @@ function CategoryManagement() {
     ];
 
     const handleSubmit = async (values: IForm) => {
-        console.log("SUBMIT_VALUES", values)
         try {
             const endpoint = editCategory ? `/gig-category/${editCategory.id}` : `/gig-category`;
             const method = editCategory ? 'PUT' : 'POST';
@@ -125,7 +159,7 @@ function CategoryManagement() {
             const res = await apiCall({ endPoint: endpoint, method, body: payload });
 
             if (res.success) {
-                toast.success(res.message || (editCategory ? 'Category updated' : 'Category added'));
+                toast.success(res.message || (editCategory ? 'Category updated successfully.' : 'Category added successfully.'));
                 fetchCategories();
                 SetIsModalOpen(false);
                 setEditCategory(null);
@@ -163,7 +197,7 @@ function CategoryManagement() {
                 setTierDropdown(res.data || []);
             }
         } catch (error) {
-            toast.error('Failed to fetch tier list');
+            console.log('Failed to fetch tier list');
         }
     }, []);
 
@@ -174,7 +208,7 @@ function CategoryManagement() {
                 setSkillsDropdown(res.data || []);
             }
         } catch (error) {
-            toast.error('Failed to fetch skills list');
+            console.log('Failed to fetch skills list');
         }
     }, []);
 
@@ -186,7 +220,7 @@ function CategoryManagement() {
                 setCategoriesData(res.data || []);
             }
         } catch (error) {
-            toast.error('Failed to fetch categories');
+            console.log('Failed to fetch categories');
         } finally {
             setCategoriesDataLoading(false);
         }
@@ -198,19 +232,10 @@ function CategoryManagement() {
         fetchSkillsDropdown();
     }, [fetchCategories]);
 
-    const groupByTier = () => {
-        const tierMap: { [tierId: number]: { tier: any; categories: any[] } } = {};
-        categoriesData.forEach((category) => {
-            const tierId = category.tire_id;
-            if (!tierMap[tierId]) {
-                tierMap[tierId] = { tier: category.tire, categories: [] };
-            }
-            tierMap[tierId].categories.push(category);
-        });
-        return Object.values(tierMap);
-    };
-
-    const grouped = groupByTier();
+    const handleEdit = useCallback((category: ICategory) => {
+        setEditCategory(category);
+        handleToggleModal(true);
+    }, [])
 
     const handleDelete = useCallback((categoryId: Number) => {
         setDeleteCategory(categoryId)
@@ -232,7 +257,7 @@ function CategoryManagement() {
             })
 
             if (res.success) {
-                toast.success('Category deleted successfully')
+                toast.success('Category deleted successfully.')
                 setIsDeleteModalOpen(false)
                 fetchCategories()
             } else {
@@ -246,83 +271,78 @@ function CategoryManagement() {
         }
     }, [deleteCategory, fetchCategories])
 
-    return (
-        <Card className="p-0">
-            <div className="bg-gradient-to-r from-blue-800 to-blue-300 text-white rounded-t-lg p-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                        <Component className="w-6 h-6" />
-                        <CardTitle className="text-xl">Category Management</CardTitle>
+    const tableHeaders = [
+        {
+            label: 'Tier',
+            key: 'tire',
+            sortable: false,
+            render: (_, row) => (
+                <div>{row?.tire?.name}</div>
+            )
+        },
+        {
+            label: 'Category Name',
+            key: 'name',
+            sortable: true
+        },
+        {
+            label: "Skills",
+            key: 'skills',
+            sortable: true,
+            render: (_, row) => (
+                <div className="text-sm">
+                    <div className="space-y-1">
+                        {row.skills.map((skill, idx) => (
+                            <div key={idx} className="text-xs text-gray-600 flex items-center gap-1 whitespace-nowrap">
+                                <Badge>{skill.name}</Badge>
+
+                            </div>
+                        ))}
                     </div>
-
-                    <Button
-                        variant="secondary"
-                        className="bg-white text-blue-600 hover:bg-gray-100"
-                        onClick={() => handleToggleModal(true)}
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Category
-                    </Button>
                 </div>
-            </div>
+            )
+        },
+        {
+            label: 'Description',
+            key: 'description',
+            sortable: true
+        },
 
-            <div className="grid gap-4 px-6 pb-6">
-                {categoriesDataLoading ? (
-                    [...Array(3)].map((_, i) => (
-                        <Card key={i} className="p-6">
-                            <Skeleton className="h-6 w-1/3 mb-2" />
-                            <Skeleton className="h-4 w-1/2 mb-4" />
-                            <div className="flex flex-wrap gap-2">
-                                {[...Array(3)].map((_, j) => (
-                                    <Skeleton key={j} className="h-6 w-20 rounded-full" />
-                                ))}
-                            </div>
-                        </Card>
-                    ))
-                ) : categoriesData.length === 0 ? (
-                    <NoDataMsg />
-                ) : (
-                    grouped.map((group, index) => (
-                        <div
-                            key={index}
-                            className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
-                        >
-                            <div className="mb-4">
-                                <Badge>{group.tier?.name}</Badge>
-                            </div>
-                            {group.categories.map((category) => (
-                                <div key={category.id} className="mb-4 border p-4 rounded-lg">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <p className="font-medium">{category.name}</p>
-                                        <div className="flex space-x-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => {
-                                                    setEditCategory(category);
-                                                    handleToggleModal(true);
-                                                }}
-                                            >
-                                                <Edit className="w-4 h-4" />
-                                            </Button>
-                                            <Button variant="outline" size="sm" onClick={() => handleDelete(category.id)}>
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2 items-center text-sm text-gray-600">
-                                        <span className="font-medium">Skills:</span>
-                                        {category.skills?.map((skill: any) => (
-                                            <Badge key={skill.id} variant="secondary">
-                                                {skill.name}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ))
+    ] satisfies Column<ICategory>[]
+
+    const renderTable = () => {
+        if (categoriesDataLoading) {
+            return <TableSkeleton showSearch rowCount={10} columnCount={1} actionButtonCount={2} />
+        }
+
+        if (categoriesData.length === 0) {
+            return NoDataMsg()
+        }
+
+        return (
+            <CustomTable<ICategory>
+                data={categoriesData}
+                columns={tableHeaders}
+                searchPlaceholder='Search by Category Name or Description'
+                actions={(row) => (
+                    <div className="flex gap-2 justify-center">
+                        <button title="edit" className="text-[var(--base)] hover:text-[var(--base-hover)]" onClick={() => handleEdit(row)}>
+                            <Edit size={16} />
+                        </button>
+                        <button title="delete" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(row as any)}>
+                            <Trash size={16} />
+                        </button>
+                    </div>
                 )}
+                onClickCreateButton={() => handleToggleModal(true)}
+            />
+        )
+    }
+
+    return (
+        <div className="p-0">
+            <div className="grid gap-4">
+                {renderTable()}
             </div>
 
             {isDeleteModalOpen && (
@@ -350,7 +370,7 @@ function CategoryManagement() {
             )}
 
             {AddModal()}
-        </Card>
+        </div>
     );
 }
 
