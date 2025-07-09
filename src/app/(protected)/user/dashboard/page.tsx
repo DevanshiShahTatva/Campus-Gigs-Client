@@ -88,6 +88,10 @@ export default function Dashboard() {
   useGetUserProfileQuery(undefined, { refetchOnMountOrArgChange: true });
 
   return (
+    <div className="flex items-center justify-center text-xl mt-30">In progress</div>
+  );
+
+  return (
     <div className="space-y-6 max-w-8xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
