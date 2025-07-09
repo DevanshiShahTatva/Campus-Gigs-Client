@@ -111,6 +111,9 @@ const SignUpPage: React.FC = () => {
         endPoint: "/auth/register",
         method: "POST",
         body: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
         isFormData: true,
       });
 

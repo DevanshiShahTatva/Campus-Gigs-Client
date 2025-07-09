@@ -266,7 +266,11 @@ const LogInPage = () => {
       if (role === "admin") {
         router.push("/admin/dashboard");
       } else {
-        router.push("/user/dashboard");
+        if(loginResponse.data.user.profile_type === "user") {
+          router.push("/gigs");
+        } else {
+          router.push("/user/dashboard");
+        }
       }
     }
 
