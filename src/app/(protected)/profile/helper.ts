@@ -79,9 +79,9 @@ export const profileFormConfig =(skillDropdown:IDropdownOption[]) => [
     groupSize: 1 as 1,
     section: true,
     subfields: [
-      { id: "professional_interests", name: "professional_interests", label: "Professional Interests", type: "textarea" as const, required: true, errorMessage: "Professional interests are required", placeholder: "What are your professional interests and career goals? (Optional)" },
-      { id: "extracurriculars", name: "extracurriculars", label: "Extracurricular Activities", type: "textarea" as const, required: true, errorMessage: "Extracurricular activities are required", placeholder: "Sports, clubs, volunteer work, hobbies, community involvement... (Optional)" },
-      { id: "certifications", name: "certifications", label: "Certifications", type: "text" as const, required: true, errorMessage: "Certifications are required", placeholder: "List your certifications (e.g., PMP, AWS, Google Analytics...) (Optional)" },
+      { id: "professional_interests", name: "professional_interests", label: "Professional Interests", type: "textarea" as const, errorMessage: "Professional interests are required", placeholder: "What are your professional interests and career goals?" },
+      { id: "extracurriculars", name: "extracurriculars", label: "Extracurricular Activities", type: "textarea" as const, errorMessage: "Extracurricular activities are required", placeholder: "Sports, clubs, volunteer work, hobbies, community involvement.." },
+      { id: "certifications", name: "certifications", label: "Certifications", type: "text" as const, errorMessage: "Certifications are required", placeholder: "List your certifications (e.g., PMP, AWS, Google Analytics...)" },
     ],
   },
   {
