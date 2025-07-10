@@ -35,33 +35,27 @@ import moment from "moment";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Loader from "@/components/common/Loader";
 import useDebounce from "@/hooks/useDebounce";
-
-const GigListing = () => {
-  const [gigs, setGigs] = useState<Gigs[]>([]);
-  const [meta, setMeta] = useState<IPagination>({
-    page: 1,
-    pageSize: 9,
-    totalPages: 0,
-    total: 1,
-  });
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-
-  const debounceSearch = useDebounce(searchQuery, 700);
-
-  const PlaceholderImage = () => (
-    <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-      <div className="text-center">
-        <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-        <p className="text-gray-500 text-sm">No Image</p>
-      </div>
+import React from "react";
+const PlaceholderImage = () => (
+  <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+    <div className="text-center">
+      <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+      <p className="text-gray-500 text-sm">No Image</p>
     </div>
-  );
+  </div>
+);
 
-  const ImageWithFallback = ({ src, alt, className }: { src: string; alt: string; className: string }) => {
+
+const ImageWithFallback = React.memo(
+  ({
+    src,
+    alt,
+    className,
+  }: {
+    src: string;
+    alt: string;
+    className: string;
+  }) => {
     const [hasError, setHasError] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -91,11 +85,29 @@ const GigListing = () => {
           className={className}
           onError={handleError}
           onLoad={handleLoad}
-          style={{ display: isLoading ? 'none' : 'block' }}
+          style={{ display: isLoading ? "none" : "block" }}
         />
       </div>
     );
-  };
+  },
+  (prevProps, nextProps) => prevProps.src === nextProps.src
+);
+
+const GigListing = () => {
+  const [gigs, setGigs] = useState<Gigs[]>([]);
+  const [meta, setMeta] = useState<IPagination>({
+    page: 1,
+    pageSize: 9,
+    totalPages: 0,
+    total: 1,
+  });
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  const debounceSearch = useDebounce(searchQuery, 700);
 
   const fetchGigs = async (page = 1, search = "") => {
     try {
@@ -124,7 +136,7 @@ const GigListing = () => {
 
   const fetchNextPage = () => {
     if (currentPage < meta.totalPages && !loading) {
-      fetchGigs(currentPage + 1);
+      fetchGigs(currentPage + 1, debounceSearch);
     }
   };
 
@@ -136,9 +148,8 @@ const GigListing = () => {
     console.log(data);
   };
 
-  const capitalize = (str: string) => {
-    return str?.charAt(0)?.toUpperCase() + str?.slice(1);
-  };
+  const capitalize = (str: string) =>
+    str?.charAt(0)?.toUpperCase() + str?.slice(1);
 
   if (!gigs.length && loading) {
     return <GigListingSkeleton />;
@@ -159,7 +170,9 @@ const GigListing = () => {
               <div className="font-semibold text-gray-900">
                 ${Number(gig.price).toFixed(2)}
               </div>
-              <div className="text-sm text-gray-500">{capitalize(gig.payment_type)}</div>
+              <div className="text-sm text-gray-500">
+                {capitalize(gig.payment_type)}
+              </div>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -167,7 +180,9 @@ const GigListing = () => {
               <Users className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <div className="font-semibold text-gray-900">{gig._count?.bids ?? 0} bids</div>
+              <div className="font-semibold text-gray-900">
+                {gig._count?.bids ?? 0} bids
+              </div>
               <div className="text-sm text-gray-500">Received</div>
             </div>
           </div>
@@ -195,9 +210,9 @@ const GigListing = () => {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {visibleSkills.map((skill: { name: string }, i: number) => (
+          {visibleSkills.map((skill, i) => (
             <span
-              key={`${i + 1}`}
+              key={i}
               className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
             >
               {skill.name}
@@ -236,158 +251,152 @@ const GigListing = () => {
   };
 
   return (
-    <div className="">
-      <div className="mx-auto">
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Browse Gigs</h1>
-              <p className="text-gray-600">
-                Discover amazing gigs and opportunities
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col md:flex-row gap-4 bg-white">
-            <div className="relative flex-1 ">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <Input
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by title, description or category..."
-                className="pl-12 h-12 text-base bg-white border-gray-200"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                size="lg"
-                onClick={() => setIsFilterOpen(true)}
-                className="px-6 h-12 bg-teal-800 hover:bg-teal-900"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Filter
-              </Button>
-              <Link href={"/gigs/create"}>
-                <Button className="px-6 h-12" size="lg">
-                  Create Gig
-                </Button>
-              </Link>
-            </div>
+    <div className="mx-auto">
+      <div className="mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Browse Gigs</h1>
+            <p className="text-gray-600">
+              Discover amazing gigs and opportunities
+            </p>
           </div>
         </div>
-
-        {renderBaseOnCondition(
-          loading,
-          <div className="h-20 mt-14 w-full text-center">
-            <Loader size={50} />
-          </div>,
-          <>
-            {gigs.length === 0 ? (
-              <Card>
-                <CardContent className="text-xl text-center font-semibold capitalize">
-                  No gigs found
-                </CardContent>
-              </Card>
-            ) : (
-              <InfiniteScroll
-                dataLength={gigs.length}
-                next={fetchNextPage}
-                hasMore={currentPage < meta.totalPages}
-                loader={
-                  <div className="h-20 mt-14 w-full text-center">
-                    <Loader size={50} />
-                  </div>
-                }
-                scrollThreshold={0.9}
-                scrollableTarget="scrollableDiv"
-                className="py-4"
+        <div className="flex flex-col md:flex-row gap-4 bg-white">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by title, description or category..."
+              className="pl-12 h-12 text-base bg-white border-gray-200"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              size="lg"
+              onClick={() => setIsFilterOpen(true)}
+              className="px-6 h-12 bg-teal-800 hover:bg-teal-900"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-2"
+                viewBox="0 0 20 20"
+                fill="currentColor"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {gigs.map((gig) => (
-                    <Link
-                      key={gig.id}
-                      href={`/gigs/${gig.id}`}
-                      className="group"
-                    >
-                      <Card className="gap-0 py-0 relative overflow-hidden bg-white border-0 shadow-lg h-full flex flex-col hover:shadow-purple-500/10">
-                        <div className="relative overflow-hidden">
-                          <div className="slider h-[200px]">
-                            <Slider
-                              slidesToShow={1}
-                              dots={gig.images.length > 1}
-                              infinite={gig.images.length > 1}
-                              customPaging={() => (
-                                <div className="w-[7px] h-[7px] bg-gray-400 rounded-full transition" />
-                              )}
-                            >
-                              {gig.images && gig.images.length > 0 ? (
-                                gig.images.map((image: string, i: number) => (
-                                  <div key={`${i + 1}`} className="h-[200px]">
-                                    <ImageWithFallback
-                                      src={image}
-                                      alt={gig.title}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  </div>
-                                ))
-                              ) : (
-                                <div className="h-[200px]">
-                                  <PlaceholderImage />
-                                </div>
-                              )}
-                            </Slider>
-                          </div>
-                          <CardContent className="content"></CardContent>
-                          <div className="w-fit absolute bottom-4 left-4 right-4">
-                            <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 shadow-lg font-medium">
-                              {capitalize(gig.gig_category.name)}
-                            </Badge>
-                          </div>
-                        </div>
-                        <CardContent className="p-6 flex-1 flex flex-col">
-                          <div className="mb-4">
-                            <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-[var(--base)] transition-colors line-clamp-1 leading-tight">
-                              {gig.title}
-                            </h3>
-                            <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed h-[45px]">
-                              {gig.description}
-                            </p>
-                          </div>
-                          {projectCardUI(gig)}
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
-                </div>
-              </InfiniteScroll>
-            )}
-          </>
-        )}
-
-        <GigFilterModal
-          isOpen={isFilterOpen}
-          onClose={() => setIsFilterOpen(false)}
-          onApplyFilters={handleApplyFilters}
-        />
-        <CommonFormModal
-          width="600px"
-          title="Bid Submission"
-          submitLabel="Submit Bid"
-          open={isModalOpen}
-          setOpen={setIsModalOpen}
-          fields={gigBidFields}
-          onSubmit={handleSubmitBid}
-        />
+                <path
+                  fillRule="evenodd"
+                  d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Filter
+            </Button>
+            <Link href="/gigs/create">
+              <Button className="px-6 h-12" size="lg">
+                Create Gig
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
+
+      {renderBaseOnCondition(
+        loading,
+        <div className="h-20 mt-14 w-full text-center">
+          <Loader size={50} />
+        </div>,
+        <>
+          {gigs.length === 0 ? (
+            <Card>
+              <CardContent className="text-xl text-center font-semibold capitalize">
+                No gigs found
+              </CardContent>
+            </Card>
+          ) : (
+            <InfiniteScroll
+              dataLength={gigs.length}
+              next={fetchNextPage}
+              hasMore={currentPage < meta.totalPages}
+              loader={
+                <div className="h-20 mt-14 w-full text-center">
+                  <Loader size={50} />
+                </div>
+              }
+              scrollThreshold={0.9}
+              scrollableTarget="scrollableDiv"
+              className="py-4"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {gigs.map((gig) => (
+                  <Link key={gig.id} href={`/gigs/${gig.id}`} className="group">
+                    <Card className="gap-0 py-0 relative overflow-hidden bg-white border-0 shadow-lg h-full flex flex-col hover:shadow-purple-500/10">
+                      <div className="relative overflow-hidden">
+                        <div className="slider h-[200px]">
+                          <Slider
+                            slidesToShow={1}
+                            dots={gig.images.length > 1}
+                            infinite={gig.images.length > 1}
+                            customPaging={() => (
+                              <div className="w-[7px] h-[7px] bg-gray-400 rounded-full transition" />
+                            )}
+                          >
+                            {gig.images.length > 0 ? (
+                              gig.images.map((image, i) => (
+                                <div key={i} className="h-[200px]">
+                                  <ImageWithFallback
+                                    src={image}
+                                    alt={gig.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              ))
+                            ) : (
+                              <div className="h-[200px]">
+                                <PlaceholderImage />
+                              </div>
+                            )}
+                          </Slider>
+                        </div>
+                        <div className="w-fit absolute bottom-4 left-4 right-4">
+                          <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 shadow-lg font-medium">
+                            {capitalize(gig.gig_category.name)}
+                          </Badge>
+                        </div>
+                      </div>
+                      <CardContent className="p-6 flex-1 flex flex-col">
+                        <div className="mb-4">
+                          <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-[var(--base)] transition-colors line-clamp-1 leading-tight">
+                            {gig.title}
+                          </h3>
+                          <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed h-[45px]">
+                            {gig.description}
+                          </p>
+                        </div>
+                        {projectCardUI(gig)}
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </InfiniteScroll>
+          )}
+        </>
+      )}
+
+      <GigFilterModal
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        onApplyFilters={handleApplyFilters}
+      />
+      <CommonFormModal
+        width="600px"
+        title="Bid Submission"
+        submitLabel="Submit Bid"
+        open={isModalOpen}
+        setOpen={setIsModalOpen}
+        fields={gigBidFields}
+        onSubmit={handleSubmitBid}
+      />
     </div>
   );
 };
