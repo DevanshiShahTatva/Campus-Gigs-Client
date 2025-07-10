@@ -116,6 +116,16 @@ function TierManagement() {
         { label: 'Description', key: 'description', sortable: true },
     ] satisfies Column<ITier>[]
 
+    const handleOpen = useCallback(() => {
+        handleToggleModal(true)
+        setEditTier(null)
+    }, [])
+
+    const handleClose = useCallback(() => {
+        handleToggleModal(false)
+        setEditTier(null)
+    }, [])
+
     const handleEdit = useCallback((tier: ITier) => {
         setEditTier(tier)
         setIsModalOpen(true)
@@ -185,7 +195,7 @@ function TierManagement() {
                         </button>
                     </div>
                 )}
-                onClickCreateButton={() => handleToggleModal(true)}
+                onClickCreateButton={handleOpen}
             />
         )
     }
@@ -197,7 +207,7 @@ function TierManagement() {
             </div>
             {isModalOpen && (
                 <CustomModal
-                    onClose={() => setIsModalOpen(false)}
+                    onClose={handleClose}
                     title={editTier ? 'Edit Tier' : 'Add Tier'}
                 >
                     <DynamicForm

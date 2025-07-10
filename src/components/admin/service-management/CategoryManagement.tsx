@@ -329,7 +329,7 @@ function CategoryManagement() {
                         <button title="edit" className="text-[var(--base)] hover:text-[var(--base-hover)]" onClick={() => handleEdit(row)}>
                             <Edit size={16} />
                         </button>
-                        <button title="delete" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(row as any)}>
+                        <button title="delete" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(Number(row?.id))}>
                             <Trash size={16} />
                         </button>
                     </div>
