@@ -176,17 +176,7 @@ function useSocket(token?: string): {
   };
 }
 
-interface Chat {
-  id: number;
-  name: string;
-  lastMessage: string;
-  otherUserId: number;
-  time: string;
-  unread: number;
-  avatar: string;
-  status: string;
-  lastSeen?: string;
-}
+import type { Chat } from "@/utils/interface";
 
 export default function ChatPage() {
   const { token, user_id } = useSelector((state: RootState) => state.user);

@@ -4,45 +4,12 @@ import { FiSend, FiPaperclip, FiSmile, FiChevronLeft, FiMessageSquare } from "re
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { apiCall } from "@/utils/apiCall";
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/redux';
 import { toast } from "react-toastify";
 
-// Types
-interface Attachment {
-  id: string;
-  name: string;
-  url: string;
-  type: "image" | "file";
-  file_size: number;
-  created_at: string;
-  filename: string;
-  message_id: number;
-  mimetype: string;
-}
-
-interface Message {
-  id: string;
-  text: string;
-  sender: "me" | "them";
-  time: string;
-  status: "sent" | "delivered" | "read";
-  timestamp: Date;
-  attachments?: Attachment[];
-}
-
-interface Chat {
-  id: number;
-  name: string;
-  lastMessage: string;
-  otherUserId: number;
-  time: string;
-  unread: number;
-  avatar: string;
-  status: string;
-  lastSeen?: string;
-}
+import { apiCall } from "@/utils/apiCall";
+import { Attachment, Chat, Message } from "@/utils/interface";
 
 interface ChatWindowProps {
   selectedChat?: Chat | null;
@@ -50,19 +17,10 @@ interface ChatWindowProps {
   socket?: any;
 }
 
-// Constants
 const MAX_ATTACHMENTS = 5;
 const MESSAGE_PAGE_SIZE = 20;
 
-// Lazy-loaded components
-const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
-  ssr: false,
-  loading: () => <p>Loading...</p>,
-});
-
-/**
- * Helper function to format date labels
- */
+// --- Utility Functions ---
 const getDateLabel = (date: Date): string => {
   const today = new Date();
   const tomorrow = new Date(today);
@@ -70,39 +28,29 @@ const getDateLabel = (date: Date): string => {
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
 
-  // Reset time for comparison
   const messageDate = new Date(date);
   messageDate.setHours(0, 0, 0, 0);
   today.setHours(0, 0, 0, 0);
   tomorrow.setHours(0, 0, 0, 0);
   yesterday.setHours(0, 0, 0, 0);
 
-  if (messageDate.getTime() === today.getTime()) {
-    return "Today";
-  } else if (messageDate.getTime() === tomorrow.getTime()) {
-    return "Tomorrow";
-  } else if (messageDate.getTime() === yesterday.getTime()) {
-    return "Yesterday";
-  }
-
-  return messageDate.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+  if (messageDate.getTime() === today.getTime()) return "Today";
+  if (messageDate.getTime() === yesterday.getTime()) return "Yesterday";
+  if (messageDate.getTime() === tomorrow.getTime()) return "Tomorrow";
+  return messageDate.toLocaleDateString();
 };
 
-/**
- * Helper function to check if two dates are on different days
- */
 const isDifferentDay = (date1: Date, date2: Date): boolean => {
   return date1.toDateString() !== date2.toDateString();
 };
 
-/**
- * Component for date separator
- */
+const getUserInitials = (name: string): string => {
+  const parts = name.trim().split(' ');
+  return parts.length === 1
+    ? parts[0][0]?.toUpperCase() || ''
+    : `${parts[0][0]?.toUpperCase() || ''}${parts[1][0]?.toUpperCase() || ''}`;
+};
+
 const DateSeparator: React.FC<{ date: Date }> = ({ date }) => (
   <div className="flex items-center justify-center my-4 sticky top-0">
     <div className="bg-gray-200 text-gray-800 font-medium text-xs px-3 py-1 rounded-full">
@@ -111,8 +59,31 @@ const DateSeparator: React.FC<{ date: Date }> = ({ date }) => (
   </div>
 );
 
+const formatMessageData = (msg: any, currentUserId: number): Message => ({
+  id: msg.id,
+  text: msg.message,
+  sender: msg.sender_id === currentUserId ? "me" : "them",
+  time: new Date(msg.created_at || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+  timestamp: new Date(msg.created_at || Date.now()),
+  attachments: msg.attachments?.map((attachment: any) => ({
+    id: attachment.id,
+    name: attachment.filename,
+    url: attachment.url,
+    type: attachment.type,
+    file_size: attachment.file_size,
+    created_at: attachment.created_at,
+    filename: attachment.filename,
+    message_id: attachment.message_id,
+    mimetype: attachment.mimetype,
+  })) || [],
+});
+
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
+  ssr: false,
+  loading: () => <p>Loading...</p>,
+});
+
 const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket }) => {
-  // State management
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [attachments, setAttachments] = useState<Array<File | Attachment>>([]);
@@ -123,32 +94,23 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Redux state
   const currentUserId = useSelector((state: RootState) => state.user.user_id);
 
-  /**
-   * Scroll to the bottom of the chat
-   */
   const scrollToBottom = useCallback((smooth: boolean = true) => {
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
     }
   }, []);
 
-  /**
-   * Format message data from API response
-   */
   const formatMessageData = useCallback((msg: any): Message => ({
     id: msg.id,
     text: msg.message,
     sender: msg.sender_id === currentUserId ? "me" : "them",
     time: new Date(msg.created_at || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    status: "sent",
     timestamp: new Date(msg.created_at || Date.now()),
     attachments: msg.attachments?.map((attachment: any) => ({
       id: attachment.id,
@@ -163,9 +125,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
     })) || [],
   }), [currentUserId]);
 
-  /**
-   * Fetch messages for the current chat
-   */
   const fetchMessages = useCallback(async (pageToFetch = 1) => {
     if (!selectedChat) return;
 
@@ -200,9 +159,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
     }
   }, [selectedChat, formatMessageData, scrollToBottom]);
 
-  /**
-   * Handle new message from socket
-   */
   const handleNewMessage = useCallback((data: any) => {
     if (!data.message || data.message.chat_id !== selectedChat?.id) return;
 
@@ -217,15 +173,17 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
     }
   }, [selectedChat, currentUserId, formatMessageData, scrollToBottom]);
 
-  // Effects
   useEffect(() => {
     setPage(1);
     setHasMore(true);
     setMessages([]);
     if (selectedChat) {
+      if (socket && socket.connected) {
+        socket.emit('markAsRead', { chatId: selectedChat.id });
+      }
       fetchMessages(1);
     }
-  }, [selectedChat, fetchMessages]);
+  }, [selectedChat, fetchMessages, socket]);
 
   useEffect(() => {
     if (socket && selectedChat) {
@@ -238,17 +196,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
     }
   }, [socket, selectedChat, handleNewMessage]);
 
-  /**
-   * Handle emoji selection
-   */
   const handleEmojiClick = (emojiData: any) => {
     setMessage((prev) => prev + emojiData.emoji);
     setShowEmojiPicker(false);
   };
 
-  /**
-   * Handle file attachment
-   */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -279,17 +231,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
     e.target.value = "";
   };
 
-  /**
-   * Remove an attachment
-   */
   const removeAttachment = (index: number) => {
     setAttachments((prev) => prev.filter((_, i) => i !== index));
     setAttachmentPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
-  /**
-   * Send a new message
-   */
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim() === "" && attachments.length === 0) return;
@@ -327,18 +273,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
     }
   };
 
-  /**
-   * Load more messages when scrolling up
-   */
   const fetchMoreMessages = useCallback(() => {
     if (!loading && hasMore) {
       fetchMessages(page + 1);
     }
   }, [loading, hasMore, page, fetchMessages]);
 
-  /**
-   * Render a single message
-   */
   const renderMessage = (msg: Message) => (
     <div key={msg.id} className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"}`}>
       <div className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-lg px-4 py-2 ${msg.sender === "me"
@@ -383,14 +323,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
     </div>
   );
 
-  /**
-   * Render messages with date separators
-   */
   const renderMessagesWithDateSeparators = () => {
     const messageElements: React.ReactNode[] = [];
 
     messages.forEach((msg, index) => {
-      // Check if we need to show a date separator
       const showDateSeparator = index === 0 ||
         isDifferentDay(msg.timestamp, messages[index - 1].timestamp);
 
@@ -406,7 +342,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
     return messageElements;
   };
 
-  // Empty state
   if (!selectedChat) {
     return (
       <div className="hidden md:flex flex-col items-center justify-center h-full bg-gray-50 p-6 text-center">
@@ -423,7 +358,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
     );
   }
 
-  // Get user initials for avatar fallback
   const getUserInitials = (name: string) => {
     const parts = name.trim().split(' ');
     return parts.length === 1
@@ -433,7 +367,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <div className="flex items-center">
           <button
@@ -469,7 +402,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
         </div>
       </div>
 
-      {/* Messages */}
       <div
         ref={chatContainerRef}
         className="flex-1 p-4 overflow-y-auto bg-gray-50 relative flex flex-col-reverse"
@@ -491,7 +423,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
         </InfiniteScroll>
       </div>
 
-      {/* Attachment Previews */}
       {attachmentPreviews.length > 0 && (
         <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
           <div className="flex flex-wrap gap-2">
@@ -520,7 +451,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
         </div>
       )}
 
-      {/* Message Input */}
       <div className="p-4 border-t border-gray-200 bg-white">
         <form className="flex items-end gap-2" onSubmit={handleSendMessage}>
           <button

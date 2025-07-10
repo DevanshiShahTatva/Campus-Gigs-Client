@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { FiSearch, FiMessageSquare } from "react-icons/fi";
+import { MdOutlineImage } from "react-icons/md";
+import { FaRegFile } from "react-icons/fa6";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -8,6 +10,7 @@ import { useSelector } from "react-redux";
 
 import { apiCall } from "@/utils/apiCall";
 import { RootState } from "@/redux";
+import { Chat, OnlineUser } from "@/utils/interface";
 
 interface ChatSidebarProps {
   onSelectChat: (chat: Chat) => void;
@@ -15,23 +18,6 @@ interface ChatSidebarProps {
   socket: any;
 }
 
-interface Chat {
-  id: number;
-  name: string;
-  lastMessage: string;
-  otherUserId: number;
-  time: string;
-  unread: number;
-  avatar: string;
-  status: string;
-  lastSeen?: string;
-  isDeleted?: boolean;
-}
-
-interface OnlineUser {
-  userId: number;
-  lastSeen?: string;
-}
 
 const formatTimeAgo = (dateString: string): string => {
   if (!dateString) return '';
@@ -100,6 +86,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
           unread: item.unreadCount || 0,
           avatar: item.otherUser?.profile || "",
           status: "offline",
+          attachments: item.lastMessage?.attachments || [],
         }));
 
         setChats((prev) => pageToFetch === 1 ? mappedChats : [...prev, ...mappedChats]);
@@ -124,6 +111,16 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
 
   useEffect(() => {
     if (!socket || !socket.connected) return;
+
+    // Listen for messages read event and update unread count
+    const handleMessagesRead = (data: { chatId: number; unreadCount: number; lastReadAt: string }) => {
+      setChats((prev) =>
+        prev.map((chat) =>
+          chat.id === data.chatId ? { ...chat, unread: data.unreadCount } : chat
+        )
+      );
+    };
+    socket.on('messagesRead', handleMessagesRead);
 
     const handleUserPresence = ({ userId, status, timestamp }: { userId: number; status: string; timestamp: string }) => {
       updateChatStatus(userId, status, timestamp);
@@ -162,6 +159,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
             ? {
               ...chat,
               lastMessage: data.message,
+              attachments: data.attachments,
               time: data.created_at,
               unread: data.sender_id === user_id ? chat.unread : (chat.unread ?? 0) + 1,
             }
@@ -291,7 +289,27 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
                     <span className="text-xs text-gray-500">{formatTimeAgo(chat.time)}</span>
                   </div>
                   <p className="text-sm text-gray-500 truncate">
-                    {chat.isDeleted ? "Message deleted" : chat.lastMessage || "No messages yet"}
+                    {chat.isDeleted ? (
+                      "Message deleted"
+                    ) : Array.isArray(chat.attachments) && chat.attachments.length > 0 ? (
+                      chat.attachments.every((att: any) => att.type === "image") && chat.attachments[0] ? (
+                        // Only images: show an image icon
+                        <span className="flex items-center gap-1">
+                          <MdOutlineImage className="inline-block h-6 w-6 text-gray-400 mr-1" />
+                          Image{chat.attachments.length > 1 ? ` +${chat.attachments.length - 1}` : ""}
+                        </span>
+                      ) : chat.attachments[0] ? (
+                        // Only files: show file icon
+                        <span className="flex items-center gap-1">
+                          <FaRegFile className="inline-block h-5 w-5 text-gray-400" />
+                          File{chat.attachments.length > 1 ? ` +${chat.attachments.length - 1}` : ""}
+                        </span>
+                      ) : (
+                        chat.lastMessage || "No messages yet"
+                      )
+                    ) : (
+                      chat.lastMessage || "No messages yet"
+                    )}
                   </p>
                 </div>
 
