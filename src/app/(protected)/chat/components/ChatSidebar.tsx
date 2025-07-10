@@ -4,8 +4,10 @@ import { FiSearch, FiMessageSquare } from "react-icons/fi";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { useSelector } from "react-redux";
 
 import { apiCall } from "@/utils/apiCall";
+import { RootState } from "@/redux";
 
 interface ChatSidebarProps {
   onSelectChat: (chat: Chat) => void;
@@ -23,42 +25,44 @@ interface Chat {
   avatar: string;
   status: string;
   lastSeen?: string;
+  isDeleted?: boolean;
 }
 
-function formatTimeAgo(dateString: string): string {
+interface OnlineUser {
+  userId: number;
+  lastSeen?: string;
+}
+
+const formatTimeAgo = (dateString: string): string => {
   if (!dateString) return '';
-  const now = new Date();
   const date = new Date(dateString);
-  const diffMs = now.getTime() - date.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
-  if (diffSec < 60) return `${diffSec}s ago`;
-  const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin} min ago`;
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr} hr ago`;
-  const diffDay = Math.floor(diffHr / 24);
-  if (diffDay < 7) return `${diffDay}d ago`;
-  return date.toLocaleDateString();
-}
+  const now = new Date();
+  const diffSec = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-function getInitials(name: string): string {
-  if (!name) return '';
-  const words = name.trim().split(' ');
-  if (words.length === 1) return words[0][0].toUpperCase();
-  return (words[0][0] + (words[1][0] || '')).toUpperCase();
-}
+  if (diffSec < 60) return `${diffSec}s ago`;
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)} min ago`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)} hr ago`;
+  if (diffSec < 604800) return `${Math.floor(diffSec / 86400)}d ago`;
+
+  return date.toLocaleDateString();
+};
+
+const getInitials = (name: string): string => {
+  const words = name.trim().split(" ");
+  return (words[0][0] + (words[1]?.[0] || "")).toUpperCase();
+};
 
 const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, socket }) => {
+  const { user_id } = useSelector((state: RootState) => state.user);
   const [searchQuery, setSearchQuery] = useState("");
   const [chats, setChats] = useState<Chat[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
 
-  // Refs to avoid stale closures in socket listeners
-  const selectedChatRef = useRef<Chat | null>(selectedChat);
-  const chatsRef = useRef<Chat[]>(chats);
+  const selectedChatRef = useRef(selectedChat);
+  const chatsRef = useRef(chats);
 
   useEffect(() => {
     selectedChatRef.current = selectedChat;
@@ -68,8 +72,17 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
     chatsRef.current = chats;
   }, [chats]);
 
+  const updateChatStatus = useCallback((userId: number, status: string, lastSeen?: string) => {
+    setChats((prevChats) =>
+      prevChats.map((chat) =>
+        chat.otherUserId === userId ? { ...chat, status, lastSeen } : chat
+      )
+    );
+  }, []);
+
   const fetchChats = useCallback(async (pageToFetch = 1) => {
     if (pageToFetch === 1) setLoading(true);
+
     try {
       const response = await apiCall({
         endPoint: `/chats?page=${pageToFetch}`,
@@ -77,22 +90,20 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
       });
 
       if (response?.success) {
-        const mappedChats = (response.data || []).map((item: any) => ({
+        const mappedChats: Chat[] = (response.data || []).map((item: any) => ({
           id: item.id,
-          name: item.otherUser?.name,
+          name: item.otherUser?.name || "Unknown",
           otherUserId: item.otherUser?.id,
-          lastMessage: item.lastMessage?.messageType === 'text' ? item.lastMessage.message : '',
-          time: formatTimeAgo(item.updatedAt),
+          lastMessage: item.lastMessage?.message || "",
+          isDeleted: !!item.lastMessage?.deleted_at,
+          time: item.lastMessage?.createdAt,
           unread: item.unreadCount || 0,
-          avatar: item.otherUser?.profile,
+          avatar: item.otherUser?.profile || "",
           status: "offline",
         }));
 
-        setChats((prev) =>
-          pageToFetch === 1 ? mappedChats : [...prev, ...mappedChats]
-        );
-
-        setHasMore(response.meta && response.meta.page < response.meta.totalPages);
+        setChats((prev) => pageToFetch === 1 ? mappedChats : [...prev, ...mappedChats]);
+        setHasMore(response.meta?.page < response.meta?.totalPages);
         setPage(pageToFetch);
       } else {
         toast.error(response.message || "Failed to fetch chats");
@@ -114,93 +125,96 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
   useEffect(() => {
     if (!socket || !socket.connected) return;
 
-    const handleUserPresence = (data: { userId: number; status: string; timestamp: string }) => {
-      setChats((prevChats) =>
-        prevChats.map((chat) =>
-          chat.otherUserId === data.userId
-            ? { ...chat, status: data.status, lastSeen: data.timestamp }
-            : chat
-        )
-      );
+    const handleUserPresence = ({ userId, status, timestamp }: { userId: number; status: string; timestamp: string }) => {
+      updateChatStatus(userId, status, timestamp);
 
-      console.log("User presence updated:", data);
-
-      const selected = chatsRef.current.find(
-        (chat) => chat.otherUserId === selectedChatRef.current?.otherUserId
-      );
-      if (selected && selected.otherUserId === data.userId) {
+      if (selectedChatRef.current?.otherUserId === userId) {
         onSelectChat({
           ...selectedChatRef.current!,
-          status: data.status,
-          lastSeen: data.timestamp,
+          status,
+          lastSeen: timestamp,
         });
       }
 
-      setOnlineUsers((prevOnline) =>
-        data.status === "online"
-          ? prevOnline.includes(data.userId) ? prevOnline : [...prevOnline, data.userId]
-          : prevOnline.filter((id) => id !== data.userId)
+      setOnlineUsers((prev) =>
+        status === "online"
+          ? prev.includes(userId) ? prev : [...prev, userId]
+          : prev.filter((id) => id !== userId)
       );
     };
 
-    const handleOnlineUsersResponse = (data: { onlineUsers: Array<{ userId: number; lastSeen?: string }> }) => {
-      setOnlineUsers(data.onlineUsers.map((u) => u.userId));
+    const handleOnlineUsersResponse = (data: { onlineUsers: OnlineUser[] }) => {
+      const ids = data.onlineUsers.map((u) => u.userId);
+      setOnlineUsers(ids);
+
       setChats((prev) =>
         prev.map((chat) => {
           const found = data.onlineUsers.find((u) => u.userId === chat.otherUserId);
-          return found ? { ...chat, status: 'online', lastSeen: found.lastSeen } : chat;
+          return found ? { ...chat, status: "online", lastSeen: found.lastSeen } : chat;
         })
       );
     };
 
-    socket.on("userPresence", handleUserPresence);
+    const handleLatestMessage = (data: any) => {
+      setChats((prev) =>
+        prev.map((chat) =>
+          chat.id === data.chat_id
+            ? {
+              ...chat,
+              lastMessage: data.message,
+              time: data.created_at,
+              unread: data.sender_id === user_id ? chat.unread : (chat.unread ?? 0) + 1,
+            }
+            : chat
+        )
+      );
+    };
 
     const requestOnlineUsers = () => {
-      if (socket.connected) {
-        socket.emit("getOnlineUsers", handleOnlineUsersResponse);
-      }
+      socket.emit("getOnlineUsers", handleOnlineUsersResponse);
     };
+
+    socket.on("userPresence", handleUserPresence);
+    socket.on("latestMessage", handleLatestMessage);
 
     const timeout = setTimeout(requestOnlineUsers, 500);
 
     return () => {
       clearTimeout(timeout);
       socket.off("userPresence", handleUserPresence);
+      socket.off("latestMessage", handleLatestMessage);
     };
-  }, [socket, onSelectChat]);
+  }, [socket, user_id, onSelectChat, updateChatStatus]);
 
   useEffect(() => {
     if (!socket) return;
 
     const handleConnect = () => {
       setTimeout(() => {
-        if (socket.connected) {
-          socket.emit("getOnlineUsers", (data: { onlineUsers: Array<{ userId: number; lastSeen?: string }> }) => {
-            if (data?.onlineUsers) {
-              setOnlineUsers(data.onlineUsers.map((u) => u.userId));
-              setChats((prev) =>
-                prev.map((chat) => {
-                  const found = data.onlineUsers.find((u) => u.userId === chat.otherUserId);
-                  return found ? { ...chat, status: 'online', lastSeen: found.lastSeen } : chat;
-                })
-              );
-            }
-          });
-        }
+        socket.emit("getOnlineUsers", (data: { onlineUsers: OnlineUser[] }) => {
+          if (data?.onlineUsers) {
+            const ids = data.onlineUsers.map((u) => u.userId);
+            setOnlineUsers(ids);
+            setChats((prev) =>
+              prev.map((chat) => {
+                const match = data.onlineUsers.find((u) => u.userId === chat.otherUserId);
+                return match ? { ...chat, status: "online", lastSeen: match.lastSeen } : chat;
+              })
+            );
+          }
+        });
       }, 100);
     };
 
     const handleDisconnect = () => {
       setOnlineUsers([]);
-      setChats((prev) => prev.map((chat) => ({ ...chat, status: 'offline' })));
+      setChats((prev) => prev.map((chat) => ({ ...chat, status: "offline" })));
     };
 
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
 
-    if (socket.connected) {
-      handleConnect();
-    }
+    if (socket.connected) handleConnect();
 
     return () => {
       socket.off("connect", handleConnect);
@@ -214,17 +228,14 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
 
   const filteredChats = chats.filter(
     (chat) =>
-      chat.name &&
-      (chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()))
+      chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <div className="h-full flex flex-col w-full">
       <div className="p-4 border-b border-gray-200">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">Messages</h2>
-        </div>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Messages</h2>
         <div className="relative">
           <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
@@ -236,6 +247,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
           />
         </div>
       </div>
+
       <div className="flex-1 overflow-y-auto">
         {loading ? (
           <div className="flex flex-col items-center justify-center h-40 text-gray-500">
@@ -252,22 +264,19 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
             hasMore={hasMore}
             loader={<div className="text-center py-2 text-xs text-gray-400">Loading...</div>}
             scrollableTarget={null}
-            style={{ overflow: 'unset' }}
+            style={{ overflow: "unset" }}
           >
             {filteredChats.map((chat) => (
               <div
                 key={chat.id}
                 onClick={() => onSelectChat(chat)}
-                className={`flex items-center gap-3 p-3 cursor-pointer transition-colors ${selectedChat?.id === chat.id ? "bg-[var(--base)]/10" : "hover:bg-gray-100"
-                  }`}
+                className={`flex items-center gap-3 p-3 cursor-pointer transition-colors ${selectedChat?.id === chat.id ? "bg-[var(--base)]/10" : "hover:bg-gray-100"}`}
               >
                 <div className="relative">
                   {chat.avatar ? (
-                    <div className="h-12 w-12 rounded-full bg-gray-200 overflow-hidden">
-                      <Image src={chat.avatar} alt={chat.name} width={48} height={48} className="h-full w-full object-cover" />
-                    </div>
+                    <Image src={chat.avatar} alt={chat.name} width={48} height={48} className="h-12 w-12 rounded-full object-cover" />
                   ) : (
-                    <div className="h-12 w-12 rounded-full flex items-center justify-center bg-[var(--base)] text-white text-lg font-bold border-2 border-[var(--base)]">
+                    <div className="h-12 w-12 flex items-center justify-center rounded-full bg-[var(--base)] text-white text-lg font-bold border-2 border-[var(--base)]">
                       {getInitials(chat.name)}
                     </div>
                   )}
@@ -275,13 +284,17 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
                     <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-white" />
                   )}
                 </div>
+
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-sm font-medium text-gray-900 truncate">{chat.name || 'Unknown User'}</h3>
-                    <span className="text-xs text-gray-500">{chat.time}</span>
+                    <h3 className="text-sm font-medium text-gray-900 truncate">{chat.name}</h3>
+                    <span className="text-xs text-gray-500">{formatTimeAgo(chat.time)}</span>
                   </div>
-                  <p className="text-sm text-gray-500 truncate">{chat.lastMessage || 'No messages yet'}</p>
+                  <p className="text-sm text-gray-500 truncate">
+                    {chat.isDeleted ? "Message deleted" : chat.lastMessage || "No messages yet"}
+                  </p>
                 </div>
+
                 {chat.unread > 0 && (
                   <span className="ml-2 bg-[var(--base)] text-white text-xs font-medium px-2 py-1 rounded-full">
                     {chat.unread}

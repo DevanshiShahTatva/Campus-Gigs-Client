@@ -46,13 +46,13 @@ const sidebarItems = [
   //   route: ROUTES.GIGS_PIPELINE,
   //   access: ["provider"],
   // },
-  // {
-  //   id: 2,
-  //   title: "Chat",
-  //   icon: <FaComments />,
-  //   route: "/chat",
-  //   access: ["user", "provider"],
-  // },
+  {
+    id: 2,
+    title: "Chat",
+    icon: <FaComments />,
+    route: "/chat",
+    access: ["user", "provider"],
+  },
   // {
   //   id: 4,
   //   title: "Settings",
@@ -103,9 +103,8 @@ const UserProviderSidebar = ({
     <>
       {/* Sidebar Drawer (fixed left, white, 20rem wide) */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 md:w-72 bg-white z-[99999] transform transition-transform duration-300 ${
-          open ? "translate-x-0" : "-translate-x-full"
-        } min-w-0 overflow-y-auto`}
+        className={`fixed top-0 left-0 h-full w-64 md:w-72 bg-white z-[99999] transform transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full"
+          } min-w-0 overflow-y-auto`}
         style={{ maxWidth: "90vw" }}
       >
         {/* Responsive Logo */}
@@ -138,11 +137,10 @@ const UserProviderSidebar = ({
                 key={item.id}
                 href={item.route}
                 onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[var(--base)]/10 hover:text-[var(--base)] transition ${
-                  pathname === item.route
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[var(--base)]/10 hover:text-[var(--base)] transition ${pathname === item.route
                     ? "bg-[var(--base)]/10 text-[var(--base)]"
                     : ""
-                }`}
+                  }`}
               >
                 <span className="text-lg text-[var(--base)]">{item.icon}</span>
                 <span className="truncate">{item.title}</span>

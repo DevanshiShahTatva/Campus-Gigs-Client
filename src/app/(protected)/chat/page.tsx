@@ -189,7 +189,7 @@ interface Chat {
 }
 
 export default function ChatPage() {
-  const { token } = useSelector((state: RootState) => state.user);
+  const { token, user_id } = useSelector((state: RootState) => state.user);
 
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
 
@@ -199,8 +199,24 @@ export default function ChatPage() {
   useEffect(() => {
     const el = document.getElementById("scrollableDiv");
     if (el) el.classList.add("overflow-hidden");
-    return () => el?.classList.remove("overflow-hidden");
-  }, []);
+
+    // Join user channel on mount
+    if (socket && socket.connected && token) {
+      if (user_id) {
+        socket.emit('joinUserChannel', { userId: user_id });
+      }
+    }
+
+    return () => {
+      el?.classList.remove("overflow-hidden");
+      // Leave user channel on unmount
+      if (socket && socket.connected && token) {
+        if (user_id) {
+          socket.emit('leaveUserChannel', { userId: user_id });
+        }
+      }
+    };
+  }, [socket, token, user_id]);
 
   const handleSelectChat = (chat: Chat) => {
     console.log("Selected chat:", chat);
