@@ -158,7 +158,8 @@ const Profile = () => {
     "profile" | "gigs" | "history" | "support" | "subscription" | "settings"
   >("profile");
   const [coverImage, setCoverImage] = useState<string | null>(null);
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [isProfileImageUploading, setIsProfileImageUploading] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const profileInputRef = useRef<HTMLInputElement>(null);
   const { role: profileMode } = useContext(RoleContext);
@@ -242,6 +243,30 @@ const Profile = () => {
       bio: userProfile.bio || "",
     };
   }, [userProfile]);
+
+  // When user selects a new profile image, store the File object and upload immediately
+  const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      setProfileImage(file);
+      setIsProfileImageUploading(true);
+      
+      // Upload the image immediately
+      try {
+        const formData = new FormData();
+        formData.append("profile", file);
+        
+        await updateUserProfile(formData).unwrap();
+        toast.success("Profile image updated successfully");
+        setProfileImage(null); // Clear the selected file after successful upload
+      } catch (error) {
+        toast.error("Failed to update profile image");
+        setProfileImage(null); // Clear the selected file on error
+      } finally {
+        setIsProfileImageUploading(false);
+      }
+    }
+  };
 
   // Function to handle profile update API call
   const handleProfileUpdate = async (values: any) => {
@@ -361,7 +386,7 @@ const Profile = () => {
               className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gray-200 overflow-hidden flex items-center justify-center relative group cursor-pointer"
               onClick={() => {}}
             >
-              {!userProfile.profile ? (
+              {!userProfile.profile && !profileImage ? (
                 <div
                   className="w-full h-full flex items-center justify-center rounded-full"
                   style={{ background: "var(--base)" }}
@@ -372,10 +397,17 @@ const Profile = () => {
                 </div>
               ) : (
                 <img
-                  src={userProfile.profile}
+                  src={profileImage ? URL.createObjectURL(profileImage) : userProfile.profile}
                   alt="Profile"
                   className="w-full h-full object-cover rounded-full"
+                  key={profileImage ? profileImage.name : userProfile.profile}
                 />
+              )}
+              {/* Loading overlay when uploading */}
+              {isProfileImageUploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                  <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                </div>
               )}
               {/* Animated Hover Overlay with Camera and Trash Icon */}
               <div
@@ -442,13 +474,7 @@ const Profile = () => {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const url = URL.createObjectURL(file);
-                    setProfileImage(url);
-                  }
-                }}
+                onChange={handleProfileImageChange}
                 aria-label="Upload profile image"
                 title="Upload profile image"
               />
