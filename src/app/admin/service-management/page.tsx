@@ -4,12 +4,12 @@ import { useState } from "react"
 import CategoryManagement from "@/components/admin/service-management/CategoryManagement"
 import SkillsManagement from "@/components/admin/service-management/SkillsManagement"
 import TierManagement from "@/components/admin/service-management/TierManagement"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-type TTab = "skills" | "tiers" | "categories"
+type TTab = "Skills" | "Tiers" | "Categories"
+const tabs: TTab[] = ["Skills", "Tiers", "Categories"]
 
 export default function ManagementPage() {
-    const [tab, setTab] = useState<TTab>("skills")
+    const [tab, setTab] = useState<TTab>("Skills")
 
     const handleTabChange = (newTabValue: TTab) => {
         setTab(newTabValue)
@@ -17,11 +17,11 @@ export default function ManagementPage() {
 
     const renderTabContent = (tab: TTab) => {
         switch (tab) {
-            case "skills":
+            case "Skills":
                 return <SkillsManagement />
-            case "tiers":
+            case "Tiers":
                 return <TierManagement />
-            case "categories":
+            case "Categories":
                 return <CategoryManagement />
             default:
                 return null
@@ -30,13 +30,22 @@ export default function ManagementPage() {
 
     return (
         <div className="space-y-6">
-            <Tabs value={tab} onValueChange={(newVal) => handleTabChange(newVal as TTab)} className="space-y-6">
-                <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="skills">Skills</TabsTrigger>
-                    <TabsTrigger value="tiers">Tiers</TabsTrigger>
-                    <TabsTrigger value="categories">Categories</TabsTrigger>
-                </TabsList>
-            </Tabs>
+            <div className="bg-white w-full border-b border-gray-300">
+                <div className="relative flex w-full">
+                    {tabs.map((tabItem,index) => (
+                        <button
+                            key={index}
+                            onClick={() => handleTabChange(tabItem)}
+                            className={`relative pb-3 px-3 sm:px-4 text-sm sm:text-base font-medium transition-all duration-200 cursor-pointer whitespace-nowrap flex-shrink-0 ${tab === tabItem
+                                ? "text-[var(--base)] after:content-[''] after:absolute after:-bottom-[1px] after:left-0 after:w-full after:h-[2px] after:bg-[var(--base)]"
+                                : "text-gray-600 hover:text-[var(--base)]"
+                                }`}
+                        >
+                            {tabItem}
+                        </button>
+                    ))}
+                </div>
+            </div>
 
             <div className="mt-4">
                 {renderTabContent(tab)}

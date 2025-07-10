@@ -37,7 +37,7 @@ export default function TermsConditions() {
   const decodedHTML = useMemo(() => he.decode(termsContent ?? ""), [termsContent]);
 
   return (
-    <section className="bg-[var(--bg-light)] w-full py-12">
+    <section className="bg-[var(--bg-light)] w-full py-12 pt-20">
       <div className="w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--text-dark)] mb-4">Terms & Conditions</h1>

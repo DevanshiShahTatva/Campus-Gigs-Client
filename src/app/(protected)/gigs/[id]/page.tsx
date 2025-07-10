@@ -471,20 +471,16 @@ const GigDetail = () => {
                 size="sm"
                 variant="outline"
                 onClick={() => handleEditBid(bid)}
-                className="text-white hover:text-white bg-[var(--base)] hover:bg-[var(--base)]"
+                className="text-white hover:text-white bg-[var(--base)] hover:bg-[var(--base)] px-5 py-4"
               >
-                <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                 Edit
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => handleDeleteBid(bid.id)}
-                className="text-white hover:text-white bg-red-400 hover:bg-red-500"
+                className="text-white hover:text-white bg-red-400 hover:bg-red-500 px-5 py-4"
               >
-                <Trash
-                  className="w-3 h-3 sm:w-4 sm:h-4 mr-2"
-                />
                 Delete
               </Button>
             </div>

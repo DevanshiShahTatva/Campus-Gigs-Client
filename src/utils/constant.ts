@@ -26,8 +26,10 @@ export const ROUTES = {
   PROFILE: "/profile",
   PREVIEW_PROFILE: "/provider",
   GIGS: "/gigs",
+  GIGS_CREATE: "/gigs/create",
   MY_GIGS: "/my-gigs",
   GIGS_PIPELINE: "/gig-pipeline",
+  BUY_PLAN_SUBSCRIPTION: "/user/buy-subscription",
   ADMIN: {
     DASHBOARD: "/admin/dashboard",
     SUBSCRIPTION: "/admin/subscription-plan",
@@ -504,7 +506,7 @@ export const FOOTER_BOTTOM_LINKS = [
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Terms & Conditions", href: "/terms-conditions" },
   { label: "Contact Us", href: "/contact-us" },
-  { label: "FAQs", href: "/FAQs" },
+  { label: "FAQs", href: "/faqs" },
 ];
 
 export const FOOTER_COPYRIGHT = "© 2025 CampusGig. All rights reserved.";

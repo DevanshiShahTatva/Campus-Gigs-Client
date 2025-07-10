@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "react-toastify";
@@ -8,9 +8,7 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import { Formik, Form, FormikHelpers } from "formik";
 import Cookie from "js-cookie";
 import { ChevronLeft, ChevronRight, User, Camera, FileText, Check, Tag, Info, ExternalLink } from "lucide-react";
-
 import { apiCall } from "@/utils/apiCall";
-import TagsInput from "./TagInput";
 import Button from "@/components/common/Button";
 import FormikTextField from "@/components/common/FormikTextField";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
@@ -18,6 +16,8 @@ import { SignupFormSchema, educationOptions } from "./helper";
 import { ISignupFormValues, Step, ApiResponse, EducationOption } from "./type";
 import { useDispatch } from "react-redux";
 import { setAuthData } from '@/redux/slices/userSlice';
+import { IDropdownOption } from "@/utils/interface";
+import { MultiSelectDropdown } from "@/components/common/ui/MultiSelectDropdown";
 
 const steps: Step[] = [
   {
@@ -52,6 +52,22 @@ const SignUpPage: React.FC = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [acceptedTerms, setAcceptedTerms] = useState<boolean>(false);
   const [emailErr, setEmailErr] = useState("");
+  const [skillsDropdown, setSkillsDropdown] = useState<IDropdownOption[]>([]);
+
+  const fetchSkillsDropdown = useCallback(async () => {
+    try {
+      const res = await apiCall({ endPoint: '/skills/dropdown', method: 'GET' });
+      if (res?.data?.length) {
+        setSkillsDropdown(res.data || []);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch skills list');
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSkillsDropdown();
+  }, [fetchSkillsDropdown]);
 
   const renderStepIndicator = (values: ISignupFormValues, errors: any) => (
     <div className="flex items-center justify-center mb-8 mt-10">
@@ -378,25 +394,14 @@ const SignUpPage: React.FC = () => {
             <Tag className="w-4 h-4 text-gray-600" />
           </div>
           <div className="skill-tags-container">
-            <TagsInput tags={values.skills || []} handleSkillsChange={(tags: any) => handleSkillsChange(tags, setFieldValue)} />
-          </div>
-          <div className="mt-3 bg-[#2181890f] rounded-lg p-3">
-            <div className="flex items-start space-x-2">
-              <Info className="w-4 h-4 text-[var(--base)] mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-[var(--base)]">
-                <div className="font-medium mb-1">How to add skills:</div>
-                <ul className="space-y-1 text-xs">
-                  <li>
-                    • Press <kbd className="px-1 py-0.5 bg-[#014c4329] rounded text-xs">Enter</kbd> to add a tag
-                  </li>
-                  <li>
-                    • Maximum <strong>10 tags</strong> allowed ({Array.isArray(values.skills) ? values.skills.length : 0}/10)
-                  </li>
-                  <li>• Allowed characters: letters, numbers, space, dash (-), and underscore (_)</li>
-                  <li>• Examples: JavaScript, React, Project-Management, UI_UX</li>
-                </ul>
-              </div>
-            </div>
+            <MultiSelectDropdown
+              error={false}
+              disabled={false}
+              placeholder="Select multiple Skills"
+              value={values.skills || []}
+              options={skillsDropdown}
+              onValueChange={(skillArr) => handleSkillsChange(skillArr, setFieldValue)}
+            />
           </div>
         </div>
 

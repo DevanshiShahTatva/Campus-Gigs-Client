@@ -120,7 +120,7 @@ const TermsModal = ({
         method: "PUT",
         body: {
           is_agreed: true,
-          userId: loginResponse?.data.user._id,
+          user_id: loginResponse?.data.user.id,
         },
       });
 
