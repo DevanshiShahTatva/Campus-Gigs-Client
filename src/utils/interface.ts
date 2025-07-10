@@ -200,27 +200,28 @@ export interface Attachment {
 export interface Chat {
   id: number;
   name: string;
-  lastMessage: string;
-  otherUserId: number;
+  last_message: string;
+  other_user_id: number;
   time: string;
   unread: number;
   avatar: string;
   status: string;
-  lastSeen?: string;
-  isDeleted?: boolean;
+  last_seen?: string;
+  is_deleted?: boolean;
   attachments?: Attachment[];
 }
 
 export interface OnlineUser {
-  userId: number;
-  lastSeen?: string;
+  user_id: number;
+  last_seen?: string;
 }
 
 export interface Message {
-  id: string;
+  id: number;
   text: string;
   sender: "me" | "them";
   time: string;
   timestamp: Date;
-  attachments?: Attachment[];
+  attachments: Attachment[];
+  is_deleted: boolean;
 }

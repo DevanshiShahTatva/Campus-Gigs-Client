@@ -209,7 +209,6 @@ export default function ChatPage() {
   }, [socket, token, user_id]);
 
   const handleSelectChat = (chat: Chat) => {
-    console.log("Selected chat:", chat);
     setSelectedChat(chat);
   };
 

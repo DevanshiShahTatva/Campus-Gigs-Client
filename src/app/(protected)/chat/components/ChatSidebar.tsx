@@ -61,7 +61,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
   const updateChatStatus = useCallback((userId: number, status: string, lastSeen?: string) => {
     setChats((prevChats) =>
       prevChats.map((chat) =>
-        chat.otherUserId === userId ? { ...chat, status, lastSeen } : chat
+        chat.other_user_id === userId ? { ...chat, status, lastSeen } : chat
       )
     );
   }, []);
@@ -78,15 +78,15 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
       if (response?.success) {
         const mappedChats: Chat[] = (response.data || []).map((item: any) => ({
           id: item.id,
-          name: item.otherUser?.name || "Unknown",
-          otherUserId: item.otherUser?.id,
-          lastMessage: item.lastMessage?.message || "",
-          isDeleted: !!item.lastMessage?.deleted_at,
-          time: item.lastMessage?.createdAt,
-          unread: item.unreadCount || 0,
-          avatar: item.otherUser?.profile || "",
+          name: item.other_user?.name || "Unknown",
+          other_user_id: item.other_user?.id,
+          last_message: item.last_message?.message || "",
+          is_deleted: item.last_message?.is_deleted,
+          time: item.last_message?.created_at,
+          unread: item.unread_count || 0,
+          avatar: item.other_user?.profile || "",
           status: "offline",
-          attachments: item.lastMessage?.attachments || [],
+          attachments: item.last_message?.attachments || [],
         }));
 
         setChats((prev) => pageToFetch === 1 ? mappedChats : [...prev, ...mappedChats]);
@@ -112,24 +112,14 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
   useEffect(() => {
     if (!socket || !socket.connected) return;
 
-    // Listen for messages read event and update unread count
-    const handleMessagesRead = (data: { chatId: number; unreadCount: number; lastReadAt: string }) => {
-      setChats((prev) =>
-        prev.map((chat) =>
-          chat.id === data.chatId ? { ...chat, unread: data.unreadCount } : chat
-        )
-      );
-    };
-    socket.on('messagesRead', handleMessagesRead);
-
     const handleUserPresence = ({ userId, status, timestamp }: { userId: number; status: string; timestamp: string }) => {
       updateChatStatus(userId, status, timestamp);
 
-      if (selectedChatRef.current?.otherUserId === userId) {
+      if (selectedChatRef.current?.other_user_id === userId) {
         onSelectChat({
           ...selectedChatRef.current!,
           status,
-          lastSeen: timestamp,
+          last_seen: timestamp,
         });
       }
 
@@ -141,27 +131,29 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
     };
 
     const handleOnlineUsersResponse = (data: { onlineUsers: OnlineUser[] }) => {
-      const ids = data.onlineUsers.map((u) => u.userId);
+      const ids = data.onlineUsers.map((u) => u.user_id);
       setOnlineUsers(ids);
 
       setChats((prev) =>
         prev.map((chat) => {
-          const found = data.onlineUsers.find((u) => u.userId === chat.otherUserId);
-          return found ? { ...chat, status: "online", lastSeen: found.lastSeen } : chat;
+          const found = data.onlineUsers.find((u) => u.user_id === chat.other_user_id);
+          return found ? { ...chat, status: "online", last_seen: found.last_seen } : chat;
         })
       );
     };
 
     const handleLatestMessage = (data: any) => {
+      console.log(data, "latest");
       setChats((prev) =>
         prev.map((chat) =>
           chat.id === data.chat_id
             ? {
               ...chat,
-              lastMessage: data.message,
+              last_message: data.message,
               attachments: data.attachments,
               time: data.created_at,
-              unread: data.sender_id === user_id ? chat.unread : (chat.unread ?? 0) + 1,
+              is_deleted: data.is_deleted,
+              unread: data.is_deleted ? chat.unread : data.sender_id === user_id ? chat.unread : (chat.unread ?? 0) + 1,
             }
             : chat
         )
@@ -191,12 +183,12 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
       setTimeout(() => {
         socket.emit("getOnlineUsers", (data: { onlineUsers: OnlineUser[] }) => {
           if (data?.onlineUsers) {
-            const ids = data.onlineUsers.map((u) => u.userId);
+            const ids = data.onlineUsers.map((u) => u.user_id);
             setOnlineUsers(ids);
             setChats((prev) =>
               prev.map((chat) => {
-                const match = data.onlineUsers.find((u) => u.userId === chat.otherUserId);
-                return match ? { ...chat, status: "online", lastSeen: match.lastSeen } : chat;
+                const match = data.onlineUsers.find((u) => u.user_id === chat.other_user_id);
+                return match ? { ...chat, status: "online", last_seen: match.last_seen } : chat;
               })
             );
           }
@@ -227,7 +219,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
   const filteredChats = chats.filter(
     (chat) =>
       chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+      chat.last_message.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -278,7 +270,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
                       {getInitials(chat.name)}
                     </div>
                   )}
-                  {onlineUsers.includes(chat.otherUserId) && (
+                  {onlineUsers.includes(chat.other_user_id) && (
                     <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-white" />
                   )}
                 </div>
@@ -289,26 +281,24 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
                     <span className="text-xs text-gray-500">{formatTimeAgo(chat.time)}</span>
                   </div>
                   <p className="text-sm text-gray-500 truncate">
-                    {chat.isDeleted ? (
+                    {chat.is_deleted ? (
                       "Message deleted"
                     ) : Array.isArray(chat.attachments) && chat.attachments.length > 0 ? (
                       chat.attachments.every((att: any) => att.type === "image") && chat.attachments[0] ? (
-                        // Only images: show an image icon
                         <span className="flex items-center gap-1">
                           <MdOutlineImage className="inline-block h-6 w-6 text-gray-400 mr-1" />
                           Image{chat.attachments.length > 1 ? ` +${chat.attachments.length - 1}` : ""}
                         </span>
                       ) : chat.attachments[0] ? (
-                        // Only files: show file icon
                         <span className="flex items-center gap-1">
                           <FaRegFile className="inline-block h-5 w-5 text-gray-400" />
                           File{chat.attachments.length > 1 ? ` +${chat.attachments.length - 1}` : ""}
                         </span>
                       ) : (
-                        chat.lastMessage || "No messages yet"
+                        chat.last_message || "No messages yet"
                       )
                     ) : (
-                      chat.lastMessage || "No messages yet"
+                      chat.last_message || "No messages yet"
                     )}
                   </p>
                 </div>
