@@ -111,8 +111,6 @@ const GigListing = () => {
 
   const fetchGigs = async (page = 1, search = "") => {
     try {
-      setLoading(true);
-
       const resp = await apiCall({
         endPoint: `${API_ROUTES.GIGS}?page=${page}&pageSize=9&search=${search}`,
         method: "GET",
@@ -131,6 +129,7 @@ const GigListing = () => {
   };
 
   useEffect(() => {
+    setLoading(true);
     fetchGigs(1, debounceSearch);
   }, [debounceSearch]);
 
