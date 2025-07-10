@@ -58,7 +58,7 @@ const formConfig: FormFieldConfig[] = [
 
 function TierManagement() {
     const [tiersData, setTiersData] = useState<ITier[]>([])
-    const [tiersDataLoading, setTiersDataLoading] = useState(false)
+    const [tiersDataLoading, setTiersDataLoading] = useState(true)
 
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -161,14 +161,14 @@ function TierManagement() {
             return <TableSkeleton showSearch rowCount={10} columnCount={1} actionButtonCount={2} />
         }
 
-        if (tiersData.length === 0) {
-            return (
-                <div className="text-center py-8 text-gray-500">
-                    <Award className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No tiers created yet. Add your first tier to get started.</p>
-                </div>
-            )
-        }
+        // if (tiersData.length === 0) {
+        //     return (
+        //         <div className="text-center py-8 text-gray-500">
+        //             <Award className="w-12 h-12 mx-auto mb-4 opacity-50" />
+        //             <p>No tiers created yet. Add your first tier to get started.</p>
+        //         </div>
+        //     )
+        // }
 
         return (
             <CustomTable<ITier>

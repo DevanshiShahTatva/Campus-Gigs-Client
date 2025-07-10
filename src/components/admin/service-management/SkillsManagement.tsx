@@ -154,14 +154,14 @@ const SkillsManagement = () => {
             return <TableSkeleton showSearch rowCount={10} columnCount={1} actionButtonCount={2} />
         }
 
-        if (skillsData.length === 0) {
-            return (
-                <div className="text-center py-8 text-gray-500">
-                    <Database className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No skills created yet. Create categories first to organize skills.</p>
-                </div>
-            )
-        }
+        // if (skillsData.length === 0) {
+        //     return (
+        //         <div className="text-center py-8 text-gray-500">
+        //             <Database className="w-12 h-12 mx-auto mb-4 opacity-50" />
+        //             <p>No skills created yet. Add your first skill to get started.</p>
+        //         </div>
+        //     )
+        // }
 
         return (
             <CustomTable<ISkill>

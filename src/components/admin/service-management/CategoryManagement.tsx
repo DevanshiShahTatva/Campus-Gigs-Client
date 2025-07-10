@@ -67,13 +67,13 @@ function NoDataMsg() {
     return (
         <div className="text-center py-8 text-gray-500">
             <Component className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>No categories created yet. Create tiers first to organize categories.</p>
+            <p>No categories created yet. Create tiers and skills first to organize categories.</p>
         </div>
     );
 }
 function CategoryManagement() {
     const [categoriesData, setCategoriesData] = useState<ICategory[]>([]);
-    const [categoriesDataLoading, setCategoriesDataLoading] = useState(false);
+    const [categoriesDataLoading, setCategoriesDataLoading] = useState(true);
     const [isModalOpen, SetIsModalOpen] = useState<boolean>(false);
     const [tierDropdown, setTierDropdown] = useState<IDropdownOption[]>([]);
     const [skillsDropdown, setSkillsDropdown] = useState<IDropdownOption[]>([]);
@@ -315,9 +315,9 @@ function CategoryManagement() {
             return <TableSkeleton showSearch rowCount={10} columnCount={1} actionButtonCount={2} />
         }
 
-        if (categoriesData.length === 0) {
-            return NoDataMsg()
-        }
+        // if (categoriesData.length === 0) {
+        //     return NoDataMsg()
+        // }
 
         return (
             <CustomTable<ICategory>
