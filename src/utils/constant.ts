@@ -29,6 +29,7 @@ export const ROUTES = {
   GIGS_CREATE: "/gigs/create",
   MY_GIGS: "/my-gigs",
   GIGS_PIPELINE: "/gig-pipeline",
+  BUY_PLAN_SUBSCRIPTION: "/user/buy-subscription",
   ADMIN: {
     DASHBOARD: "/admin/dashboard",
     SUBSCRIPTION: "/admin/subscription-plan",

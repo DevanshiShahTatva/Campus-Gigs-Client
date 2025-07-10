@@ -15,6 +15,7 @@ import { IDropdownOption } from "@/utils/interface";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import Link from "next/link";
+import moment from "moment";
 
 // Custom Profile Photo Component
 const ProfilePhotoUpload = ({
@@ -254,7 +255,7 @@ const Profile = () => {
       // Upload the image immediately
       try {
         const formData = new FormData();
-        formData.append("profile", file);
+        formData.append("file", file);
         
         await updateUserProfile(formData).unwrap();
         toast.success("Profile image updated successfully");
@@ -736,8 +737,8 @@ const Profile = () => {
                         const planName = plan.subscription_plan?.name || "-";
                         const planPrice = plan.subscription_plan?.price ?? plan.price;
                         const status = plan.status ? plan.status.charAt(0).toUpperCase() + plan.status.slice(1) : "-";
-                        const startDate = plan.created_at ? new Date(plan.created_at).toLocaleDateString() : "-";
-                        const endDate = plan.subscription_expiry_date ? new Date(plan.subscription_expiry_date).toLocaleDateString() : "-";
+                        const startDate = plan.created_at ? moment(plan.created_at).format("DD/MM/YYYY") : "-";
+                        const endDate = plan.subscription_expiry_date ? moment(plan.subscription_expiry_date).format("DD/MM/YYYY") : "-";
                         const isActive = plan.status === "active";
                         const isCancelled = plan.status === "cancelled";
                         const features = plan.subscription_plan?.features || [];

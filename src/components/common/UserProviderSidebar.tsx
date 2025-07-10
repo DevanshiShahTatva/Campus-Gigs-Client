@@ -39,34 +39,27 @@ const sidebarItems = [
     route: ROUTES.MY_GIGS,
     access: ["user", "provider"],
   },
-  {
-    id: 7,
-    title: "Gigs Pipeline",
-    icon: <FaProjectDiagram />,
-    route: ROUTES.GIGS_PIPELINE,
-    access: ["provider"],
-  },
-  {
-    id: 2,
-    title: "Chat",
-    icon: <FaComments />,
-    route: "/chat",
-    access: ["user", "provider"],
-  },
-  {
-    id: 5,
-    title: "Subscription Plans",
-    icon: <FaCreditCard />,
-    route: "/user/buy-subscription",
-    access: ["user", "provider"],
-  },
-  {
-    id: 4,
-    title: "Settings",
-    icon: <FaCog />,
-    route: "#",
-    access: ["user", "provider"],
-  }
+  // {
+  //   id: 7,
+  //   title: "Gigs Pipeline",
+  //   icon: <FaProjectDiagram />,
+  //   route: ROUTES.GIGS_PIPELINE,
+  //   access: ["provider"],
+  // },
+  // {
+  //   id: 2,
+  //   title: "Chat",
+  //   icon: <FaComments />,
+  //   route: "/chat",
+  //   access: ["user", "provider"],
+  // },
+  // {
+  //   id: 4,
+  //   title: "Settings",
+  //   icon: <FaCog />,
+  //   route: "#",
+  //   access: ["user", "provider"],
+  // }
 ];
 
 const UserProviderSidebar = ({
@@ -89,7 +82,12 @@ const UserProviderSidebar = ({
       .filter((item) => item.access.includes(userProfile.data.profile_type))
       .map((item) => item.route);
 
-    const changeRoutes = [...allowedRoutes, ROUTES.PROFILE, ROUTES.PREVIEW_PROFILE];
+    const changeRoutes = [
+      ...allowedRoutes,
+      ROUTES.PROFILE,
+      ROUTES.PREVIEW_PROFILE,
+      ROUTES.BUY_PLAN_SUBSCRIPTION,
+    ];
 
     const isCurrentRouteAllowed = changeRoutes.some((route) =>
       pathname.startsWith(route)
@@ -119,9 +117,9 @@ const UserProviderSidebar = ({
           />
         </div>
         {/* Mobile-only nav tabs */}
-        
+
         {/* User/Provider toggle and profile (mobile only) */}
-       
+
         {/* Close button */}
         <button
           className="absolute top-4 right-4 p-2 rounded-full text-[var(--base)] hover:bg-[var(--base)]/10 transition-colors z-10"
@@ -140,8 +138,11 @@ const UserProviderSidebar = ({
                 key={item.id}
                 href={item.route}
                 onClick={() => setOpen(false)}
-                className=
-                  {`flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[var(--base)]/10 hover:text-[var(--base)] transition ${pathname === item.route ? "bg-[var(--base)]/10 text-[var(--base)]" : ""}`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[var(--base)]/10 hover:text-[var(--base)] transition ${
+                  pathname === item.route
+                    ? "bg-[var(--base)]/10 text-[var(--base)]"
+                    : ""
+                }`}
               >
                 <span className="text-lg text-[var(--base)]">{item.icon}</span>
                 <span className="truncate">{item.title}</span>

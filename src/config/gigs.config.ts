@@ -114,7 +114,7 @@ export const gigsFields = (
           label: "Certifications",
           type: "array",
           required: false,
-          placeholder: "e.g., Software engineer, 3 BCA",
+          placeholder: "e.g., Software engineer",
         },
         {
           id: "images",
