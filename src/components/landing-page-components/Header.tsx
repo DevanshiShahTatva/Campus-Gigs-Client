@@ -1,6 +1,10 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { useGetUserProfileQuery } from "@/redux/api";
+import { getAvatarName } from "@/utils/helper";
+import type { RootState } from "@/redux";
 import Link from "next/link";
 import Cookie from "js-cookie";
 
@@ -8,22 +12,13 @@ const Header = () => {
   const router = useRouter();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isToken, setIsToken] = useState("");
-
-  const onLogout = () => {
-    Cookie.remove("token");
-    router.push("/login");
-  };
+  const token = useSelector((state: RootState) => state.user?.token);
+  const { data: userData } = useGetUserProfileQuery(undefined, { skip: !token });
+  const user = userData?.data;
 
   const gotoProfile = () => {
     router.push("/profile");
   };
-
-  useEffect(() => {
-    if (localStorage) {
-      setIsToken(localStorage.getItem("token") as string);
-    }
-  }, []);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -119,12 +114,17 @@ const Header = () => {
             Pricing
           </a>
 
-          {isToken ? (
+          {token ? (
             <button
-              className="h-[41.80px] w-[41.80px] rounded-full bg-[color:var(--base)] text-white font-bold relative cursor-pointer"
+              className="h-[41.80px] w-[41.80px] rounded-full bg-[color:var(--base)] text-white font-bold relative cursor-pointer flex items-center justify-center border-2 border-[var(--base)] shadow-sm"
               onClick={() => gotoProfile()}
+              title={user?.name || "Profile"}
             >
-              {localStorage?.getItem("name")?.charAt(0)?.toUpperCase()}
+              {user?.avatar ? (
+                <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
+              ) : (
+                <span>{getAvatarName(user?.name || "", true)}</span>
+              )}
             </button>
           ) : (
             <Link href="/login">
@@ -228,11 +228,25 @@ const Header = () => {
               Pricing
             </a>
             <div className="pt-4 border-t border-[var(--base)]/20">
-              <Link href="/login">
-                <button className="w-full bg-[var(--base)] text-[color:var(--text-light)] px-4 py-3 rounded-lg hover:bg-[var(--base-hover)] transition-all duration-300 font-semibold shadow-lg">
-                  Sign In
+              {token ? (
+                <button
+                  className="w-full h-[41.80px] rounded-full bg-[var(--base)] text-white font-bold flex items-center justify-center border-2 border-[var(--base)] shadow-sm mt-2"
+                  onClick={() => gotoProfile()}
+                  title={user?.name || "Profile"}
+                >
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover" />
+                  ) : (
+                    <span>{getAvatarName(user?.name || "", true)}</span>
+                  )}
                 </button>
-              </Link>
+              ) : (
+                <Link href="/login">
+                  <button className="w-full bg-[var(--base)] text-[color:var(--text-light)] px-4 py-3 rounded-lg hover:bg-[var(--base-hover)] transition-all duration-300 font-semibold shadow-lg mt-2">
+                    Sign In
+                  </button>
+                </Link>
+              )}
             </div>
           </div>
         </div>

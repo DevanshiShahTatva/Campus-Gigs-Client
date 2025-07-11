@@ -173,7 +173,7 @@ const Checkout = ({ params }: PageProps) => {
                     if (response?.status === 200) {
                       toast.success("🎉 Subscription plan purchased successfully!");
 
-                      router.push("/user/dashboard");
+                      router.push("/gigs");
                     } else {
                       toast.error("Payment completed but activation failed. Please contact support.");
                     }

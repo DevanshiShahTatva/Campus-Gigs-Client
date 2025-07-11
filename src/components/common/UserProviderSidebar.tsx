@@ -9,6 +9,9 @@ import {
   FaHome,
   FaTimes,
   FaCreditCard,
+  FaListAlt,
+  FaClipboardList,
+  FaProjectDiagram,
 } from "react-icons/fa";
 import Link from "next/link";
 import { ROUTES } from "@/utils/constant";
@@ -25,45 +28,38 @@ const sidebarItems = [
   {
     id: 3,
     title: "Gigs",
-    icon: <FaTasks />,
+    icon: <FaListAlt />,
     route: "/gigs",
     access: ["user", "provider"],
   },
   {
     id: 6,
     title: "My Gigs",
-    icon: <FaCog />,
+    icon: <FaClipboardList />,
     route: ROUTES.MY_GIGS,
     access: ["user", "provider"],
   },
-  {
-    id: 7,
-    title: "Gigs Pipeline",
-    icon: <FaTasks />,
-    route: ROUTES.GIGS_PIPELINE,
-    access: ["provider"],
-  },
-  {
-    id: 2,
-    title: "Chat",
-    icon: <FaComments />,
-    route: "/chat",
-    access: ["user", "provider"],
-  },
-  {
-    id: 5,
-    title: "Subscription Plans",
-    icon: <FaCreditCard />,
-    route: "/user/buy-subscription",
-    access: ["user", "provider"],
-  },
-  {
-    id: 4,
-    title: "Settings",
-    icon: <FaCog />,
-    route: "#",
-    access: ["user", "provider"],
-  }
+  // {
+  //   id: 7,
+  //   title: "Gigs Pipeline",
+  //   icon: <FaProjectDiagram />,
+  //   route: ROUTES.GIGS_PIPELINE,
+  //   access: ["provider"],
+  // },
+  // {
+  //   id: 2,
+  //   title: "Chat",
+  //   icon: <FaComments />,
+  //   route: "/chat",
+  //   access: ["user", "provider"],
+  // },
+  // {
+  //   id: 4,
+  //   title: "Settings",
+  //   icon: <FaCog />,
+  //   route: "#",
+  //   access: ["user", "provider"],
+  // }
 ];
 
 const UserProviderSidebar = ({
@@ -86,7 +82,12 @@ const UserProviderSidebar = ({
       .filter((item) => item.access.includes(userProfile.data.profile_type))
       .map((item) => item.route);
 
-    const changeRoutes = [...allowedRoutes, ROUTES.PROFILE, ROUTES.PREVIEW_PROFILE];
+    const changeRoutes = [
+      ...allowedRoutes,
+      ROUTES.PROFILE,
+      ROUTES.PREVIEW_PROFILE,
+      ROUTES.BUY_PLAN_SUBSCRIPTION,
+    ];
 
     const isCurrentRouteAllowed = changeRoutes.some((route) =>
       pathname.startsWith(route)
@@ -116,52 +117,9 @@ const UserProviderSidebar = ({
           />
         </div>
         {/* Mobile-only nav tabs */}
-        <nav className="flex flex-col space-y-2 py-2 px-2 w-full text-base md:hidden">
-          <Link
-            href="#"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[var(--base)]/10 hover:text-[var(--base)] transition"
-          >
-            <span className="text-lg text-[var(--base)]">
-              <FaHome />
-            </span>
-            <span className="truncate">Dashboard</span>
-          </Link>
-          <Link
-            href="#"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[var(--base)]/10 hover:text-[var(--base)] transition"
-          >
-            <span className="text-lg text-[var(--base)]">
-              <FaTasks />
-            </span>
-            <span className="truncate">Gigs</span>
-          </Link>
-          <Link
-            href="#"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[var(--base)]/10 hover:text-[var(--base)] transition"
-          >
-            <span className="text-lg text-[var(--base)]">
-              <FaComments />
-            </span>
-            <span className="truncate">Chat</span>
-          </Link>
-          <Link
-            href="/user/buy-subscription"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[var(--base)]/10 hover:text-[var(--base)] transition"
-          >
-            <span className="text-lg text-[var(--base)]">
-              <FaCreditCard />
-            </span>
-            <span className="truncate">Subscription Plans</span>
-          </Link>
-        </nav>
+
         {/* User/Provider toggle and profile (mobile only) */}
-        <div className="md:hidden px-4 py-4 border-t border-gray-100">
-          {/* User/Provider toggle and profile dropdown code from header goes here */}
-        </div>
+
         {/* Close button */}
         <button
           className="absolute top-4 right-4 p-2 rounded-full text-[var(--base)] hover:bg-[var(--base)]/10 transition-colors z-10"
@@ -170,7 +128,7 @@ const UserProviderSidebar = ({
         >
           <FaTimes className="w-5 h-5" />
         </button>
-        <nav className="flex-1 space-y-2 py-6 px-2 w-full text-base md:text-base">
+        <nav className="flex-1 space-y-2 pb-6 px-2 w-full text-base md:text-base">
           {sidebarItems
             .filter((barItem) =>
               barItem.access.includes(userProfile?.data?.profile_type)
@@ -180,8 +138,11 @@ const UserProviderSidebar = ({
                 key={item.id}
                 href={item.route}
                 onClick={() => setOpen(false)}
-                className=
-                  {`flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[var(--base)]/10 hover:text-[var(--base)] transition ${pathname === item.route ? "bg-[var(--base)]/10 text-[var(--base)]" : ""}`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[var(--base)]/10 hover:text-[var(--base)] transition ${
+                  pathname === item.route
+                    ? "bg-[var(--base)]/10 text-[var(--base)]"
+                    : ""
+                }`}
               >
                 <span className="text-lg text-[var(--base)]">{item.icon}</span>
                 <span className="truncate">{item.title}</span>

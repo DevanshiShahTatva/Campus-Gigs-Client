@@ -1,7 +1,7 @@
 // Profile page helpers and config
 import { educationOptions as rawEducationOptions } from "@/app/(auth)/sign-up/helper";
-import { FiUpload, FiCamera, FiTrash2 } from "react-icons/fi";
-import React, { useState, useRef } from "react";
+import React from "react";
+import { IDropdownOption } from "@/utils/interface";
 
 // Map educationOptions to { id, label } for DynamicForm compatibility
 export const educationOptions = rawEducationOptions.map(opt => ({ id: opt.id, label: opt.label }));
@@ -53,7 +53,7 @@ export const getInitials = (name: string = "User") => {
     .slice(0, 2);
 };
 
-export const profileFormConfig = [
+export const profileFormConfig =(skillDropdown:IDropdownOption[]) => [
   {
     title: "Personal Information",
     groupSize: 2 as 2,
@@ -71,7 +71,6 @@ export const profileFormConfig = [
     section: true,
     subfields: [
       { id: "educationLevel", name: "educationLevel", label: "Education Level", type: "select" as const, required: true, errorMessage: "Education level is required", options: educationOptions, placeholder: "Search or select your education level" },
-      { id: "customEducation", name: "customEducation", label: "Custom Education (if Other)", type: "text" as const, required: false, placeholder: "e.g., Trade School, Bootcamp, Self-taught, Online Courses..." },
     ],
   },
   {
@@ -80,9 +79,9 @@ export const profileFormConfig = [
     groupSize: 1 as 1,
     section: true,
     subfields: [
-      { id: "professionalInterests", name: "professionalInterests", label: "Professional Interests", type: "textarea" as const, required: true, errorMessage: "Professional interests are required", placeholder: "What are your professional interests and career goals? (Optional)" },
-      { id: "extracurriculars", name: "extracurriculars", label: "Extracurricular Activities", type: "textarea" as const, required: true, errorMessage: "Extracurricular activities are required", placeholder: "Sports, clubs, volunteer work, hobbies, community involvement... (Optional)" },
-      { id: "certifications", name: "certifications", label: "Certifications", type: "text" as const, required: true, errorMessage: "Certifications are required", placeholder: "List your certifications (e.g., PMP, AWS, Google Analytics...) (Optional)" },
+      { id: "professional_interests", name: "professional_interests", label: "Professional Interests", type: "textarea" as const, errorMessage: "Professional interests are required", placeholder: "What are your professional interests and career goals?" },
+      { id: "extracurriculars", name: "extracurriculars", label: "Extracurricular Activities", type: "textarea" as const, errorMessage: "Extracurricular activities are required", placeholder: "Sports, clubs, volunteer work, hobbies, community involvement.." },
+      { id: "certifications", name: "certifications", label: "Certifications", type: "text" as const, errorMessage: "Certifications are required", placeholder: "List your certifications (e.g., PMP, AWS, Google Analytics...)" },
     ],
   },
   {
@@ -91,7 +90,7 @@ export const profileFormConfig = [
     groupSize: 1 as 1,
     section: true,
     subfields: [
-      { id: "skills", name: "skills", label: "Skills", type: "tags" as const, required: true, errorMessage: "At least one skill is required", placeholder: "e.g., React, JavaScript", minItems: 1, maxItems: 10 },
+      { id: "skills", name: "skills", label: "Skills", type: "multiselect", required: true, options: skillDropdown, errorMessage: "At least one skill is required", placeholder: "e.g., React, JavaScript", minItems: 1, maxItems: 10 },
     ],
   },
   {

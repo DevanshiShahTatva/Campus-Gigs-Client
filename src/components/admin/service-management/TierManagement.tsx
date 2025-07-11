@@ -1,8 +1,6 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
-import { Card, CardTitle } from '@/components/ui/card';
-import { Award, Edit, Plus, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Award, Edit, Trash } from 'lucide-react';
 import { CustomModal } from '@/components/common/CustomModal';
 import DynamicForm, { FormFieldConfig } from '@/components/common/form/DynamicForm';
 import { apiCall } from '@/utils/apiCall';
@@ -60,7 +58,7 @@ const formConfig: FormFieldConfig[] = [
 
 function TierManagement() {
     const [tiersData, setTiersData] = useState<ITier[]>([])
-    const [tiersDataLoading, setTiersDataLoading] = useState(false)
+    const [tiersDataLoading, setTiersDataLoading] = useState(true)
 
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -99,7 +97,7 @@ function TierManagement() {
                     body: values,
                 })
                 if (res.success) {
-                    toast.success(`Tier ${isEdit ? 'updated' : 'created'} successfully`)
+                    toast.success(`Tier ${isEdit ? 'updated' : 'created'} successfully.`)
                     setIsModalOpen(false)
                     fetchTiers()
                 } else {
@@ -117,6 +115,16 @@ function TierManagement() {
         { label: 'Tier Name', key: 'name', sortable: true },
         { label: 'Description', key: 'description', sortable: true },
     ] satisfies Column<ITier>[]
+
+    const handleOpen = useCallback(() => {
+        handleToggleModal(true)
+        setEditTier(null)
+    }, [])
+
+    const handleClose = useCallback(() => {
+        handleToggleModal(false)
+        setEditTier(null)
+    }, [])
 
     const handleEdit = useCallback((tier: ITier) => {
         setEditTier(tier)
@@ -143,7 +151,7 @@ function TierManagement() {
             })
 
             if (res.success) {
-                toast.success('Skill deleted successfully')
+                toast.success('Tier deleted successfully.')
                 setIsDeleteModalOpen(false)
                 fetchTiers()
             } else {
@@ -163,55 +171,43 @@ function TierManagement() {
             return <TableSkeleton showSearch rowCount={10} columnCount={1} actionButtonCount={2} />
         }
 
-        if (tiersData.length === 0) {
-            return (
-                <div className="text-center py-8 text-gray-500">
-                    <Award className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No tiers created yet. Add your first tier to get started.</p>
-                </div>
-            )
-        }
+        // if (tiersData.length === 0) {
+        //     return (
+        //         <div className="text-center py-8 text-gray-500">
+        //             <Award className="w-12 h-12 mx-auto mb-4 opacity-50" />
+        //             <p>No tiers created yet. Add your first tier to get started.</p>
+        //         </div>
+        //     )
+        // }
 
         return (
             <CustomTable<ITier>
+                searchPlaceholder='Search by Tier Name or Description'
                 data={tiersData}
                 columns={tableHeaders}
                 actions={(row) => (
                     <div className="flex gap-2 justify-center">
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
-                            <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleDelete(row)}>
-                            <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <button title="edit" className="text-[var(--base)] hover:text-[var(--base-hover)]" onClick={() => handleEdit(row)}>
+                            <Edit size={16} />
+                        </button>
+                        <button title="delete" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(row)}>
+                            <Trash size={16} />
+                        </button>
                     </div>
                 )}
+                onClickCreateButton={handleOpen}
             />
         )
     }
 
     return (
-        <Card className='p-0'>
-            <div className="bg-gradient-to-r from-purple-800 to-purple-300 text-white rounded-t-lg p-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                        <Award className="w-6 h-6" />
-                        <CardTitle className="text-xl">Tier Management</CardTitle>
-                    </div>
-                    <Button variant="secondary" className="bg-white text-purple-600 hover:bg-gray-100"
-                        onClick={() => handleToggleModal(true)}
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Tier
-                    </Button>
-                </div>
-            </div>
-            <div className="grid gap-4 px-6 pb-6">
+        <div className='p-0'>
+            <div className="grid gap-4">
                 {renderTable()}
             </div>
             {isModalOpen && (
                 <CustomModal
-                    onClose={() => setIsModalOpen(false)}
+                    onClose={handleClose}
                     title={editTier ? 'Edit Tier' : 'Add Tier'}
                 >
                     <DynamicForm
@@ -245,7 +241,7 @@ function TierManagement() {
                     </div>
                 </ModalLayout>
             )}
-        </Card>
+        </div>
     )
 }
 

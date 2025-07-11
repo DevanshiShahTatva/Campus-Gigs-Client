@@ -102,6 +102,11 @@ const DynamicForm = ({
         const label = subfield.label || subfield.name;
 
         switch (subfield.type) {
+          case "text":
+          case "textarea":
+            validator = Yup.string()
+              .trim(`${label} is required`);
+            break;
           case "number":
             validator = Yup.number()
               .typeError(`${label} must be a number`)

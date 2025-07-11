@@ -37,7 +37,7 @@ export default function PrivacyPolicy() {
   const decodedHTML = useMemo(() => he.decode(policyContent ?? ""), [policyContent]);
 
   return (
-    <section className="min-h-screen bg-[var(--bg-light)] py-12 w-full">
+    <section className="min-h-screen bg-[var(--bg-light)] py-12 pt-20 w-full">
       <div className="w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--text-dark)] mb-4">Privacy Policy</h1>

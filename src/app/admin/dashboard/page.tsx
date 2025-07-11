@@ -123,6 +123,10 @@ const getActivityIcon = (type: string) => {
 };
 
 const AdminDashboard: React.FC = () => {
+
+  return (
+    <div className="flex items-center justify-center text-xl mt-10 h-[85vh]">In progress</div>
+  );
   return (
     <div className="container mx-auto space-y-6 p-4">
       {/* Header */}

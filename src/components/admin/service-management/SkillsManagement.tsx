@@ -1,9 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import { Card, CardTitle } from '@/components/ui/card'
-import { Database, Edit, Plus, Trash2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Database, Edit, Trash } from 'lucide-react'
 import { CustomModal } from '@/components/common/CustomModal'
 import DynamicForm, { FormFieldConfig } from '@/components/common/form/DynamicForm'
 import { CustomTable } from '@/components/common/CustomTable'
@@ -108,7 +106,7 @@ const SkillsManagement = () => {
                     body: values,
                 })
                 if (res.success) {
-                    toast.success(`Skill ${isEdit ? 'updated' : 'created'} Successfully`)
+                    toast.success(`Skill ${isEdit ? 'updated' : 'created'} successfully.`)
                     setIsModalOpen(false)
                     fetchSkills()
                 } else {
@@ -133,7 +131,7 @@ const SkillsManagement = () => {
             })
 
             if (res.success) {
-                toast.success('Skill deleted successfully')
+                toast.success('Skill deleted successfully.')
                 setIsDeleteModalOpen(false)
                 fetchSkills()
             } else {
@@ -156,53 +154,38 @@ const SkillsManagement = () => {
             return <TableSkeleton showSearch rowCount={10} columnCount={1} actionButtonCount={2} />
         }
 
-        if (skillsData.length === 0) {
-            return (
-                <div className="text-center py-8 text-gray-500">
-                    <Database className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No skills created yet. Create categories first to organize skills.</p>
-                </div>
-            )
-        }
+        // if (skillsData.length === 0) {
+        //     return (
+        //         <div className="text-center py-8 text-gray-500">
+        //             <Database className="w-12 h-12 mx-auto mb-4 opacity-50" />
+        //             <p>No skills created yet. Add your first skill to get started.</p>
+        //         </div>
+        //     )
+        // }
 
         return (
             <CustomTable<ISkill>
+                searchPlaceholder='Search by Skill Name'
                 data={skillsData}
                 columns={tableHeaders}
                 actions={(row) => (
                     <div className="flex gap-2 justify-center">
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
-                            <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleDelete(row)}>
-                            <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <button title="edit" className="text-[var(--base)] hover:text-[var(--base-hover)]" onClick={() => handleEdit(row)}>
+                            <Edit size={16} />
+                        </button>
+                        <button title="delete" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(row)}>
+                            <Trash size={16} />
+                        </button>
                     </div>
                 )}
+                onClickCreateButton={handleAdd}
             />
         )
     }
 
     return (
-        <Card className="p-0">
-            <div className="bg-gradient-to-r from-green-800 to-green-300 text-white rounded-t-lg p-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                        <Database className="w-6 h-6" />
-                        <CardTitle className="text-xl">Skills Management</CardTitle>
-                    </div>
-                    <Button
-                        variant="secondary"
-                        className="bg-white text-green-600 hover:bg-gray-100"
-                        onClick={handleAdd}
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Skill
-                    </Button>
-                </div>
-            </div>
-
-            <div className="grid gap-4 px-6 pb-6">{renderTable()}</div>
+        <div className="p-0">
+            <div className="grid gap-4 ">{renderTable()}</div>
 
             {isModalOpen && (
                 <CustomModal
@@ -240,7 +223,7 @@ const SkillsManagement = () => {
                     </div>
                 </ModalLayout>
             )}
-        </Card>
+        </div>
     )
 }
 
