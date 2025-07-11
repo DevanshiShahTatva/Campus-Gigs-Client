@@ -39,13 +39,13 @@ const sidebarItems = [
     route: ROUTES.MY_GIGS,
     access: ["user", "provider"],
   },
-  // {
-  //   id: 7,
-  //   title: "Gigs Pipeline",
-  //   icon: <FaProjectDiagram />,
-  //   route: ROUTES.GIGS_PIPELINE,
-  //   access: ["provider"],
-  // },
+  {
+    id: 7,
+    title: "Gigs Pipeline",
+    icon: <FaProjectDiagram />,
+    route: ROUTES.GIGS_PIPELINE,
+    access: ["provider"],
+  },
   // {
   //   id: 2,
   //   title: "Chat",
