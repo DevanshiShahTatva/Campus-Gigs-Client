@@ -31,8 +31,24 @@ export const api = createApi({
       }),
       invalidatesTags: ["UserProfile"],
     }),
+    getUserNotifications: builder.query<any, void>({
+      query: () => "/notifications",
+    }),
+    markNotificationRead: builder.mutation<any, { notificationId: number }>({
+      query: (body) => ({
+        url: "/notifications/mark-read",
+        method: "POST",
+        body,
+      }),
+    }),
     // Add more endpoints here
   }),
 });
 
-export const { useGetUserProfileQuery, useGetProviderPublicProfileQuery, useUpdateUserProfileMutation } = api;
+export const {
+  useGetUserProfileQuery,
+  useGetProviderPublicProfileQuery,
+  useUpdateUserProfileMutation,
+  useGetUserNotificationsQuery,
+  useMarkNotificationReadMutation
+} = api;
