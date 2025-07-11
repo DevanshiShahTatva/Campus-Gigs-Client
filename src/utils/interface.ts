@@ -218,7 +218,7 @@ export interface OnlineUser {
 
 export interface Message {
   id: number;
-  text: string;
+  message: string;
   sender: "me" | "them";
   time: string;
   timestamp: Date;

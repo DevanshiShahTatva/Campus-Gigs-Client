@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { FiSend, FiPaperclip, FiSmile, FiChevronLeft, FiMessageSquare, FiTrash2, FiEdit3, FiCheck, FiX, FiMoreVertical } from "react-icons/fi";
+import { FiSend, FiPaperclip, FiSmile, FiChevronLeft, FiMessageSquare, FiCheck, FiX } from "react-icons/fi";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -12,6 +12,26 @@ import { apiCall } from "@/utils/apiCall";
 import { Attachment, Chat, Message } from "@/utils/interface";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 import MessageDropdown from "./MessageDropdown";
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import Loader from "@/components/common/Loader";
+
+const MAX_ATTACHMENTS = 5;
+const MESSAGE_PAGE_SIZE = 20;
+
+const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
+const EditMessageSchema = Yup.object().shape({
+  message: Yup.string().trim().required('Message cannot be empty'),
+  newFiles: Yup.array()
+    .of(
+      Yup.mixed()
+        .test('fileSize', 'File too large (max 3MB)', value => {
+          if (!value) return true; // allow empty
+          // Only check size if value is a File
+          return value instanceof File ? value.size <= MAX_FILE_SIZE : true;
+        })
+    )
+});
 
 interface ChatWindowProps {
   selectedChat?: Chat | null;
@@ -19,8 +39,7 @@ interface ChatWindowProps {
   socket?: any;
 }
 
-const MAX_ATTACHMENTS = 5;
-const MESSAGE_PAGE_SIZE = 20;
+
 
 const getDateLabel = (date: Date): string => {
   const today = new Date();
@@ -71,6 +90,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
   const [attachments, setAttachments] = useState<Array<File | Attachment>>([]);
   const [attachmentPreviews, setAttachmentPreviews] = useState<Attachment[]>([]);
   const [sending, setSending] = useState(false);
+  const [updatingMessageId, setUpdatingMessageId] = useState<number | null>(null);
+  const [deletingMessageId, setDeletingMessageId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -78,7 +99,49 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
 
   // Edit and Delete states
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+
+  // Listen for socket events (messageUpdated, messageDeleted, etc)
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleMessageUpdated = (updatedMsg: any) => {
+      console.log("Message updated:", updatedMsg);
+      setMessages(prev =>
+        prev.map(m =>
+          m.id === updatedMsg.id
+            ? {
+              ...m,
+              message: updatedMsg.message,
+              attachments: updatedMsg.attachments || m.attachments,
+              // Add any other fields you want to update
+            }
+            : m
+        )
+      );
+    };
+
+    // Example: handle messageDeleted event
+    const handleMessageDeleted = (deletedMsg: any) => {
+      setMessages(prev =>
+        prev.map(m =>
+          m.id === deletedMsg.message_id
+            ? { ...m, is_deleted: true, }
+            : m
+        )
+      );
+    };
+
+    socket.on('messageUpdated', handleMessageUpdated);
+    socket.on('messageDeleted', handleMessageDeleted); // Example of another event
+
+    return () => {
+      socket.off('messageUpdated', handleMessageUpdated);
+      socket.off('messageDeleted', handleMessageDeleted); // Cleanup
+    };
+  }, [socket]);
   const [editingText, setEditingText] = useState("");
+  const [editingExistingAttachments, setEditingExistingAttachments] = useState<Attachment[]>([]);
+  const [editingNewAttachments, setEditingNewAttachments] = useState<File[]>([]);
   const [showDropdown, setShowDropdown] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -117,7 +180,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
 
   const formatMessageData = useCallback((msg: any): Message => ({
     id: msg.id,
-    text: msg.message,
+    message: msg.message,
     sender: msg.sender_id === currentUserId ? "me" : "them",
     time: new Date(msg.created_at || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     timestamp: new Date(msg.created_at || Date.now()),
@@ -149,6 +212,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
 
   // Confirm delete handler
   const handleConfirmDeleteMessage = async () => {
+    setDeletingMessageId(messageIdForDelete);
+
     if (!selectedChat || messageIdForDelete === null) return;
     setIsDeleting(true);
     try {
@@ -156,6 +221,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
         endPoint: `/chats/${messageIdForDelete}`,
         method: "DELETE",
       });
+
       if (!response?.success) {
         throw new Error(response?.message || "Failed to delete message");
       }
@@ -166,6 +232,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
       setIsDeleting(false);
       setDeleteDialogOpen(false);
       setMessageIdForDelete(null);
+      setDeletingMessageId(null);
     }
   };
 
@@ -178,38 +245,53 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
 
   // Edit message handlers
   const handleEditMessage = (msgId: number, currentText: string) => {
+    const msg = messages.find(m => m.id === msgId);
     setEditingMessageId(msgId);
     setEditingText(currentText);
+    setEditingExistingAttachments(msg?.attachments || []);
+    setEditingNewAttachments([]);
     setIsEditing(true);
     setShowDropdown(null);
   };
 
-  const handleSaveEdit = async (msgId: number) => {
-    if (!selectedChat || editingText.trim() === "") return;
+  const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const newFiles = Array.from(files);
+    setEditingNewAttachments(prev => [...prev, ...newFiles]);
+    e.target.value = "";
+  };
+
+  const handleRemoveEditAttachment = (attachmentId: string) => {
+    setEditingExistingAttachments(prev => prev.filter(a => a.id !== attachmentId));
+  };
+
+  const handleRemoveNewEditAttachment = (idx: number) => {
+    setEditingNewAttachments(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleSaveEdit = async (msgId: number, message?: string, newFiles?: File[]) => {
+    setUpdatingMessageId(msgId);
+    if (!selectedChat || !message || message.trim() === "") return;
 
     try {
-      const response = await apiCall({
+      let response;
+      const formData = new FormData();
+      formData.append("message", (message ?? editingText).trim());
+      if (editingNewAttachments.length > 0 || editingExistingAttachments.length !== messages.find(m => m.id === msgId)?.attachments.length) {
+        (newFiles ?? editingNewAttachments).forEach((file: File) => formData.append("files", file));
+        formData.append("existingAttachmentIds", JSON.stringify(editingExistingAttachments.map((a: Attachment) => a.id)));
+      }
+      response = await apiCall({
         endPoint: `/chats/${selectedChat.id}/messages/${msgId}`,
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: editingText.trim() }),
+        body: formData,
+        isFormData: true,
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       if (!response?.success) {
         throw new Error(response?.message || "Failed to update message");
-      }
-
-      setMessages((prev) => prev.map(m =>
-        m.id === msgId ? { ...m, text: editingText.trim() } : m
-      ));
-
-      // Emit socket event for real-time update
-      if (socket && socket.connected) {
-        socket.emit('messageEdited', {
-          chatId: selectedChat.id,
-          messageId: msgId,
-          newText: editingText.trim()
-        });
       }
 
       toast.success("Message updated successfully");
@@ -218,14 +300,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
     } finally {
       setEditingMessageId(null);
       setEditingText("");
+      setEditingExistingAttachments([]);
+      setEditingNewAttachments([]);
       setIsEditing(false);
+      setUpdatingMessageId(null);
     }
   };
+
 
   const handleCancelEdit = () => {
     setEditingMessageId(null);
     setEditingText("");
     setIsEditing(false);
+    setEditingExistingAttachments([]);
+    setEditingNewAttachments([]);
   };
 
   const fetchMessages = useCallback(async (pageToFetch = 1) => {
@@ -274,24 +362,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
       toast.success("New message received");
     }
   }, [selectedChat, currentUserId, formatMessageData, scrollToBottom]);
-
-  // Socket event handlers for real-time updates
-  useEffect(() => {
-    if (socket) {
-      const handleMessageDeleted = (data: any) => {
-        console.log(data, 'deleted');
-        setMessages((prev) => prev.map(m =>
-          m.id === data.message_id ? { ...m, is_deleted: true, text: "" } : m
-        ));
-      };
-
-      socket.on('messageDeleted', handleMessageDeleted);
-
-      return () => {
-        socket.off('messageDeleted', handleMessageDeleted);
-      };
-    }
-  }, [socket, selectedChat]);
 
   useEffect(() => {
     setPage(1);
@@ -410,7 +480,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
         : "bg-white text-gray-800 rounded-tl-none shadow-sm"
         }`}>
 
-        {msg.sender === "me" && !msg.is_deleted && (
+        {msg.sender === "me" && !msg.is_deleted && editingMessageId !== msg.id && (
           <MessageDropdown
             msg={msg}
             showDropdown={showDropdown}
@@ -425,41 +495,117 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
         ) : (
           <>
             {editingMessageId === msg.id ? (
-              <div className="mb-2">
-                <input
-                  ref={editInputRef}
-                  type="text"
-                  value={editingText}
-                  onChange={(e) => setEditingText(e.target.value)}
-                  className="w-full bg-white/10 border border-white/20 rounded px-2 py-1 text-sm text-white placeholder-white/70 focus:outline-none focus:border-white/40"
-                  placeholder="Edit message..."
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleSaveEdit(msg.id);
-                    } else if (e.key === 'Escape') {
-                      handleCancelEdit();
-                    }
-                  }}
-                />
-                <div className="flex items-center gap-2 mt-2">
-                  <button
-                    onClick={() => handleSaveEdit(msg.id)}
-                    className="p-1 rounded hover:bg-white/20 text-white/70 hover:text-white"
-                    title="Save"
-                  >
-                    <FiCheck className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={handleCancelEdit}
-                    className="p-1 rounded hover:bg-white/20 text-white/70 hover:text-white"
-                    title="Cancel"
-                  >
-                    <FiX className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+              <Formik
+                initialValues={{
+                  message: msg.message,
+                  newFiles: editingNewAttachments || [],
+                }}
+                validationSchema={EditMessageSchema}
+                onSubmit={async (values, { setSubmitting }) => {
+                  await handleSaveEdit(msg.id, values.message, values.newFiles);
+                  setSubmitting(false);
+                }}
+                enableReinitialize
+              >
+                {({ setFieldValue, isSubmitting, values, }) => (
+                  <Form className="mb-2">
+                    <Field
+                      name="message"
+                      as="input"
+                      innerRef={editInputRef}
+                      className="w-full bg-white/10 border border-white/20 rounded px-2 py-1 text-sm text-white placeholder-white/70 focus:outline-none focus:border-white/40"
+                      placeholder="Edit message..."
+                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          (e.target as HTMLInputElement).form?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                        } else if (e.key === 'Escape') {
+                          handleCancelEdit();
+                        }
+                      }}
+                    />
+                    <ErrorMessage name="message" component="div" className="text-red-400 text-xs mt-1" />
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {/* Existing attachments preview/removal */}
+                      {editingExistingAttachments && editingExistingAttachments.length > 0 && editingExistingAttachments.map((attachment: Attachment, idx: number) => (
+                        <div key={attachment.id || idx} className="relative h-16 w-16">
+                          {attachment.type === "image" ? (
+                            <Image src={attachment.url} alt={attachment.name} fill className="object-cover rounded" />
+                          ) : (
+                            <div className="flex items-center justify-center h-full w-full bg-gray-200 rounded">
+                              <span className="text-xs text-gray-700">{attachment.name}</span>
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            className="absolute top-0 right-0 bg-black/60 text-white rounded-full p-1 text-xs"
+                            title="Remove attachment"
+                            onClick={() => handleRemoveEditAttachment(attachment.id)}
+                          >
+                            <FiX />
+                          </button>
+                        </div>
+                      ))}
+                      {/* New attachments preview/removal */}
+                      {values.newFiles && values.newFiles.length > 0 && values.newFiles.map((file: File, idx: number) => (
+                        <div key={file.name + idx} className="relative h-16 w-16">
+                          {file.type?.startsWith("image/") ? (
+                            <img src={URL.createObjectURL(file)} alt={file.name} className="object-cover rounded h-full w-full" />
+                          ) : (
+                            <div className="flex items-center justify-center h-full w-full bg-gray-200 rounded">
+                              <span className="text-xs text-gray-700">{file.name}</span>
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            className="absolute top-0 right-0 bg-black/60 text-white rounded-full p-1 text-xs"
+                            title="Remove attachment"
+                            onClick={() => setFieldValue('newFiles', values.newFiles.filter((_: File, i: number) => i !== idx))}
+                          >
+                            <FiX />
+                          </button>
+                        </div>
+                      ))}
+                      {/* File input for new attachments */}
+                      <label className="flex flex-col items-center justify-center h-16 w-16 border-2 border-dashed border-gray-400 rounded cursor-pointer hover:bg-white/10">
+                        <FiPaperclip className="text-xl text-gray-400" />
+                        <input
+                          name="newFiles"
+                          type="file"
+                          multiple
+                          accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                          className="hidden"
+                          onChange={event => {
+                            const files = Array.from(event.currentTarget.files || []);
+                            setFieldValue('newFiles', [...values.newFiles, ...files]);
+                          }}
+                        />
+                      </label>
+                    </div>
+                    <ErrorMessage name="newFiles" component="div" className="text-red-400 text-xs mt-1" />
+                    <div className="flex items-center gap-2 mt-2">
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="p-1 rounded hover:bg-white/20 text-white/70 hover:text-white"
+                        title="Save"
+                      >
+                        <FiCheck className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        className="p-1 rounded hover:bg-white/20 text-white/70 hover:text-white"
+                        title="Cancel"
+                      >
+                        <FiX className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </Form>
+                )}
+              </Formik>
             ) : (
-              msg.text && <p className="text-sm mb-2">{msg.text}</p>
+              msg.message && <p className="text-sm mb-2">{msg.message}</p>
             )}
 
             {msg.attachments && msg.attachments?.length > 0 && (
@@ -538,7 +684,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
   }
 
   return (
-    <>
+    <div className="flex flex-col h-full relative">
+      {/* Loader Overlay */}
+      {(sending || updatingMessageId !== null || deletingMessageId !== null) && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 rounded-r-lg">
+          <Loader />
+        </div>
+      )}
       <ConfirmationDialog
         isOpen={deleteDialogOpen}
         onClose={handleCancelDeleteMessage}
@@ -553,13 +705,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <div className="flex items-center">
-            <button
-              className="md:hidden mr-2 p-1 rounded-full hover:bg-gray-100"
-              onClick={onBack}
-              aria-label="Back to conversations"
-            >
-              <FiChevronLeft className="h-5 w-5 text-gray-600" />
-            </button>
+            {onBack && (
+              <button
+                className="md:hidden mr-2 p-1 rounded-full hover:bg-gray-100"
+                onClick={onBack}
+                aria-label="Back to conversations"
+              >
+                <FiChevronLeft className="h-5 w-5 text-gray-600" />
+              </button>
+            )}
             <div className="relative mr-3">
               {selectedChat?.avatar && selectedChat.avatar !== '/default-avatar.png' ? (
                 <div className="h-10 w-10 rounded-full bg-gray-200 overflow-hidden">
@@ -694,7 +848,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
           </form>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

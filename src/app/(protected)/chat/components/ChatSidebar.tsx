@@ -143,7 +143,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
     };
 
     const handleLatestMessage = (data: any) => {
-      console.log(data, "latest");
       setChats((prev) =>
         prev.map((chat) =>
           chat.id === data.chat_id
