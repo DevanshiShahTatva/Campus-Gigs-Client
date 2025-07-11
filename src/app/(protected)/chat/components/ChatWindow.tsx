@@ -684,13 +684,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
   }
 
   return (
-    <div className="flex flex-col h-full relative">
-      {/* Loader Overlay */}
-      {(sending || updatingMessageId !== null || deletingMessageId !== null) && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 rounded-r-lg">
-          <Loader />
-        </div>
-      )}
+    <>
       <ConfirmationDialog
         isOpen={deleteDialogOpen}
         onClose={handleCancelDeleteMessage}
@@ -701,7 +695,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
         cancelText="Cancel"
         isDeleting={isDeleting}
       />
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full relative">
+        {(sending || updatingMessageId !== null || deletingMessageId !== null) && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30">
+            <Loader />
+          </div>
+        )}
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <div className="flex items-center">
@@ -848,7 +847,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
           </form>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

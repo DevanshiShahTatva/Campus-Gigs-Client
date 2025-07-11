@@ -187,7 +187,7 @@ export default function ChatPage() {
   const { socket, isConnected, connectionError } = useSocket(token!);
 
   useEffect(() => {
-    const el = document.getElementById("scrollableDiv");
+    const el = document.getElementById("mainSection");
     if (el) el.classList.add("overflow-hidden");
 
     // Join user channel on mount

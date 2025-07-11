@@ -11,13 +11,14 @@ import { useSelector } from "react-redux";
 import { apiCall } from "@/utils/apiCall";
 import { RootState } from "@/redux";
 import { Chat, OnlineUser } from "@/utils/interface";
+import { SOCKET_EVENTS } from "@/lib/utils";
+import useDebounce from "@/hooks/useDebounce";
 
 interface ChatSidebarProps {
   onSelectChat: (chat: Chat) => void;
   selectedChat: Chat | null;
   socket: any;
 }
-
 
 const formatTimeAgo = (dateString: string): string => {
   if (!dateString) return '';
@@ -46,6 +47,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
+  const debouncedSearch = useDebounce(searchQuery, 400);
 
   const selectedChatRef = useRef(selectedChat);
   const chatsRef = useRef(chats);
@@ -66,12 +68,12 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
     );
   }, []);
 
-  const fetchChats = useCallback(async (pageToFetch = 1) => {
+  const fetchChats = useCallback(async (pageToFetch = 1, search = "") => {
     if (pageToFetch === 1) setLoading(true);
 
     try {
       const response = await apiCall({
-        endPoint: `/chats?page=${pageToFetch}`,
+        endPoint: `/chats?page=${pageToFetch}${search ? `&search=${encodeURIComponent(search)}` : ""}`,
         method: "GET",
       });
 
@@ -106,8 +108,8 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
   }, []);
 
   useEffect(() => {
-    fetchChats(1);
-  }, [fetchChats]);
+    fetchChats(1, debouncedSearch);
+  }, [debouncedSearch, fetchChats]);
 
   useEffect(() => {
     if (!socket || !socket.connected) return;
@@ -160,18 +162,18 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
     };
 
     const requestOnlineUsers = () => {
-      socket.emit("getOnlineUsers", handleOnlineUsersResponse);
+      socket.emit(SOCKET_EVENTS.getOnlineUsers, handleOnlineUsersResponse);
     };
 
-    socket.on("userPresence", handleUserPresence);
-    socket.on("latestMessage", handleLatestMessage);
+    socket.on(SOCKET_EVENTS.userPresence, handleUserPresence);
+    socket.on(SOCKET_EVENTS.latestMessage, handleLatestMessage);
 
     const timeout = setTimeout(requestOnlineUsers, 500);
 
     return () => {
       clearTimeout(timeout);
-      socket.off("userPresence", handleUserPresence);
-      socket.off("latestMessage", handleLatestMessage);
+      socket.off(SOCKET_EVENTS.userPresence, handleUserPresence);
+      socket.off(SOCKET_EVENTS.latestMessage, handleLatestMessage);
     };
   }, [socket, user_id, onSelectChat, updateChatStatus]);
 
@@ -180,7 +182,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
 
     const handleConnect = () => {
       setTimeout(() => {
-        socket.emit("getOnlineUsers", (data: { onlineUsers: OnlineUser[] }) => {
+        socket.emit(SOCKET_EVENTS.getOnlineUsers, (data: { onlineUsers: OnlineUser[] }) => {
           if (data?.onlineUsers) {
             const ids = data.onlineUsers.map((u) => u.user_id);
             setOnlineUsers(ids);
@@ -200,26 +202,22 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
       setChats((prev) => prev.map((chat) => ({ ...chat, status: "offline" })));
     };
 
-    socket.on("connect", handleConnect);
-    socket.on("disconnect", handleDisconnect);
+    socket.on(SOCKET_EVENTS.connect, handleConnect);
+    socket.on(SOCKET_EVENTS.disconnect, handleDisconnect);
 
     if (socket.connected) handleConnect();
 
     return () => {
-      socket.off("connect", handleConnect);
-      socket.off("disconnect", handleDisconnect);
+      socket.off(SOCKET_EVENTS.connect, handleConnect);
+      socket.off(SOCKET_EVENTS.disconnect, handleDisconnect);
     };
   }, [socket]);
 
   const fetchMoreChats = () => {
-    if (!loading && hasMore) fetchChats(page + 1);
+    if (!loading && hasMore) fetchChats(page + 1, debouncedSearch);
   };
 
-  const filteredChats = chats.filter(
-    (chat) =>
-      chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      chat.last_message.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredChats = chats;
 
   return (
     <div className="h-full flex flex-col w-full">
