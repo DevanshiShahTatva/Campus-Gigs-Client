@@ -18,6 +18,7 @@ const adminRoutes = [
   ROUTES.ADMIN.TIRE,
   ROUTES.ADMIN.GIGCATEGORY,
   ROUTES.ADMIN.SERVICE_MANAGEMENT,
+  ROUTES.ADMIN.USERS,
 ];
 
 const userRoutes = [

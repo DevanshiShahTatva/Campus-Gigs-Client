@@ -34,7 +34,7 @@ export interface DynamicTableProps<T extends { id: number }> {
   searchPlaceholder?: string;
   children?: React.ReactNode;
   title: string;
-  onClickCreateButton: () => void;
+  onClickCreateButton?: () => void;
   isCreateButtonDisabled?: boolean;
   hasDeleteButton?: boolean;
   loading?: boolean;
@@ -102,22 +102,24 @@ export interface GigCategory {
   tire: Tire;
 }
 
+export interface CurrentSubscriptionPlan {
+  id: number;
+  user_id: number;
+  subscription_plan_id: number;
+  price: number;
+  status: string;
+  subscription_expiry_date: string;
+  transaction_id: string;
+  created_at: string;
+  updated_at: string;
+  is_deleted: boolean;
+  subscription_plan: ISubscriptionPlan;
+}
+
 export interface ISubscriptionCurrentPlanApiResponse {
   status: number;
   message: string;
-  data: {
-    id: number;
-    user_id: number;
-    subscription_plan_id: number;
-    price: number;
-    status: string;
-    subscription_expiry_date: string;
-    transaction_id: string;
-    created_at: string;
-    updated_at: string;
-    is_deleted: boolean;
-    subscription_plan: ISubscriptionPlan;
-  };
+  data: CurrentSubscriptionPlan;
 }
 
 export interface Tire {
@@ -141,6 +143,8 @@ export interface User {
   certifications: string | null;
   education: string;
   skills: Skill[];
+  subscription_plans: CurrentSubscriptionPlan[];
+
 }
 
 export interface Bid {
