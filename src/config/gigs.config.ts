@@ -121,7 +121,7 @@ export const gigsFields = (
           name: "images",
           label: "Select image",
           type: "fileupload",
-          required: true,
+          required: false,
           multiple: true,
           accept: ".png, .svg, .jpg, .jpeg, image/*",
           maxSize: 5,
