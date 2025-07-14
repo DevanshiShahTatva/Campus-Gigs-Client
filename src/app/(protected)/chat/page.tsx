@@ -78,7 +78,7 @@ function useSocket(token?: string): {
       }
 
       const namespace = "chat";
-      const socketUrl = `${wsUrl}${namespace}`;
+      const socketUrl = `${wsUrl}/${namespace}`;
 
       console.log("Connecting to WebSocket:", socketUrl);
 
@@ -242,6 +242,8 @@ export default function ChatPage() {
 
   const showSidebar = !isMobile || (isMobile && selectedChat === null);
   const showChatWindow = !isMobile || (isMobile && selectedChat !== null);
+
+  console.log("isConnected::", isConnected, connectionError);
 
   return (
     <div className="flex h-full bg-white rounded-lg border border-gray-200 overflow-hidden">
