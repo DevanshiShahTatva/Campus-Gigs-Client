@@ -67,7 +67,7 @@ export default function UserDetail() {
       minute: "2-digit",
     });
   };
-  
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -356,9 +356,6 @@ export default function UserDetail() {
                   <div className="flex flex-wrap gap-3">
                     <Button variant="outline" size="sm">
                       Send Message
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      View Activity
                     </Button>
                     {data?.is_banned ? (
                       <Button variant="default" size="sm">
