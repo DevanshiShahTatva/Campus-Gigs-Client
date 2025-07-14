@@ -12,14 +12,15 @@ import { apiCall } from "@/utils/apiCall";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
+import { CentralLoader } from "@/components/common/Loader";
 import BidSkeletonList from "@/components/skeleton/bidSkeleton";
 import GigDetailSkeleton from "@/components/skeleton/gigDetailSkeleton";
 import { ArrowLeftIcon, CalendarIcon, CheckCircle, ClockIcon, MessageCircle, TagIcon, Star, Edit, Trash, Image as ImageIcon } from "lucide-react";
+import { useGetUserProfileQuery } from "@/redux/api";
 import { gigBidFields } from "@/config/gigbid.config";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { useGetUserProfileQuery } from "@/redux/api";
 
 interface IBid {
   id: string;
@@ -34,7 +35,7 @@ interface IBid {
     profile?: string;
     avgRating: number;
     totalReview: number;
-    about: string;
+    headline: string;
   };
 }
 
@@ -50,6 +51,7 @@ const GigDetail = () => {
   const [editBid, setEditBid] = useState<IBid | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bidLoading, setBidLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const { data: userProfile } = useGetUserProfileQuery(undefined, { refetchOnMountOrArgChange: true, });
 
   const PlaceholderImage = () => (
@@ -139,6 +141,7 @@ const GigDetail = () => {
   }, [id]);
 
   const fetchBids = async () => {
+    setBidLoading(true);
     const response = await apiCall({
       endPoint: `/bids/gig/${id}`,
       method: "GET",
@@ -146,11 +149,12 @@ const GigDetail = () => {
     if (response?.success) {
       setBids(response.data);
     }
+    setBidLoading(false);
   };
 
   const handleSubmitBid = async (data: any) => {
     try {
-      setBidLoading(true);
+      setSubmitLoading(true);
       const response = await apiCall({
         endPoint: editBid ? `/bids/update/${editBid.id}` : `/bids/create`,
         method: editBid ? "PUT" : "POST",
@@ -163,7 +167,6 @@ const GigDetail = () => {
       });
       if (response?.success) {
         setIsModalOpen(false);
-        setBidLoading(false);
         if (editBid) {
           setEditBid(null);
           const { bid_amount, description, payment_type } = response.data;
@@ -173,6 +176,7 @@ const GigDetail = () => {
           setGitDetails((prev: any) => ({ ...prev, hasBid: true }));
         }
       }
+      setSubmitLoading(false);
     } catch (error) {
       console.log(error);
     }
@@ -442,7 +446,7 @@ const GigDetail = () => {
                   </div>
                 </div>
               </div>
-              {bid.provider.about && <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">{bid.provider.about}</p>}
+              {bid.provider.headline && <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">{bid.provider.headline}</p>}
             </div>
           </div>
           <div className="text-left sm:text-right flex-shrink-0">
@@ -555,6 +559,7 @@ const GigDetail = () => {
 
   return (
     <div className="bg-gray-50">
+      {submitLoading && <CentralLoader loading={submitLoading} />}
       {renderHeader()}
       <main className="mx-auto py-4 sm:py-6 lg:px-8">
         <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-8 space-y-6 lg:space-y-0">
