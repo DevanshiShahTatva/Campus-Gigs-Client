@@ -247,6 +247,7 @@ const GigDetail = () => {
   const renderHeader = () => (
     <div className="mx-auto py-0 px-3 sm:py-0 sm:px-4 lg:px-8 flex items-center">
       <button
+        title="back"
         onClick={() => router.back()}
         className="mr-3 p-1 rounded-full hover:bg-gray-100 cursor-pointer flex-shrink-0"
       >
@@ -415,6 +416,25 @@ const GigDetail = () => {
     </div>
   );
 
+  // Add chat initiation handler
+  const handleStartChat = async (otherUserId: string) => {
+    try {
+      const response = await apiCall({
+        endPoint: "/chats",
+        method: "POST",
+        body: { userId: Number(otherUserId) },
+      });
+      if (response?.data?.id || response?.data?.data?.id) {
+        // Prefer chat id, but pass userId for auto-selection
+        router.push(`/chat?userId=${otherUserId}`);
+      } else {
+        throw new Error("Failed to create or get chat");
+      }
+    } catch (err) {
+      alert("Failed to start chat. Please try again.");
+    }
+  };
+
   const renderBidCard = (bid: IBid) => (
     <Card key={bid.id} className="gap-0 py-0">
       <CardContent className="p-4">
@@ -487,7 +507,17 @@ const GigDetail = () => {
           )}
           {user_id === gigDetails.user_id && bid.status !== "accepted" && bid.status !== "rejected" && (
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              <Button size="sm" variant="outline" className="w-full sm:w-auto">
+              {/* Message button for both gig owner and provider */}
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => {
+                  // If current user is provider, chat with gig owner; else, chat with provider
+                  const otherUserId = user_id === bid.provider.id ? gigDetails.user_id : bid.provider.id;
+                  handleStartChat(otherUserId);
+                }}
+              >
                 <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                 Message
               </Button>

@@ -18,6 +18,7 @@ interface ChatSidebarProps {
   onSelectChat: (chat: Chat) => void;
   selectedChat: Chat | null;
   socket: any;
+  onChatsLoaded?: (chats: Chat[]) => void;
 }
 
 const formatTimeAgo = (dateString: string): string => {
@@ -39,7 +40,7 @@ const getInitials = (name: string): string => {
   return (words[0][0] + (words[1]?.[0] || "")).toUpperCase();
 };
 
-const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, socket }) => {
+const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, socket, onChatsLoaded }) => {
   const { user_id } = useSelector((state: RootState) => state.user);
   const [searchQuery, setSearchQuery] = useState("");
   const [chats, setChats] = useState<Chat[]>([]);
@@ -94,6 +95,10 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
         setChats((prev) => pageToFetch === 1 ? mappedChats : [...prev, ...mappedChats]);
         setHasMore(response.meta?.page < response.meta?.totalPages);
         setPage(pageToFetch);
+        // Call onChatsLoaded after loading chats (only on first page)
+        if (pageToFetch === 1 && onChatsLoaded) {
+          onChatsLoaded(mappedChats);
+        }
       } else {
         toast.error(response.message || "Failed to fetch chats");
         setHasMore(false);
@@ -105,7 +110,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
     }
 
     if (pageToFetch === 1) setLoading(false);
-  }, []);
+  }, [onChatsLoaded]);
 
   useEffect(() => {
     fetchChats(1, debouncedSearch);

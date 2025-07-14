@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { io, Socket } from "socket.io-client";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import ChatSidebar from "./components/ChatSidebar";
 import ChatWindow from "./components/ChatWindow";
@@ -180,11 +181,38 @@ import type { Chat } from "@/utils/interface";
 
 export default function ChatPage() {
   const { token, user_id } = useSelector((state: RootState) => state.user);
-
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
-
+  const [autoSelected, setAutoSelected] = useState(false); // NEW: flag to prevent infinite loop
   const isMobile = useIsMobile();
   const { socket, isConnected, connectionError } = useSocket(token!);
+  const searchParams = useSearchParams();
+  const userIdParam = searchParams.get("userId");
+
+  // Auto-select chat if userId param is present, only once
+  const handleChatsLoaded = (chats: any[]) => {
+    if (userIdParam && !autoSelected) {
+      const chat = chats.find((c: any) => String(c.other_user_id) === String(userIdParam));
+      if (chat) {
+        setSelectedChat(chat);
+        setAutoSelected(true);
+      }
+    }
+  };
+
+  // Auto-select chat if userId param is present
+  useEffect(() => {
+    if (!userIdParam) return;
+    // Wait for ChatSidebar to load chats, then select the chat with this user
+    // We'll use a custom event to communicate with ChatSidebar
+    const handler = (e: CustomEvent) => {
+      if (e.detail && e.detail.chats) {
+        const chat = e.detail.chats.find((c: any) => String(c.other_user_id) === String(userIdParam));
+        if (chat) setSelectedChat(chat);
+      }
+    };
+    window.addEventListener("chatsLoaded", handler as EventListener);
+    return () => window.removeEventListener("chatsLoaded", handler as EventListener);
+  }, [userIdParam]);
 
   useEffect(() => {
     const el = document.getElementById("mainSection");
@@ -233,8 +261,9 @@ export default function ChatPage() {
         <div className={`flex border-r ${isMobile ? "w-full" : "max-w-[300px]"} border-gray-200`}>
           <ChatSidebar
             socket={socket}
-            onSelectChat={handleSelectChat}
+            onSelectChat={setSelectedChat}
             selectedChat={selectedChat}
+            onChatsLoaded={handleChatsLoaded}
           />
         </div>
       )}
