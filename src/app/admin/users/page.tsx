@@ -11,8 +11,10 @@ import { API_ROUTES, DEFAULT_PAGINATION } from "@/utils/constant";
 import { Eye } from "lucide-react";
 import { toast } from "react-toastify";
 import { apiCall } from "@/utils/apiCall";
+import { useRouter } from "next/navigation";
 
 function Users() {
+  const router = useRouter();
   const [userList, setUserList] = useState<User[]>([]);
   const [totalPages, setTotalPages] = useState(DEFAULT_PAGINATION.totalPages);
 
@@ -88,6 +90,10 @@ function Users() {
     return <p className="capitalize">{getRole}</p>;
   };
 
+  const handleView = (row: User) => {
+    router.push(`/admin/users/${row.id}`);
+  };
+
   return (
     <div>
       <div className="mb-8">
@@ -115,7 +121,7 @@ function Users() {
               <button
                 title="view"
                 className="text-[var(--base)] hover:text-[var(--base-hover)]"
-                // onClick={() => handleEdit(row)}
+                onClick={() => handleView(row)}
               >
                 <Eye size={16} />
               </button>

@@ -36,6 +36,7 @@ export const ROUTES = {
     SUPPORT_REQUESTS: "/admin/support-requests",
     FAQS: "/admin/faqs",
     USERS: "/admin/users",
+    USER_DETAILS: "/admin/users/:id",
     GIGCATEGORY: "/admin/gig-category",
     CREATE_FAQs: "/admin/faqs/create",
     PRIVACY_POLICY: "/admin/privacy-policy",
@@ -75,7 +76,8 @@ export const API_ROUTES = {
     CONTACT_US_BULK: "/contact-us/bulk-delete",
     TIRE: "/tire",
     GIG_CATEGORY: "/gig-category",
-    USERS: "/admin/users"
+    USERS: "/admin/users",
+    USER_DETAILS: "/admin/user/"
   },
 };
 

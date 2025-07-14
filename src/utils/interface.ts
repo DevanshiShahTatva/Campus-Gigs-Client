@@ -108,7 +108,7 @@ export interface CurrentSubscriptionPlan {
   subscription_plan_id: number;
   price: number;
   status: string;
-  subscription_expiry_date: string;
+  subscription_expiry_date: Date;
   transaction_id: string;
   created_at: string;
   updated_at: string;
@@ -138,11 +138,21 @@ export interface User {
   name: string;
   role: string;
   profile: string;
+  profile_type: string;
+  is_banned: boolean;
   professional_interests: string | null;
   extracurriculars: string | null;
   certifications: string | null;
   education: string;
   skills: Skill[];
+  created_at: Date;
+  updated_at: Date;
+  strike_number: number;
+  is_agreed: boolean;
+  location: string;
+  headline: string;
+  bio: string;
+  subscription: CurrentSubscriptionPlan;
   subscription_plans: CurrentSubscriptionPlan[];
 
 }
