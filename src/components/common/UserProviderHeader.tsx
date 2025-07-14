@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { FaBell, FaChevronDown, FaExchangeAlt, FaUser, FaCog, FaSignOutAlt, FaCheckCircle, FaInfoCircle, FaBars, FaStar } from "react-icons/fa";
 import { RoleContext } from "@/context/role-context";
-import { useGetUserProfileQuery, useUpdateUserProfileMutation, useGetUserNotificationsQuery, useMarkNotificationReadMutation } from "@/redux/api";
+import { useGetUserProfileQuery, useUpdateUserProfileMutation, useGetUserNotificationsQuery, useMarkNotificationReadMutation, useMarkAllNotificationsReadMutation } from "@/redux/api";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/redux/slices/userSlice";
 import { getRoleLabel, getAvatarName } from "@/utils/helper";
@@ -69,7 +69,10 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
   const { optimisticRole, handleRoleSwitch } = useOptimisticRole(role, setRole, updateUserProfile);
   const currentRole: RoleType = optimisticRole ?? role;
   const userId = useSelector((state: any) => state.user?.user_id || state.user?.user?.id);
-  const { data: fetchedNotifications, refetch } = useGetUserNotificationsQuery();
+  const token = useSelector((state: any) => state.user?.token);
+  const { data: fetchedNotifications, refetch } = useGetUserNotificationsQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
   // Use the correct data property from the API response
   const notificationsRaw = Array.isArray(fetchedNotifications?.data)
     ? fetchedNotifications.data
@@ -87,6 +90,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
 
   const socket = useSocket(userId);
   const [markNotificationRead] = useMarkNotificationReadMutation();
+  const [markAllNotificationsRead] = useMarkAllNotificationsReadMutation();
   const [markAllLoading, setMarkAllLoading] = useState(false);
 
   // Get user initials for avatar fallback
@@ -141,9 +145,8 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
   // Mark all notifications as read (UI + API)
   const handleMarkAllAsRead = async () => {
     setMarkAllLoading(true);
-    const unread = notifications.filter((notif: any) => !notif.read);
     try {
-      await Promise.all(unread.map((notif: any) => markNotificationRead({ notificationId: notif.id })));
+      await markAllNotificationsRead();
       refetch();
     } catch (e) {
       console.error("Failed to mark all notifications as read", e);
@@ -175,10 +178,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
     };
   }, [socket, refetch]);
 
-  // Update this function to trigger a browser notification directly
-  const triggerTestNotification = () => {
-    showPushNotification()
-  };
+
 
   return (
     <header className="w-full h-16 flex items-center justify-between border-b border-[var(--base)]/10 shadow bg-white sticky top-0 z-[40]">
@@ -201,14 +201,6 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
           </span>
         </div>
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-          {/* TEMP: Button to trigger test push notification */}
-          <button
-            onClick={triggerTestNotification}
-            style={{ background: '#f59e42', color: 'white', borderRadius: 4, padding: '4px 12px', marginRight: 8 }}
-            title="Trigger Test Notification"
-          >
-            Test Notification
-          </button>
           {/* Notifications always visible */}
           <div className="relative">
             <button
@@ -226,7 +218,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
             </button>
             {/* Notifications Dropdown */}
             <div
-              className={`notif-dropdown absolute right-0 mt-2 w-80 bg-white border border-[var(--base)]/20 rounded-xl shadow-2xl transition-all duration-200 z-40 overflow-hidden ${notifOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
+              className={`notif-dropdown absolute -right-5 sm:right-0 mt-2 w-64 sm:w-80 bg-white border border-[var(--base)]/20 rounded-xl shadow-2xl transition-all duration-200 z-40 overflow-hidden ${notifOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
                 }`}
               onMouseLeave={() => setNotifOpen(false)}
             >
@@ -247,7 +239,18 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
                   <div className="px-5 py-6 text-center text-gray-400">No notifications</div>
                 ) : (
                   notifications.map((notif:any) => (
-                    <div key={notif.id} className={`flex flex-col gap-2 px-5 py-4 ${notif.read ? "bg-gray-50" : "bg-white"}`}>
+                    <div
+                      key={notif.id}
+                      className={`flex flex-col gap-2 px-5 py-4 ${notif.read ? "bg-gray-50" : "bg-white"} ${notif.link ? "cursor-pointer hover:bg-[var(--base)]/10 transition" : ""}`}
+                      onClick={async () => {
+                        if (notif.link) {
+                          if (!notif.read) {
+                            await handleMarkAsRead(notif.id);
+                          }
+                          router.push(notif.link);
+                        }
+                      }}
+                    >
                       <div className="flex items-start gap-3">
                         <span className="mt-1">
                           {notif.type === "success" ? (
@@ -263,7 +266,10 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
                       {!notif.read && (
                         <button
                           className="text-xs text-[var(--base)] hover:underline self-start"
-                          onClick={() => handleMarkAsRead(notif.id)}
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleMarkAsRead(notif.id);
+                          }}
                         >
                           Mark as read
                         </button>

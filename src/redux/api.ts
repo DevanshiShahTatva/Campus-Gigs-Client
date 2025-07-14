@@ -41,6 +41,12 @@ export const api = createApi({
         body,
       }),
     }),
+    markAllNotificationsRead: builder.mutation<any, void>({
+      query: () => ({
+        url: "/notifications/mark-all-read",
+        method: "POST",
+      }),
+    }),
     // Add more endpoints here
   }),
 });
@@ -50,5 +56,6 @@ export const {
   useGetProviderPublicProfileQuery,
   useUpdateUserProfileMutation,
   useGetUserNotificationsQuery,
-  useMarkNotificationReadMutation
+  useMarkNotificationReadMutation,
+  useMarkAllNotificationsReadMutation,
 } = api;
