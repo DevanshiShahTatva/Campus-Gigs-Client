@@ -25,6 +25,7 @@ import { toast } from "react-toastify";
 import { getAvatarName, renderBaseOnCondition } from "@/utils/helper";
 import { useParams, useRouter } from "next/navigation";
 import { User } from "@/utils/interface";
+import AdminUserDetailsSkelton from "@/components/skeleton/AdminUserDetailsSkelton";
 
 export default function UserDetail() {
   const params = useParams();
@@ -86,7 +87,7 @@ export default function UserDetail() {
 
         {renderBaseOnCondition(
           loading,
-          <h1>loading</h1>,
+          <AdminUserDetailsSkelton />,
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1 space-y-6">
               <Card>
