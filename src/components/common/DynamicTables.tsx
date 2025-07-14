@@ -88,7 +88,7 @@ export function DynamicTable<T extends { id: number }>({
           <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>
         {children}
-        <Button
+        {onClickCreateButton && <Button
           variant={hasDeleteButton ? "delete" : "green"}
           className={` ${isCreateButtonDisabled ? "opacity-40 !cursor-not-allowed" : ""}  flex items-center h-[46px] disabled:opacity-50`}
           onClick={onClickCreateButton}
@@ -104,7 +104,7 @@ export function DynamicTable<T extends { id: number }>({
               Add
             </>
           )}
-        </Button>
+        </Button>}
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-4 relative">
