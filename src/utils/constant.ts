@@ -35,6 +35,8 @@ export const ROUTES = {
     SUBSCRIPTION: "/admin/subscription-plan",
     SUPPORT_REQUESTS: "/admin/support-requests",
     FAQS: "/admin/faqs",
+    USERS: "/admin/users",
+    USER_DETAILS: "/admin/users/:id",
     GIGCATEGORY: "/admin/gig-category",
     CREATE_FAQs: "/admin/faqs/create",
     PRIVACY_POLICY: "/admin/privacy-policy",
@@ -75,6 +77,8 @@ export const API_ROUTES = {
     CONTACT_US_BULK: "/contact-us/bulk-delete",
     TIRE: "/tire",
     GIG_CATEGORY: "/gig-category",
+    USERS: "/admin/users",
+    USER_DETAILS: "/admin/user/"
   },
 };
 
@@ -161,6 +165,12 @@ export const USER_SIDEBAR_ITEMS = [
     title: "FAQs",
     route: ROUTES.ADMIN.FAQS,
     icon: "/assets/faqs.svg"
+  },
+  {
+    id: 8,
+    title: "Users",
+    route: ROUTES.ADMIN.USERS,
+    icon: "/assets/users.svg"
   },
 ];
 
