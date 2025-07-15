@@ -8,7 +8,6 @@ import { IPlanApiResponse, ISubscriptionCurrentPlanApiResponse, ISubscriptionPla
 import IconMap from "@/components/common/IconMap";
 import SkeletonSubscriptionPlan from "@/components/landing-page-components/SkeletonSubscriptionPlan";
 import { CentralLoader } from "@/components/common/Loader";
-import Layout from "../../layout";
 
 const BuySubscription = () => {
   const router = useRouter();

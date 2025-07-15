@@ -196,5 +196,46 @@ export interface Gigs {
   review?: string;
   _count?: {
     bids: number;
-  }
+  };
+}
+
+export interface Attachment {
+  id: string;
+  name: string;
+  url: string;
+  type: "image" | "file";
+  file_size: number;
+  created_at: string;
+  filename: string;
+  message_id: number;
+  mimetype: string;
+}
+
+export interface Chat {
+  id: number;
+  name: string;
+  last_message: string;
+  other_user_id: number;
+  time: string;
+  unread: number;
+  avatar: string;
+  status: string;
+  last_seen?: string;
+  is_deleted?: boolean;
+  attachments?: Attachment[];
+}
+
+export interface OnlineUser {
+  user_id: number;
+  last_seen?: string;
+}
+
+export interface Message {
+  id: number;
+  message: string;
+  sender: "me" | "them";
+  time: string;
+  timestamp: Date;
+  attachments: Attachment[];
+  is_deleted: boolean;
 }
