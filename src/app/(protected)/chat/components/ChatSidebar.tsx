@@ -159,7 +159,12 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
               attachments: data.attachments,
               time: data.created_at,
               is_deleted: data.is_deleted,
-              unread: data.is_deleted ? chat.unread : data.sender_id === user_id ? chat.unread : (chat.unread ?? 0) + 1,
+              unread:
+              data.is_deleted || data.sender_id === user_id
+                ? chat.unread
+                : selectedChat?.id === data.chat_id
+                  ? 0
+                  : (chat.unread ?? 0) + 1,
             }
             : chat
         )
@@ -180,7 +185,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
       socket.off(SOCKET_EVENTS.userPresence, handleUserPresence);
       socket.off(SOCKET_EVENTS.latestMessage, handleLatestMessage);
     };
-  }, [socket, user_id, onSelectChat, updateChatStatus]);
+  }, [socket, selectedChat, user_id, onSelectChat, updateChatStatus]);
 
   useEffect(() => {
     if (!socket) return;
@@ -223,6 +228,8 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
   };
 
   const filteredChats = chats;
+
+  console.log("filteredChats::", filteredChats, chatsRef, chats)
 
   return (
     <div className="h-full flex flex-col w-full">

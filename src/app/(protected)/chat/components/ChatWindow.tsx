@@ -353,6 +353,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
   const handleNewMessage = useCallback((data: any) => {
     if (!data.message || data.message.chat_id !== selectedChat?.id) return;
 
+    if (
+      selectedChat &&
+      data.message.chat_id == selectedChat?.id &&
+      currentUserId !== data.message.sender.id
+    ) {
+      socket.emit("markAsRead", { chatId: selectedChat.id });
+    }
+
     const newMessage = formatMessageData(data.message);
     setMessages((prev) => [...prev, newMessage]);
 
@@ -475,7 +483,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
 
   const renderMessage = (msg: Message) => (
     <div key={msg.id} className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"}`}>
-      <div className={`relative group max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-lg px-4 py-2 ${msg.sender === "me"
+      <div className={`relative group ${editingMessageId === msg.id ? "max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl w-full" : "max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl"} rounded-lg px-4 py-2 ${msg.sender === "me"
         ? "bg-[var(--base)] text-white rounded-tr-none"
         : "bg-white text-gray-800 rounded-tl-none shadow-sm"
         }`}>
@@ -696,7 +704,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
         isDeleting={isDeleting}
       />
       <div className="flex flex-col h-full relative">
-        {(sending || updatingMessageId !== null || deletingMessageId !== null) && (
+        {(updatingMessageId !== null || deletingMessageId !== null) && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30">
             <Loader />
           </div>
@@ -812,7 +820,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
             <div className="flex-1 relative">
               <input
                 type="text"
-                className="w-full border border-gray-200 rounded-full px-4 py-2 focus:outline-none focus:border-[var(--base)] text-sm"
+                className="w-full border border-gray-200 rounded-full pl-4 pr-10 py-2 focus:outline-none focus:border-[var(--base)] text-sm"
                 placeholder="Type a message..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
@@ -842,7 +850,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
                 }`}
               aria-label="Send message"
             >
-              <FiSend className="h-5 w-5" />
+              {sending ? <Loader size={20} /> : <FiSend className="h-5 w-5" />}
             </button>
           </form>
         </div>

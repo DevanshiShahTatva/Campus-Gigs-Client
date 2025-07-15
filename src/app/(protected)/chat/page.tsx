@@ -243,8 +243,6 @@ export default function ChatPage() {
   const showSidebar = !isMobile || (isMobile && selectedChat === null);
   const showChatWindow = !isMobile || (isMobile && selectedChat !== null);
 
-  console.log("isConnected::", isConnected, connectionError);
-
   return (
     <div className="flex h-full bg-white rounded-lg border border-gray-200 overflow-hidden">
       {connectionError && (
