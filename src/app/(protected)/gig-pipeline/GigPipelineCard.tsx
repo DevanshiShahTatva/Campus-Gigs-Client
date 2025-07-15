@@ -19,6 +19,7 @@ interface GigCardProps {
   onStartGig?: (id: number, status: string) => void;
   onCompleteGig?: (id: number, status: string) => void;
   onPriorityChange?: (id: number, priority: PRIORITY) => void;
+  onChallengeReview: (id: number) => void;
   userId: number;
 }
 
@@ -27,6 +28,7 @@ const GigCard = ({
   onStartGig,
   onCompleteGig,
   onPriorityChange,
+  onChallengeReview,
   userId,
 }: GigCardProps) => {
   const getPriorityColor = (priority: string) => {
@@ -116,45 +118,57 @@ const GigCard = ({
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-3">
-              <h3 className="font-semibold text-xl text-gray-900">
-                {gig.title}
-              </h3>
-              <Badge
-                className={`${getStatusColor(
-                  pipelineStage
-                )} border font-medium`}
-              >
-                {getStatusText(pipelineStage)}
-              </Badge>
-              {(gig.priority && pipelineStage === "in_progress") && (
-                <Badge
-                  className={`${getPriorityColor(
-                    gig.priority
-                  )} border font-medium`}
-                >
-                  {gig.priority} priority
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex items-center gap-4 mb-3">
-              <Badge
-                variant="secondary"
-                className="bg-teal-50 text-teal-700 border-teal-200"
-              >
-                {gig.gig_category.name}
-              </Badge>
-              {bid?.bid_amount && (
-                <div className="flex items-center gap-1 text-sm text-teal-600 bg-teal-50 px-2 py-1 rounded-md">
-                  <TrendingUp className="h-3 w-3" />
-                  <span className="font-medium">
-                    Your bid: ${Number(bid?.bid_amount).toFixed(2)}
-                  </span>
+            <div className="flex justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <h3 className="font-semibold text-xl text-gray-900">
+                    {gig.title}
+                  </h3>
+                  <Badge
+                    className={`${getStatusColor(
+                      pipelineStage
+                    )} border font-medium`}
+                  >
+                    {getStatusText(pipelineStage)}
+                  </Badge>
+                  {(gig.priority && pipelineStage === "in_progress") && (
+                    <Badge
+                      className={`${getPriorityColor(
+                        gig.priority
+                      )} border font-medium`}
+                    >
+                      {gig.priority} priority
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-4 mb-3">
+                  <Badge
+                    variant="secondary"
+                    className="bg-teal-50 text-teal-700 border-teal-200"
+                  >
+                    {gig.gig_category.name}
+                  </Badge>
+                  {bid?.bid_amount && (
+                    <div className="flex items-center gap-1 text-sm text-teal-600 bg-teal-50 px-2 py-1 rounded-md">
+                      <TrendingUp className="h-3 w-3" />
+                      <span className="font-medium">
+                        Your bid: ${Number(bid?.bid_amount).toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              {pipelineStage === "completed" && (
+                <div>
+                  <button
+                    onClick={() => onChallengeReview(gig.id)}
+                    className="bg-[var(--base)] text-white px-3 py-1 rounded"
+                  >
+                    Review
+                  </button>
                 </div>
               )}
             </div>
-
             <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
               {gig.description}
             </p>

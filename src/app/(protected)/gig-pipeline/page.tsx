@@ -9,8 +9,21 @@ import { toast } from "react-toastify";
 import MyGigSkelton from "@/components/skeleton/MyGigSkelton";
 import { renderBaseOnCondition } from "@/utils/helper";
 import InfiniteScroll from "react-infinite-scroll-component";
-import Loader from "@/components/common/Loader";
+import Loader, { CentralLoader } from "@/components/common/Loader";
 import { useGetUserProfileQuery } from "@/redux/api";
+import ReviewComplaintModal from "./ReviewComplaintModal";
+
+interface IRatingDetails {
+  ratingId: number;
+  complaintId: number;
+  userRating: number;
+  userFeedback: string;
+  userIssue: string;
+  userExpectation: string;
+  gigTitle: string;
+  customerName: string;
+  complaintDate: string;
+}
 
 const GigPipeline = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -24,6 +37,8 @@ const GigPipeline = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [gigs, setGigs] = useState<Gigs[]>([]);
   const [activeTab, setActiveTab] = useState("pending");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [ratingDetail, setRatingDetail] = useState<IRatingDetails | null>(null);
   const { data: userProfile } = useGetUserProfileQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
@@ -119,6 +134,34 @@ const GigPipeline = () => {
     fetchGigsPipeline(1, id);
   };
 
+  const handleChallengeReview = async (gigId: number) => {
+    try {
+      setIsLoading(true);
+      const res = await apiCall({
+        method: "GET",
+        endPoint: `/rating/get-by-gig/${gigId}`,
+      });
+
+      if (res?.success) {
+        setRatingDetail({
+          ratingId: res.data.id,
+          complaintId: res.data.complaintId,
+          gigTitle: res.data.gigTitle,
+          customerName: res.data.customerName,
+          userRating: res.data.userRating,
+          userFeedback: res.data.userFeedback,
+          userIssue: res.data.userIssue,
+          userExpectation: res.data.userExpectation,
+          complaintDate: res.data.complaintDate,
+        });
+      }
+    } catch (error) {
+      toast.error("Failed to fetch rating details");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getEmptyState = () => {
     let icon = "📋";
     let title = "No gigs found";
@@ -168,6 +211,7 @@ const GigPipeline = () => {
 
   return (
     <div>
+      {isLoading && <CentralLoader loading={isLoading} />}
       {isSubmitting && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <Loader size={48} colorClass="text-[var(--base)]" />
@@ -189,11 +233,10 @@ const GigPipeline = () => {
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                  activeTab === tab.id
-                    ? "border-teal-500 text-teal-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
+                  ? "border-teal-500 text-teal-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <span>{tab.label}</span>
@@ -230,6 +273,7 @@ const GigPipeline = () => {
                     key={gig.id}
                     gig={gig}
                     userId={userProfile.data.id}
+                    onChallengeReview={handleChallengeReview}
                     onStartGig={
                       activeTab === "accepted"
                         ? handleChangeStatusGig
@@ -251,6 +295,12 @@ const GigPipeline = () => {
             </InfiniteScroll>
           )}
         </>
+      )}
+      {ratingDetail && (
+        <ReviewComplaintModal
+          complaintDetails={ratingDetail}
+          onClose={() => setRatingDetail(null)}
+        />
       )}
     </div>
   );
