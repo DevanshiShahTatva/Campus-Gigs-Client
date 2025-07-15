@@ -13,7 +13,7 @@ interface DisputeData {
 }
 
 interface ComplaintDetails {
-  ratingId: number;
+  complaintId: number;
   userRating: number;
   userFeedback: string;
   userIssue: string;
@@ -42,15 +42,13 @@ const ReviewComplaintModal = ({
     try {
       setLoading(true);
 
-      const disputeData = new FormData();
-      disputeData.append('complaint_id', "1");
-      disputeData.append('response_to_issue', formData.responseToIssue);
-
       const response = await apiCall({
-        endPoint: '/rating/challenge',
+        endPoint: '/rating/challenge-complaint',
         method: 'POST',
-        body: disputeData,
-        isFormData: true
+        body: {
+          complaint_id: complaintDetails.complaintId,
+          provider_response: formData.responseToIssue
+        },
       });
 
       if (response?.success) {

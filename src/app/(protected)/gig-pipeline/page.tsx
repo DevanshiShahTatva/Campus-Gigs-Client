@@ -14,7 +14,6 @@ import { useGetUserProfileQuery } from "@/redux/api";
 import ReviewComplaintModal from "./ReviewComplaintModal";
 
 interface IRatingDetails {
-  ratingId: number;
   complaintId: number;
   userRating: number;
   userFeedback: string;
@@ -144,7 +143,6 @@ const GigPipeline = () => {
 
       if (res?.success) {
         setRatingDetail({
-          ratingId: res.data.id,
           complaintId: res.data.complaintId,
           gigTitle: res.data.gigTitle,
           customerName: res.data.customerName,
