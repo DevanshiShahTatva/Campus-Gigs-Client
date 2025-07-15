@@ -14,7 +14,7 @@ import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 import MessageDropdown from "./MessageDropdown";
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import Loader, { SmallLoader } from "@/components/common/Loader";
+import Loader from "@/components/common/Loader";
 
 const MAX_ATTACHMENTS = 5;
 const MESSAGE_PAGE_SIZE = 20;
