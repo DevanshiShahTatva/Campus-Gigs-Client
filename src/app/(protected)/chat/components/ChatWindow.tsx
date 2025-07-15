@@ -14,7 +14,7 @@ import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 import MessageDropdown from "./MessageDropdown";
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import Loader from "@/components/common/Loader";
+import Loader, { SmallLoader } from "@/components/common/Loader";
 
 const MAX_ATTACHMENTS = 5;
 const MESSAGE_PAGE_SIZE = 20;
@@ -704,7 +704,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
         isDeleting={isDeleting}
       />
       <div className="flex flex-col h-full relative">
-        {(sending || updatingMessageId !== null || deletingMessageId !== null) && (
+        {(updatingMessageId !== null || deletingMessageId !== null) && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30">
             <Loader />
           </div>
@@ -850,7 +850,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
                 }`}
               aria-label="Send message"
             >
-              <FiSend className="h-5 w-5" />
+              {sending ? <Loader size={20} /> : <FiSend className="h-5 w-5" />}
             </button>
           </form>
         </div>
