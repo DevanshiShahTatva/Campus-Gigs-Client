@@ -69,17 +69,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
     );
   }, []);
 
-  const updateChatUnread = useCallback(() => {
-    const updateChats = chatsRef.current.map((singleChat) => {
-      return {
-        ...singleChat,
-        unread: 0
-      }
-    });
-    setChats(updateChats);
-    if (onChatsLoaded) onChatsLoaded(updateChats);
-  }, [onChatsLoaded]);
-
   const fetchChats = useCallback(async (pageToFetch = 1, search = "") => {
     if (pageToFetch === 1) setLoading(true);
 
@@ -170,7 +159,12 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
               attachments: data.attachments,
               time: data.created_at,
               is_deleted: data.is_deleted,
-              unread: data.is_deleted ? chat.unread : data.sender_id === user_id ? chat.unread : (chat.unread ?? 0) + 1,
+              unread:
+              data.is_deleted || data.sender_id === user_id
+                ? chat.unread
+                : selectedChat?.id === data.chat_id
+                  ? 0
+                  : (chat.unread ?? 0) + 1,
             }
             : chat
         )
@@ -181,26 +175,8 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
       socket.emit(SOCKET_EVENTS.getOnlineUsers, handleOnlineUsersResponse);
     };
 
-    const handleNewMessage = (data: any) => {
-      if (!data.message) return;
-
-      const currentSelected = selectedChatRef.current;
-      if (selectedChat && data.chatId == currentSelected?.id) {
-        updateChatUnread();
-        // const updateChats = chats.map((singleChat) => {
-        //   return {
-        //     ...singleChat,
-        //     unread: 0
-        //   }
-        // });
-        // setChats(updateChats);
-        // onChatsLoaded(updateChats)
-      }
-    };
-
     socket.on(SOCKET_EVENTS.userPresence, handleUserPresence);
     socket.on(SOCKET_EVENTS.latestMessage, handleLatestMessage);
-    // socket.on("messagesRead", handleNewMessage);
 
     const timeout = setTimeout(requestOnlineUsers, 500);
 
@@ -208,7 +184,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
       clearTimeout(timeout);
       socket.off(SOCKET_EVENTS.userPresence, handleUserPresence);
       socket.off(SOCKET_EVENTS.latestMessage, handleLatestMessage);
-      socket.off("messagesRead", handleNewMessage);
     };
   }, [socket, selectedChat, user_id, onSelectChat, updateChatStatus]);
 
