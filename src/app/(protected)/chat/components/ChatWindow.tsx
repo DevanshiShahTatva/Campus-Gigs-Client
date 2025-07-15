@@ -483,7 +483,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
 
   const renderMessage = (msg: Message) => (
     <div key={msg.id} className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"}`}>
-      <div className={`relative group max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-lg px-4 py-2 ${msg.sender === "me"
+      <div className={`relative group ${editingMessageId === msg.id ? "max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl w-full" : "max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl"} rounded-lg px-4 py-2 ${msg.sender === "me"
         ? "bg-[var(--base)] text-white rounded-tr-none"
         : "bg-white text-gray-800 rounded-tl-none shadow-sm"
         }`}>
