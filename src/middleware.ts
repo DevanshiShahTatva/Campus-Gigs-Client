@@ -5,7 +5,13 @@ import { ROLE, ROUTES } from "./utils/constant";
 const userDefaultRoute = ROUTES.HOME;
 const adminDefaultRoute = ROUTES.ADMIN.DASHBOARD;
 
-const publicRoutes = [ROUTES.HOME, ROUTES.LOGIN, ROUTES.SIGN_UP, ROUTES.FORGOT_PASSWORD, ROUTES.RESET_PASSWORD, ROUTES.GIGS];
+const publicRoutes = [
+  ROUTES.HOME,
+  ROUTES.LOGIN,
+  ROUTES.SIGN_UP,
+  ROUTES.FORGOT_PASSWORD,
+  ROUTES.RESET_PASSWORD,
+];
 
 const adminRoutes = [
   ROUTES.ADMIN.DASHBOARD,
@@ -30,6 +36,7 @@ const userRoutes = [
   ROUTES.USER.GIGS,
   ROUTES.USER.GIGS_CREATE,
   ROUTES.USER.PROVIDER,
+  ROUTES.USER.CHAT,
 ];
 
 export async function middleware(request: NextRequest) {
@@ -69,7 +76,9 @@ export async function middleware(request: NextRequest) {
     const allowedRoutes = roleRoutes[userRole] || [];
     const defaultRedirect = defaultRoutes[userRole] || "/";
 
-    const isAllowed = allowedRoutes.some((route) => currentPath.startsWith(route));
+    const isAllowed = allowedRoutes.some((route) =>
+      currentPath.startsWith(route)
+    );
     if (!isAllowed) {
       return NextResponse.redirect(new URL(defaultRedirect, request.url));
     }
@@ -79,7 +88,10 @@ export async function middleware(request: NextRequest) {
       currentPath.startsWith("/profile") ||
       currentPath.startsWith("/gigs") ||
       currentPath.startsWith("/gigs/create") ||
-      currentPath.startsWith("/provider");
+      currentPath.startsWith("/provider") ||
+      currentPath.startsWith("/chat") ||
+      currentPath.startsWith("/buy-subscription") ||
+      currentPath.startsWith("/buy-subscription/:id/checkout");
 
     if (isProtected && !token) {
       const loginUrl = new URL("/login", request.url);
@@ -105,5 +117,7 @@ export const config = {
     "/profile/:path*",
     "/gigs/:path*",
     "/provider/:path*",
+    "/chat/:path*",
+    "/buy-subscription/:path*",
   ],
 };

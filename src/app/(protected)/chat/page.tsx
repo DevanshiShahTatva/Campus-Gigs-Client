@@ -1,0 +1,283 @@
+"use client";
+
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useSelector } from "react-redux";
+import { io, Socket } from "socket.io-client";
+import { useRouter, useSearchParams } from "next/navigation";
+
+import ChatSidebar from "./components/ChatSidebar";
+import ChatWindow from "./components/ChatWindow";
+import { RootState } from "@/redux";
+
+const MOBILE_BREAKPOINT = 768;
+
+function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+
+    handleResize(); // run once on mount
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return isMobile;
+}
+
+function useSocket(token?: string): {
+  socket: Socket | null;
+  isConnected: boolean;
+  connectionError: string | null;
+} {
+  const socketRef = useRef<Socket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isConnectingRef = useRef(false);
+
+  const cleanup = useCallback(() => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+
+    if (socketRef.current) {
+      socketRef.current.removeAllListeners();
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
+
+    setIsConnected(false);
+    setConnectionError(null);
+    isConnectingRef.current = false;
+  }, []);
+
+  const connectSocket = useCallback(() => {
+    if (!token || isConnectingRef.current || socketRef.current?.connected) {
+      return;
+    }
+
+    const wsUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/^https?/, "ws");
+    if (!wsUrl) {
+      console.warn("WebSocket URL not defined");
+      setConnectionError("WebSocket URL not configured");
+      return;
+    }
+
+    isConnectingRef.current = true;
+    setConnectionError(null);
+
+    try {
+      // Clean up any existing socket first
+      if (socketRef.current) {
+        socketRef.current.removeAllListeners();
+        socketRef.current.disconnect();
+      }
+
+      const namespace = "chat";
+      const socketUrl = `${wsUrl}/${namespace}`;
+
+      console.log("Connecting to WebSocket:", socketUrl);
+
+      socketRef.current = io(socketUrl, {
+        transports: ["websocket", "polling"],
+        auth: { token },
+        withCredentials: true,
+        timeout: 10000,
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        forceNew: true,
+      });
+
+      socketRef.current.on("connect", () => {
+        console.log("WebSocket connected successfully");
+        setIsConnected(true);
+        setConnectionError(null);
+        isConnectingRef.current = false;
+      });
+
+      socketRef.current.on("connect_error", (err) => {
+        console.error("WebSocket connection error:", err.message);
+        setConnectionError(err.message);
+        setIsConnected(false);
+        isConnectingRef.current = false;
+      });
+
+      socketRef.current.on("disconnect", (reason) => {
+        console.log("WebSocket disconnected:", reason);
+        setIsConnected(false);
+        isConnectingRef.current = false;
+
+        if (reason === "io client disconnect" || reason === "io server disconnect") {
+          return;
+        }
+        if (token && !reconnectTimeoutRef.current) {
+          reconnectTimeoutRef.current = setTimeout(() => {
+            console.log("Attempting to reconnect...");
+            connectSocket();
+          }, 2000);
+        }
+      });
+
+      socketRef.current.on("reconnect", (attemptNumber) => {
+        console.log("WebSocket reconnected after", attemptNumber, "attempts");
+        setIsConnected(true);
+        setConnectionError(null);
+      });
+
+      socketRef.current.on("reconnect_error", (err) => {
+        console.error("WebSocket reconnection error:", err.message);
+        setConnectionError(err.message);
+      });
+
+      socketRef.current.on("reconnect_failed", () => {
+        console.error("WebSocket reconnection failed");
+        setConnectionError("Failed to reconnect to server");
+        setIsConnected(false);
+      });
+
+    } catch (error) {
+      console.error("Error creating socket:", error);
+      setConnectionError("Failed to create socket connection");
+      isConnectingRef.current = false;
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) {
+      cleanup();
+      return;
+    }
+
+    const connectTimeout = setTimeout(() => {
+      connectSocket();
+    }, 100);
+
+    return () => {
+      clearTimeout(connectTimeout);
+      cleanup();
+    };
+  }, [token, connectSocket, cleanup]);
+
+  useEffect(() => {
+    return () => {
+      cleanup();
+    };
+  }, [cleanup]);
+
+  return {
+    socket: socketRef.current,
+    isConnected,
+    connectionError,
+  };
+}
+
+import type { Chat } from "@/utils/interface";
+
+export default function ChatPage() {
+  const { token, user_id } = useSelector((state: RootState) => state.user);
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [autoSelected, setAutoSelected] = useState(false); // NEW: flag to prevent infinite loop
+  const isMobile = useIsMobile();
+  const { socket, isConnected, connectionError } = useSocket(token!);
+  const searchParams = useSearchParams();
+  const userIdParam = searchParams.get("userId");
+
+  // Auto-select chat if userId param is present, only once
+  const handleChatsLoaded = (chats: any[]) => {
+    if (userIdParam && !autoSelected) {
+      const chat = chats.find((c: any) => String(c.other_user_id) === String(userIdParam));
+      if (chat) {
+        setSelectedChat(chat);
+        setAutoSelected(true);
+      }
+    }
+  };
+
+  // Auto-select chat if userId param is present
+  useEffect(() => {
+    if (!userIdParam) return;
+    // Wait for ChatSidebar to load chats, then select the chat with this user
+    // We'll use a custom event to communicate with ChatSidebar
+    const handler = (e: CustomEvent) => {
+      if (e.detail && e.detail.chats) {
+        const chat = e.detail.chats.find((c: any) => String(c.other_user_id) === String(userIdParam));
+        if (chat) setSelectedChat(chat);
+      }
+    };
+    window.addEventListener("chatsLoaded", handler as EventListener);
+    return () => window.removeEventListener("chatsLoaded", handler as EventListener);
+  }, [userIdParam]);
+
+  useEffect(() => {
+    const el = document.getElementById("mainSection");
+    if (el) el.classList.add("overflow-hidden");
+
+    // Join user channel on mount
+    if (socket && socket.connected && token) {
+      if (user_id) {
+        socket.emit('joinUserChannel', { userId: user_id });
+      }
+    }
+
+    return () => {
+      el?.classList.remove("overflow-hidden");
+      // Leave user channel on unmount
+      if (socket && socket.connected && token) {
+        if (user_id) {
+          socket.emit('leaveUserChannel', { userId: user_id });
+        }
+      }
+    };
+  }, [socket, token, user_id]);
+
+  const handleSelectChat = (chat: Chat) => {
+    setSelectedChat(chat);
+  };
+
+  const showSidebar = !isMobile || (isMobile && selectedChat === null);
+  const showChatWindow = !isMobile || (isMobile && selectedChat !== null);
+
+  console.log("isConnected::", isConnected, connectionError);
+
+  return (
+    <div className="flex h-full bg-white rounded-lg border border-gray-200 overflow-hidden">
+      {connectionError && (
+        <div className="absolute top-0 left-0 right-0 bg-red-500 text-white text-center py-2 text-sm z-50">
+          Connection Error: {connectionError}
+        </div>
+      )}
+
+      {!isConnected && !connectionError && (
+        <div className="absolute top-0 left-0 right-0 bg-yellow-500 text-white text-center py-2 text-sm z-50">
+          Connecting to chat server...
+        </div>
+      )}
+
+      {showSidebar && (
+        <div className={`flex border-r ${isMobile ? "w-full" : "max-w-[300px]"} border-gray-200`}>
+          <ChatSidebar
+            socket={socket}
+            onSelectChat={setSelectedChat}
+            selectedChat={selectedChat}
+            onChatsLoaded={handleChatsLoaded}
+          />
+        </div>
+      )}
+      {showChatWindow && (
+        <div className="flex flex-col flex-1">
+          <ChatWindow
+            selectedChat={selectedChat}
+            onBack={() => setSelectedChat(null)}
+            socket={socket}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
