@@ -353,6 +353,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
   const handleNewMessage = useCallback((data: any) => {
     if (!data.message || data.message.chat_id !== selectedChat?.id) return;
 
+    if (
+      selectedChat &&
+      data.message.chat_id == selectedChat?.id &&
+      currentUserId !== data.message.sender.id
+    ) {
+      socket.emit("markAsRead", { chatId: selectedChat.id });
+    }
+
     const newMessage = formatMessageData(data.message);
     setMessages((prev) => [...prev, newMessage]);
 

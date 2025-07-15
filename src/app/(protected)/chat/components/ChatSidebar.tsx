@@ -69,6 +69,17 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
     );
   }, []);
 
+  const updateChatUnread = useCallback(() => {
+    const updateChats = chatsRef.current.map((singleChat) => {
+      return {
+        ...singleChat,
+        unread: 0
+      }
+    });
+    setChats(updateChats);
+    if (onChatsLoaded) onChatsLoaded(updateChats);
+  }, [onChatsLoaded]);
+
   const fetchChats = useCallback(async (pageToFetch = 1, search = "") => {
     if (pageToFetch === 1) setLoading(true);
 
@@ -170,8 +181,26 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
       socket.emit(SOCKET_EVENTS.getOnlineUsers, handleOnlineUsersResponse);
     };
 
+    const handleNewMessage = (data: any) => {
+      if (!data.message) return;
+
+      const currentSelected = selectedChatRef.current;
+      if (selectedChat && data.chatId == currentSelected?.id) {
+        updateChatUnread();
+        // const updateChats = chats.map((singleChat) => {
+        //   return {
+        //     ...singleChat,
+        //     unread: 0
+        //   }
+        // });
+        // setChats(updateChats);
+        // onChatsLoaded(updateChats)
+      }
+    };
+
     socket.on(SOCKET_EVENTS.userPresence, handleUserPresence);
     socket.on(SOCKET_EVENTS.latestMessage, handleLatestMessage);
+    // socket.on("messagesRead", handleNewMessage);
 
     const timeout = setTimeout(requestOnlineUsers, 500);
 
@@ -179,8 +208,9 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
       clearTimeout(timeout);
       socket.off(SOCKET_EVENTS.userPresence, handleUserPresence);
       socket.off(SOCKET_EVENTS.latestMessage, handleLatestMessage);
+      socket.off("messagesRead", handleNewMessage);
     };
-  }, [socket, user_id, onSelectChat, updateChatStatus]);
+  }, [socket, selectedChat, user_id, onSelectChat, updateChatStatus]);
 
   useEffect(() => {
     if (!socket) return;
@@ -223,6 +253,8 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ onSelectChat, selectedChat, s
   };
 
   const filteredChats = chats;
+
+  console.log("filteredChats::", filteredChats, chatsRef, chats)
 
   return (
     <div className="h-full flex flex-col w-full">
