@@ -28,7 +28,7 @@ export const CentralLoader = ({ loading }: { loading: boolean }) => {
   if (!loading) return null;
 
   return (
-    <div className="dark:bg-dark-1/70 fixed inset-0 z-50 flex items-center justify-center bg-white/70">
+    <div className="dark:bg-dark-1/70 fixed inset-0 z-999 flex items-center justify-center bg-white/70">
       <svg
         aria-hidden="true"
         role="status"
