@@ -24,12 +24,15 @@ export const ROUTES = {
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
   PROFILE: "/profile",
+  CONTACT: "/contact-us",
   PREVIEW_PROFILE: "/provider",
   GIGS: "/gigs",
   GIGS_CREATE: "/gigs/create",
   MY_GIGS: "/my-gigs",
   GIGS_PIPELINE: "/gig-pipeline",
   BUY_PLAN_SUBSCRIPTION: "/user/buy-subscription",
+  PAYMENT_SUCCESS: "/payment/success",
+  PAYMENT_CANCEL: "/payment/cancel",
   ADMIN: {
     DASHBOARD: "/admin/dashboard",
     SUBSCRIPTION: "/admin/subscription-plan",
@@ -52,7 +55,7 @@ export const ROUTES = {
     GIGS: "/gigs",
     GIGS_CREATE: "/gigs/create",
     PROVIDER: "/provider",
-    CHAT: "/chat",
+    CHAT: "/chat"
   },
 };
 

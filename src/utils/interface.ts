@@ -110,7 +110,7 @@ export interface CurrentSubscriptionPlan {
   status: string;
   subscription_expiry_date: Date;
   transaction_id: string;
-  created_at: string;
+  created_at: Date;
   updated_at: string;
   is_deleted: boolean;
   subscription_plan: ISubscriptionPlan;
