@@ -20,7 +20,7 @@ interface ComplaintDetails {
   userExpectation: string;
   gigTitle: string;
   customerName: string;
-  complaintDate: string;
+  ratingDate: string;
 }
 
 const ReviewComplaintModal = ({
@@ -131,7 +131,7 @@ const ReviewComplaintModal = ({
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Date:</span>
-                    <p className="text-gray-600">{moment(complaintDetails.complaintDate).format("DD/MM/YYYY hh:mm A")}</p>
+                    <p className="text-gray-600">{moment(complaintDetails.ratingDate).format("DD/MM/YYYY hh:mm A")}</p>
                   </div>
                 </div>
                 <div className="space-y-4">

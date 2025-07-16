@@ -21,7 +21,7 @@ interface IRatingDetails {
   userExpectation: string;
   gigTitle: string;
   customerName: string;
-  complaintDate: string;
+  ratingDate: string;
 }
 
 const GigPipeline = () => {
@@ -150,7 +150,7 @@ const GigPipeline = () => {
           userFeedback: res.data.userFeedback,
           userIssue: res.data.userIssue,
           userExpectation: res.data.userExpectation,
-          complaintDate: res.data.complaintDate,
+          ratingDate: res.data.ratingDate,
         });
       }
     } catch (error) {
@@ -270,6 +270,7 @@ const GigPipeline = () => {
                   <GigCard
                     key={gig.id}
                     gig={gig}
+                    activeTab={activeTab}
                     userId={userProfile.data.id}
                     onChallengeReview={handleChallengeReview}
                     onStartGig={

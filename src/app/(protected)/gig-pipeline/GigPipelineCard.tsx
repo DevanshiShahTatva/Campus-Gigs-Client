@@ -16,6 +16,7 @@ import { BID_STATUS, GIG_STATUS, PRIORITY } from "@/utils/constant";
 
 interface GigCardProps {
   gig: Gigs;
+  activeTab: string;
   onStartGig?: (id: number, status: string) => void;
   onCompleteGig?: (id: number, status: string) => void;
   onPriorityChange?: (id: number, priority: PRIORITY) => void;
@@ -25,6 +26,7 @@ interface GigCardProps {
 
 const GigCard = ({
   gig,
+  activeTab,
   onStartGig,
   onCompleteGig,
   onPriorityChange,
@@ -158,7 +160,7 @@ const GigCard = ({
                   )}
                 </div>
               </div>
-              {pipelineStage === "completed" && (
+              {activeTab === "rejected" && (
                 <div>
                   <button
                     onClick={() => onChallengeReview(gig.id)}
