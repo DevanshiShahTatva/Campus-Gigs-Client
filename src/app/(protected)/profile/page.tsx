@@ -16,6 +16,9 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import Link from "next/link";
 import moment from "moment";
+import { useSelector } from 'react-redux';
+import { useSocket } from '@/hooks/useSocket';
+import { RootState } from "@/redux/index";
 
 // Custom Profile Photo Component
 const ProfilePhotoUpload = ({
@@ -176,6 +179,8 @@ const Profile = () => {
   const [isSupportLoading, setIsSupportLoading] = useState(false);
   const [supportError, setSupportError] = useState<string | null>(null);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const userId = useSelector((state: RootState) => state.user?.user_id || state.user?.user?.id);
+  const socket = useSocket(userId ? String(userId) : null);
 
   useEffect(() => {
     if (activeTab === "subscription") {
@@ -203,6 +208,32 @@ const Profile = () => {
         .finally(() => setIsSupportLoading(false));
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (!socket) return;
+    const handleUserNotification = (data: any) => {
+      if (data?.title === 'Support Request Acknowledged') {
+        toast.info(data.message || 'Your support request has been acknowledged.');
+        if (activeTab === 'support') {
+          // Refetch support requests
+          setIsSupportLoading(true);
+          setSupportError(null);
+          apiCall({ endPoint: '/contact-us/my-requests', method: 'GET' })
+            .then((res) => {
+              setSupportRequests(res?.data || []);
+            })
+            .catch(() => {
+              setSupportError('Failed to load support requests');
+            })
+            .finally(() => setIsSupportLoading(false));
+        }
+      }
+    };
+    socket.on('userNotification', handleUserNotification);
+    return () => {
+      socket.off('userNotification', handleUserNotification);
+    };
+  }, [socket, activeTab]);
 
   const [skillsDropdown, setSkillsDropdown] = useState<IDropdownOption[]>([]);
 
