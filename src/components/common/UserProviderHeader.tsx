@@ -10,6 +10,7 @@ import { logout } from "@/redux/slices/userSlice";
 import { getRoleLabel, getAvatarName } from "@/utils/helper";
 import { showPushNotification } from "@/utils/helper";
 import { useSocket } from "@/hooks/useSocket";
+import Toast from "./Toast";
 
 // Types
 interface UserProviderHeaderProps {
@@ -92,6 +93,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
   const [markNotificationRead] = useMarkNotificationReadMutation();
   const [markAllNotificationsRead] = useMarkAllNotificationsReadMutation();
   const [markAllLoading, setMarkAllLoading] = useState(false);
+  const [toast, setToast] = useState<{ message: string; link?: string } | null>(null);
 
   // Get user initials for avatar fallback
   const initials = getAvatarName(user?.name || "", true);
@@ -108,7 +110,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
     router.push("/login");
   };
 
-  // Close dropdowns on outside click
+  // Close dropdowns on outside clickz
   React.useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (!(e.target as HTMLElement).closest(".notif-dropdown")) setNotifOpen(false);
@@ -161,10 +163,24 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
   };
 
   React.useEffect(() => {
+    const handleVisibilityChange = () => {
+
+      console.log(document.visibilityState === "visible" ? "YESSSSSS IN ":"NOOO HERE NEVER")
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  React.useEffect(() => {
     if (!socket) return;
 
     // Listen for bid/user notifications
     const handleUserNotification = (data: any) => {
+      console.log("SOMETHING NEW====>", data)
       showPushNotification(data.title || "Notification", {
         body: data.message || "You received a new notification.",
         link: data.link,
@@ -173,10 +189,52 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
     };
     socket.on("userNotification", handleUserNotification);
 
+    // Listen for chat notifications
+    const handleChatNotification = (data: any) => {
+      console.log("SOCEKTID and USERID", userId, "=======");
+      
+
+      
+      if (pathname !== `/chat`) {
+        if (typeof document !== "undefined") {
+          console.log(data,"SSSSSSSNotification received, visibilityState:", document.visibilityState, "hasFocus:", document.hasFocus && document.hasFocus());
+        }
+        if (
+          typeof document !== "undefined" &&
+          document.visibilityState === "visible" 
+          // && document.hasFocus && document.hasFocus()
+        ) {
+
+          setToast({ message: `${data.title}: ${data.message}`, link: data.link });
+
+          console.log("IN IFFF");
+          
+        } else{
+          console.log("IN ELSE");
+          
+        }
+        
+        // if (window.Notification && Notification.permission === "granted") {
+        //   console.log("IN ELSEEEE");
+          
+        //   const n = new Notification(data.title, {
+        //     body: data.message,
+        //     data: { url: data.link },
+        //   });
+        //   n.onclick = (event) => {
+        //     event.preventDefault();
+        //     window.open(data.link, "_blank");
+        //   };
+        // }
+      }
+    };
+    socket.on("chatNotification", handleChatNotification);
+
     return () => {
       socket.off("userNotification", handleUserNotification);
+      socket.off("chatNotification", handleChatNotification);
     };
-  }, [socket, refetch]);
+  }, [socket, refetch, pathname]);
 
 
 
@@ -378,6 +436,13 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
           </div>
         </div>
       </div>
+      {toast && (
+        <Toast
+          message={toast.message}
+          link={toast.link}
+          onClose={() => setToast(null)}
+        />
+      )}
     </header>
   );
 };

@@ -7,7 +7,7 @@ export function useSocket(userId: string | null) {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    if (!userId || !token) return;
+    if (!token) return;
 
     // Use environment variable or fallback
     const baseUrl =
@@ -21,17 +21,30 @@ export function useSocket(userId: string | null) {
       },
     });
 
-    socket.on("connect", () => {
-      console.log("Socket connected:", socket.id);
-      socket.emit("joinRoom", userId);
-    });
-
     socketRef.current = socket;
 
     return () => {
       socket.disconnect();
     };
-  }, [userId, token]);
+  }, [token]);
+
+  // Always emit joinRoom when userId or socket changes and both are available
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (socket && userId && socket.connected) {
+      socket.emit("joinRoom", userId);
+    }
+    // Also listen for connect event to re-emit joinRoom after reconnect
+    if (socket && userId) {
+      const handleConnect = () => {
+        socket.emit("joinRoom", userId);
+      };
+      socket.on("connect", handleConnect);
+      return () => {
+        socket.off("connect", handleConnect);
+      };
+    }
+  }, [userId, socketRef.current]);
 
   return socketRef.current;
 }
