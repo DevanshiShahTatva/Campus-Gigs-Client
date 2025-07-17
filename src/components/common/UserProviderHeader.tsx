@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useContext, useCallback } from "react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { FaBell, FaChevronDown, FaExchangeAlt, FaUser, FaCog, FaSignOutAlt, FaCheckCircle, FaInfoCircle, FaBars, FaStar } from "react-icons/fa";
 import { RoleContext } from "@/context/role-context";
 import { useGetUserProfileQuery, useUpdateUserProfileMutation, useGetUserNotificationsQuery, useMarkNotificationReadMutation, useMarkAllNotificationsReadMutation } from "@/redux/api";
@@ -11,6 +12,7 @@ import { getRoleLabel, getAvatarName } from "@/utils/helper";
 import { showPushNotification } from "@/utils/helper";
 import { useSocket } from "@/hooks/useSocket";
 import Toast from "./Toast";
+import { CentralLoader } from "./Loader";
 
 // Types
 interface UserProviderHeaderProps {
@@ -28,12 +30,13 @@ type Notification = {
 };
 
 // Custom hook for optimistic role switching
-function useOptimisticRole(role: RoleType, setRole: (r: RoleType) => void, updateUserProfile: any) {
+function useOptimisticRole(role: RoleType, setRole: (r: RoleType) => void, updateUserProfile: any, setLoading: (loading: boolean) => void) {
   const [optimisticRole, setOptimisticRole] = useState<RoleType | undefined>();
   const handleRoleSwitch = useCallback(async () => {
     const newRole: RoleType = role === "user" ? "provider" : "user";
     setOptimisticRole(newRole);
     setRole(newRole);
+    setLoading(true);
     try {
       const response = await updateUserProfile({ profile_type: newRole }).unwrap();
       if (response?.data?.profile_type === newRole || response?.profile_type === newRole) {
@@ -45,6 +48,8 @@ function useOptimisticRole(role: RoleType, setRole: (r: RoleType) => void, updat
     } catch (error) {
       setRole(role);
       setOptimisticRole(undefined);
+    } finally {
+      setLoading(false);
     }
   }, [role, setRole, updateUserProfile]);
   return { optimisticRole, handleRoleSwitch };
@@ -58,6 +63,7 @@ function getRoleIcon(role: RoleType) {
 const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { role, setRole } = useContext(RoleContext);
   const router = useRouter();
   const pathname = usePathname();
@@ -67,7 +73,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
   const user = data?.data;
   const dispatch = useDispatch();
   const [updateUserProfile] = useUpdateUserProfileMutation();
-  const { optimisticRole, handleRoleSwitch } = useOptimisticRole(role, setRole, updateUserProfile);
+  const { optimisticRole, handleRoleSwitch } = useOptimisticRole(role, setRole, updateUserProfile, setLoading);
   const currentRole: RoleType = optimisticRole ?? role;
   const userId = useSelector((state: any) => state.user?.user_id || state.user?.user?.id);
   const token = useSelector((state: any) => state.user?.token);
@@ -240,6 +246,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
 
   return (
     <header className="w-full h-16 flex items-center justify-between border-b border-[var(--base)]/10 shadow bg-white sticky top-0 z-[40]">
+      {loading && <CentralLoader loading={loading} />}
       <div className="w-full mx-auto flex flex-wrap items-center justify-between max-w-8xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 md:gap-6 min-w-0">
           {/* Hamburger menu icon (always visible, themed) */}
@@ -346,7 +353,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
                   type="checkbox"
                   className="sr-only peer"
                   checked={role === "provider"}
-                  onChange={handleRoleSwitch}
+                  onChange={() => handleRoleSwitch()}
                   aria-label="Toggle user/provider role"
                 />
                 <div className="w-24 h-8 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[var(--base)] rounded-full peer peer-checked:bg-[var(--base)] transition-all duration-200 flex items-center justify-between relative px-2">

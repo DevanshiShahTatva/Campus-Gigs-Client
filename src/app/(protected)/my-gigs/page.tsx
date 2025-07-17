@@ -24,6 +24,7 @@ import MyGigSkelton from "@/components/skeleton/MyGigSkelton";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 import { useRouter } from "next/navigation";
 import { useGetUserProfileQuery } from "@/redux/api";
+import GigRatingModal from "../gig-pipeline/GigRatingModal";
 
 const MyGigs = () => {
   const router = useRouter();
@@ -34,6 +35,7 @@ const MyGigs = () => {
   const [gigIdForDelete, setGigIdForDelete] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [gigs, setGigs] = useState<Gigs[]>([]);
+  const [gigIdForReview, setGigIdForReview] = useState<number>(0);
   const [meta, setMeta] = useState<IPagination>({
     page: 1,
     pageSize: 9,
@@ -150,11 +152,10 @@ const MyGigs = () => {
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                  activeTab === tab.id
+                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
                     ? "border-teal-500 text-teal-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -204,14 +205,29 @@ const MyGigs = () => {
                       <CardHeader className="pb-3">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
-                            <CardTitle className="text-lg text-gray-900 mb-2">
-                              {gig.title}{" "}
-                              <Badge
-                                variant={"secondary"}
-                                className="bg-[var(--base)] text-white"
-                              >
-                                {gig.gig_category.name}
-                              </Badge>
+                            <CardTitle className="flex justify-between text-lg text-gray-900 mb-2">
+                              <div className="flex items-center gap-2">
+                                {gig.title}{" "}
+                                <Badge
+                                  variant={"secondary"}
+                                  className="bg-[var(--base)] text-white"
+                                >
+                                  {gig.gig_category.name}
+                                </Badge>
+                              </div>
+                              {gig.status === "completed" && (
+                                <div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setGigIdForReview(gig.id);
+                                    }}
+                                    className="bg-[var(--base)] text-white px-3 py-1 rounded"
+                                  >
+                                    Review
+                                  </button>
+                                </div>
+                              )}
                             </CardTitle>
                             <div className="flex flex-wrap gap-2 mb-2">
                               {gig.skills.map((data) => {
@@ -308,6 +324,12 @@ const MyGigs = () => {
         confirmText="Delete Gig"
         isDeleting={isDeleting}
       />
+      {gigIdForReview && (
+        <GigRatingModal
+          gigId={gigIdForReview}
+          onClose={() => setGigIdForReview(0)}
+        />
+      )}
     </>
   );
 };

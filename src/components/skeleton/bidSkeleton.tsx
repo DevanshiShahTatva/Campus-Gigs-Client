@@ -19,7 +19,6 @@ const BidSkeleton = () => {
               </div>
               <div className="space-y-2 mb-2">
                 <div className="h-3 sm:h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-                <div className="h-3 sm:h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
               </div>
             </div>
           </div>
