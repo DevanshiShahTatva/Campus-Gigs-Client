@@ -143,6 +143,7 @@ const SignUpPage: React.FC = () => {
             name: response.data.user.name,
             profile: response.data.user.profile,
             user_id: response.data.user.id,
+            profile_type: response.data.user.profile_type,
           }));
         }
         router.push("/user/buy-subscription");

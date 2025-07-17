@@ -7,7 +7,7 @@ import { FaBell, FaChevronDown, FaExchangeAlt, FaUser, FaCog, FaSignOutAlt, FaCh
 import { RoleContext } from "@/context/role-context";
 import { useGetUserProfileQuery, useUpdateUserProfileMutation, useGetUserNotificationsQuery, useMarkNotificationReadMutation, useMarkAllNotificationsReadMutation } from "@/redux/api";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "@/redux/slices/userSlice";
+import { logout, setProfileType } from "@/redux/slices/userSlice";
 import { getRoleLabel, getAvatarName } from "@/utils/helper";
 import { showPushNotification } from "@/utils/helper";
 import { useSocket } from "@/hooks/useSocket";
@@ -26,6 +26,7 @@ type RoleType = "user" | "provider";
 // Custom hook for optimistic role switching
 function useOptimisticRole(role: RoleType, setRole: (r: RoleType) => void, updateUserProfile: any, setLoading: (loading: boolean) => void) {
   const [optimisticRole, setOptimisticRole] = useState<RoleType | undefined>();
+  const dispatch = useDispatch();
   const handleRoleSwitch = useCallback(async () => {
     const newRole: RoleType = role === "user" ? "provider" : "user";
     setOptimisticRole(newRole);
@@ -33,6 +34,7 @@ function useOptimisticRole(role: RoleType, setRole: (r: RoleType) => void, updat
     setLoading(true);
     try {
       const response = await updateUserProfile({ profile_type: newRole }).unwrap();
+      dispatch(setProfileType(newRole));
       if (response?.data?.profile_type === newRole || response?.profile_type === newRole) {
         setOptimisticRole(undefined);
       } else {
@@ -80,7 +82,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
       ? fetchedNotifications
       : [];
 
-  const notifications = notificationsRaw.map((notif:any) => ({
+  const notifications = notificationsRaw.map((notif: any) => ({
     id: notif.id,
     type: notif.notification_type || notif.type || "info",
     message: notif.description || notif.message || notif.title || "",
@@ -131,7 +133,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
   const showRoleToggle = !!(user?.subscription && user.subscription.subscription_plan && user.subscription.subscription_plan.price > 0);
 
   // Calculate if there are unread notifications
-  const hasUnread = notifications.some((notif:any) => !notif.read);
+  const hasUnread = notifications.some((notif: any) => !notif.read);
 
   // Mark a single notification as read (UI + API)
   const handleMarkAsRead = async (id: number) => {
@@ -176,26 +178,26 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
     socket.on("userNotification", handleUserNotification);
 
     // Listen for chat notifications
-    const handleChatNotification = (data: any) => {      
+    const handleChatNotification = (data: any) => {
       if (pathname !== `/chat`) {
-          if (
-            typeof document !== "undefined" &&
-            (document.visibilityState !== "visible" || !document.hasFocus())
-          ) {
-            // Show push notification if not on the tab or browser is minimized
-            showPushNotification(data.senderName || data.title || "Notification", {
-              body: data.message || "You received a new message.",
-              link: `/chat?userId=` + data.senderId,
-              icon: data.senderAvatar,
-            });
-          } else {
-            setToast({
-              message: data.message || `${data.title}: ${data.message}`,
-              link: `/chat?userId=` + data.senderId,
-              senderName: data.senderName,
-              senderAvatar: data.senderAvatar,
-            });
-          }
+        if (
+          typeof document !== "undefined" &&
+          (document.visibilityState !== "visible" || !document.hasFocus())
+        ) {
+          // Show push notification if not on the tab or browser is minimized
+          showPushNotification(data.senderName || data.title || "Notification", {
+            body: data.message || "You received a new message.",
+            link: `/chat?userId=` + data.senderId,
+            icon: data.senderAvatar,
+          });
+        } else {
+          setToast({
+            message: data.message || `${data.title}: ${data.message}`,
+            link: `/chat?userId=` + data.senderId,
+            senderName: data.senderName,
+            senderAvatar: data.senderAvatar,
+          });
+        }
       }
     };
     socket.on("chatNotification", handleChatNotification);
@@ -267,7 +269,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
                 {notifications.length === 0 ? (
                   <div className="px-5 py-6 text-center text-gray-400">No notifications</div>
                 ) : (
-                  notifications.map((notif:any) => (
+                  notifications.map((notif: any) => (
                     <div
                       key={notif.id}
                       className={`flex flex-col gap-2 px-5 py-4 ${notif.read ? "bg-gray-50" : "bg-white"} ${notif.link ? "cursor-pointer hover:bg-[var(--base)]/10 transition" : ""}`}

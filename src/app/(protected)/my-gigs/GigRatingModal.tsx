@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { Star, AlertTriangle, CheckCircle, ThumbsUp } from 'lucide-react';
+import moment from 'moment';
+import { Star, AlertTriangle, CheckCircle, ThumbsUp, MessageSquare } from 'lucide-react';
 import { apiCall } from '@/utils/apiCall';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -17,7 +18,23 @@ const getRatingText = (rating: number) => {
   return texts[rating] || 'Rate the service';
 };
 
-const GigRatingModal = ({ gigId, onClose }: { gigId: number, onClose: () => void }) => {
+interface ExistingRatingData {
+  userRating: number;
+  userFeedback: string;
+  userIssue?: string;
+  userExpectation?: string;
+  providerResponse?: string;
+  providerChallengeDate?: string;
+}
+
+interface GigRatingModalProps {
+  gigId: number;
+  isReadonly?: boolean;
+  existingRating?: ExistingRatingData | null;
+  onClose: () => void;
+}
+
+const GigRatingModal = ({ gigId, existingRating, isReadonly = false, onClose }: GigRatingModalProps) => {
   const [step, setStep] = useState('rating');
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
@@ -29,7 +46,31 @@ const GigRatingModal = ({ gigId, onClose }: { gigId: number, onClose: () => void
     sincerityAgreement: false
   });
 
-  const submitRating = async (data: any) => {
+  useEffect(() => {
+    if (existingRating) {
+      setRating(existingRating.userRating);
+      setFeedback(existingRating.userFeedback || '');
+      setFormData({
+        issue: existingRating.userIssue || '',
+        shouldHaveDone: existingRating.userExpectation || '',
+        sincerityAgreement: true
+      });
+
+      if (isReadonly) {
+        setStep('rating');
+      } else {
+        if (existingRating.userRating < 4 && existingRating.userIssue) {
+          setStep('unsatisfied');
+        } else {
+          setStep('rating');
+        }
+      }
+    }
+  }, [existingRating, isReadonly]);
+
+  const submitRating = async () => {
+    if (isReadonly) return;
+
     try {
       setLoading(true);
       const response = await apiCall({
@@ -37,10 +78,10 @@ const GigRatingModal = ({ gigId, onClose }: { gigId: number, onClose: () => void
         method: 'POST',
         body: {
           gig_id: gigId,
-          rating: data.rating,
+          rating: rating,
           rating_feedback: feedback,
-          issue_text: rating < 4 ? data.issue_text : undefined,
-          what_provider_done: rating < 4 ? data.what_provider_done : undefined,
+          issue_text: rating < 4 ? formData.issue : undefined,
+          what_provider_done: rating < 4 ? formData.shouldHaveDone : undefined,
         }
       });
 
@@ -57,6 +98,7 @@ const GigRatingModal = ({ gigId, onClose }: { gigId: number, onClose: () => void
   };
 
   const handleRatingClick = (rating: number) => {
+    if (isReadonly) return;
     setRating(rating);
     if (rating >= 4) {
       setFormData({
@@ -68,27 +110,23 @@ const GigRatingModal = ({ gigId, onClose }: { gigId: number, onClose: () => void
   };
 
   const handleRatingSubmit = () => {
-    if (rating < 1) {
-      return;
-    }
+    if (isReadonly) return;
+    if (rating < 1) return;
 
     if (rating >= 4) {
-      submitRating({ rating, feedback });
+      submitRating();
     } else {
       setStep('unsatisfied');
     }
   };
 
   const handleUnsatisfiedSubmit = () => {
+    if (isReadonly) return;
     if (!formData.issue || !formData.shouldHaveDone || !formData.sincerityAgreement) {
       return;
     }
 
-    submitRating({
-      rating,
-      issue_text: formData.issue,
-      what_provider_done: formData.shouldHaveDone,
-    });
+    submitRating();
   };
 
   if (!gigId) return null;
@@ -110,7 +148,9 @@ const GigRatingModal = ({ gigId, onClose }: { gigId: number, onClose: () => void
       >
         <div className="px-4 py-3 sm:px-6 sm:py-4 border-b bg-background rounded-t-[0.75rem] flex-shrink-0">
           <DialogHeader>
-            <DialogTitle className="text-lg sm:text-xl">Gig Review</DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl">
+              {isReadonly ? 'Review Details' : 'Gig Review'}
+            </DialogTitle>
           </DialogHeader>
         </div>
         <div className="flex-1 overflow-y-auto">
@@ -121,10 +161,10 @@ const GigRatingModal = ({ gigId, onClose }: { gigId: number, onClose: () => void
                   <Star className="text-[var(--base)]" size={24} />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  How was your experience?
+                  {isReadonly ? 'Service Rating' : 'How was your experience?'}
                 </h3>
                 <p className="text-gray-600">
-                  Please rate the provider's service
+                  {isReadonly ? 'Your rating and feedback for this service' : 'Please rate the provider\'s service'}
                 </p>
               </div>
               <div className="flex justify-center mb-6">
@@ -132,9 +172,10 @@ const GigRatingModal = ({ gigId, onClose }: { gigId: number, onClose: () => void
                   <button
                     key={star}
                     onClick={() => handleRatingClick(star)}
-                    onMouseEnter={() => setHoveredRating(star)}
-                    onMouseLeave={() => setHoveredRating(0)}
-                    className="mx-1 transition-all duration-200 hover:scale-130 border-none outline-none"
+                    onMouseEnter={() => !isReadonly && setHoveredRating(star)}
+                    onMouseLeave={() => !isReadonly && setHoveredRating(0)}
+                    disabled={isReadonly}
+                    className={`mx-1 transition-all duration-200 ${isReadonly ? 'cursor-default' : 'hover:scale-130 cursor-pointer'} border-none outline-none`}
                   >
                     <Star
                       size={32}
@@ -153,26 +194,69 @@ const GigRatingModal = ({ gigId, onClose }: { gigId: number, onClose: () => void
               </div>
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Your Feedback <span className="text-destructive ml-1">*</span>
+                  {isReadonly ? 'Your Feedback' : 'Your Feedback'} <span className="text-destructive ml-1">*</span>
                 </label>
                 <textarea
                   rows={3}
                   value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
-                  placeholder="Describe what you expected or what should have been done differently..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[var(--base)] focus:border-[var(--base)] transition-colors resize-none text-black"
+                  onChange={(e) => !isReadonly && setFeedback(e.target.value)}
+                  placeholder="Describe your experience with the service..."
+                  readOnly={isReadonly}
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[var(--base)] focus:border-[var(--base)] transition-colors resize-none text-black ${isReadonly ? 'bg-gray-50 cursor-default' : ''}`}
                 />
               </div>
-              <button
-                onClick={handleRatingSubmit}
-                disabled={!rating || !feedback}
-                className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 ${(rating && feedback)
-                  ? 'bg-[var(--base)] text-white hover:bg-[var(--base-hover)] shadow-lg hover:shadow-xl'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  }`}
-              >
-                {rating >= 4 ? 'Submit Review' : 'Next'}
-              </button>
+              {isReadonly && rating < 4 && (existingRating?.userIssue || existingRating?.userExpectation) && (
+                <div className="mb-6 space-y-4">
+                  {existingRating?.userIssue && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Issue Reported
+                      </label>
+                      <div className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-black">
+                        {existingRating.userIssue}
+                      </div>
+                    </div>
+                  )}
+                  {existingRating?.userExpectation && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        What Should Have Been Done
+                      </label>
+                      <div className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-black">
+                        {existingRating.userExpectation}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {isReadonly && existingRating?.providerResponse && (
+                <div className="mb-6">
+                  <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <MessageSquare className="mr-2" size={16} />
+                    Provider's Response
+                  </label>
+                  <div className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-black">
+                    <p className="mb-2">{existingRating.providerResponse}</p>
+                    {existingRating.providerChallengeDate && (
+                      <p className="text-sm text-gray-600">
+                        Responded on: {moment(existingRating.providerChallengeDate).format('DD-MM-YYYY hh:mm A')}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+              {!isReadonly && (
+                <button
+                  onClick={handleRatingSubmit}
+                  disabled={!rating || !feedback}
+                  className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 ${(rating && feedback)
+                    ? 'bg-[var(--base)] text-white hover:bg-[var(--base-hover)] shadow-lg hover:shadow-xl'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
+                >
+                  {rating >= 4 ? 'Submit Review' : 'Next'}
+                </button>
+              )}
             </div>
           )}
           {step === 'unsatisfied' && (
@@ -255,7 +339,7 @@ const GigRatingModal = ({ gigId, onClose }: { gigId: number, onClose: () => void
                   }
                 </p>
                 <button
-                  onClick={() => onClose()}
+                  onClick={onClose}
                   className="w-full py-3 px-4 bg-[var(--base)] text-white rounded-lg hover:bg-[var(--base-hover)] transition-colors font-medium"
                 >
                   Close
@@ -264,7 +348,7 @@ const GigRatingModal = ({ gigId, onClose }: { gigId: number, onClose: () => void
             </div>
           )}
         </div>
-        {step === 'unsatisfied' && (
+        {step === 'unsatisfied' && !isReadonly && (
           <div className="p-3 sm:p-4 border-t bg-background rounded-b-[0.75rem] flex-shrink-0">
             <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
               <Button
@@ -285,6 +369,19 @@ const GigRatingModal = ({ gigId, onClose }: { gigId: number, onClose: () => void
                   }`}
               >
                 Submit Report
+              </Button>
+            </DialogFooter>
+          </div>
+        )}
+        {isReadonly && (
+          <div className="p-3 sm:p-4 border-t bg-background rounded-b-[0.75rem] flex-shrink-0">
+            <DialogFooter>
+              <Button
+                type="button"
+                onClick={onClose}
+                className="w-full sm:w-auto text-sm sm:text-base h-9 sm:h-10"
+              >
+                Close
               </Button>
             </DialogFooter>
           </div>

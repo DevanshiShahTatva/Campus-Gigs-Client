@@ -18,33 +18,35 @@ import { toast } from "react-toastify";
 import { Gigs, IPagination } from "@/utils/interface";
 import { renderBaseOnCondition } from "@/utils/helper";
 import moment from "moment";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux";
 import InfiniteScroll from "react-infinite-scroll-component";
-import Loader from "@/components/common/Loader";
+import Loader, { CentralLoader } from "@/components/common/Loader";
 import MyGigSkelton from "@/components/skeleton/MyGigSkelton";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 import { useRouter } from "next/navigation";
-import { useGetUserProfileQuery } from "@/redux/api";
-import GigRatingModal from "../gig-pipeline/GigRatingModal";
+import GigRatingModal from "./GigRatingModal";
 
 const MyGigs = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("un_started");
   const [loading, setLoading] = useState<boolean>(true);
+  const [ratingLoading, setRatingLoading] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [gigIdForDelete, setGigIdForDelete] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [gigs, setGigs] = useState<Gigs[]>([]);
-  const [gigIdForReview, setGigIdForReview] = useState<number>(0);
+  const [ratingData, setRatingData] = useState<any>(null);
+  const [gigIdForRating, setGigIdForRating] = useState<number>(0);
   const [meta, setMeta] = useState<IPagination>({
     page: 1,
     pageSize: 9,
     totalPages: 0,
     total: 1,
   });
-  const { data: userProfile } = useGetUserProfileQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-  });
+
+  const profileType = useSelector((state: RootState) => state.user.profile_type);
 
   const fetchGigs = async (page = 1, status = "") => {
     setActiveTab(status);
@@ -52,7 +54,7 @@ const MyGigs = () => {
       setLoading(true);
 
       const resp = await apiCall({
-        endPoint: `${API_ROUTES.MY_GIGS}?page=${page}&pageSize=10&status=${status}&profile_type=${userProfile.data.profile_type}`,
+        endPoint: `${API_ROUTES.MY_GIGS}?page=${page}&pageSize=10&status=${status}&profile_type=${profileType}`,
         method: "GET",
       });
 
@@ -70,7 +72,7 @@ const MyGigs = () => {
 
   useEffect(() => {
     fetchGigs(1, "un_started");
-  }, [userProfile]);
+  }, [profileType]);
 
   const fetchNextPage = () => {
     if (currentPage < meta.totalPages && !loading) {
@@ -131,9 +133,28 @@ const MyGigs = () => {
     router.push(`gigs/${id}`);
   };
 
+  const getRatingDetail = async (gigId: number) => {
+    try {
+      setRatingLoading(true);
+      const res = await apiCall({
+        method: "GET",
+        endPoint: `/rating/get-by-gig/${gigId}`,
+      });
+
+      if (res?.success) {
+        setRatingData(res.data);
+      }
+    } catch (error) {
+      toast.error("Failed to get gig details");
+    } finally {
+      setRatingLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="mb-8 flex items-center justify-between">
+        {ratingLoading && <CentralLoader loading={ratingLoading} />}
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">My Gigs</h1>
           <p className="text-gray-600">
@@ -153,8 +174,8 @@ const MyGigs = () => {
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
                 className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
-                    ? "border-teal-500 text-teal-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  ? "border-teal-500 text-teal-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
               >
                 {tab.label}
@@ -220,7 +241,8 @@ const MyGigs = () => {
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      setGigIdForReview(gig.id);
+                                      setGigIdForRating(gig.id);
+                                      getRatingDetail(gig.id);
                                     }}
                                     className="bg-[var(--base)] text-white px-3 py-1 rounded"
                                   >
@@ -324,10 +346,15 @@ const MyGigs = () => {
         confirmText="Delete Gig"
         isDeleting={isDeleting}
       />
-      {gigIdForReview && (
+      {!!gigIdForRating && (
         <GigRatingModal
-          gigId={gigIdForReview}
-          onClose={() => setGigIdForReview(0)}
+          isReadonly={!!ratingData}
+          gigId={gigIdForRating}
+          existingRating={ratingData}
+          onClose={() => {
+            setGigIdForRating(0);
+            setRatingData(null);
+          }}
         />
       )}
     </>

@@ -255,6 +255,7 @@ const LogInPage = () => {
           name: loginResponse.data.user.name,
           profile: loginResponse.data.user.profile,
           user_id: loginResponse.data.user.id,
+          profile_type: loginResponse.data.user.profile_type,
         }));
       }
       if (loginResponse.success) {
