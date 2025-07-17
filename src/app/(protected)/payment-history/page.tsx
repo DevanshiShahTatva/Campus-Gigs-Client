@@ -96,7 +96,6 @@ const PaymentHistory = () => {
               You haven't made any transactions yet. Your payments will appear
               here once completed.
             </p>
-            <Button>Make Payment</Button>
           </div>
         </CardContent>
       </Card>
