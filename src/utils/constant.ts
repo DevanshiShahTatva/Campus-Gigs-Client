@@ -55,7 +55,8 @@ export const ROUTES = {
     GIGS: "/gigs",
     GIGS_CREATE: "/gigs/create",
     PROVIDER: "/provider",
-    CHAT: "/chat"
+    CHAT: "/chat",
+    PAYMENT_HISTORY: "/payment-history"
   },
 };
 

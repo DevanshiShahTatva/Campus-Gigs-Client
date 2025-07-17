@@ -4,14 +4,12 @@ import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
   FaComments,
-  FaTasks,
-  FaCog,
   FaHome,
   FaTimes,
-  FaCreditCard,
   FaListAlt,
   FaClipboardList,
   FaProjectDiagram,
+  FaMoneyBillWaveAlt
 } from "react-icons/fa";
 import Link from "next/link";
 import { ROUTES } from "@/utils/constant";
@@ -53,13 +51,13 @@ const sidebarItems = [
     route: ROUTES.GIGS_PIPELINE,
     access: ["provider"],
   },
-  // {
-  //   id: 4,
-  //   title: "Settings",
-  //   icon: <FaCog />,
-  //   route: "#",
-  //   access: ["user", "provider"],
-  // }
+  {
+    id: 8,
+    title: "Payment History",
+    icon: <FaMoneyBillWaveAlt />,
+    route: ROUTES.USER.PAYMENT_HISTORY,
+    access: ["provider", "user"],
+  },
 ];
 
 const UserProviderSidebar = ({

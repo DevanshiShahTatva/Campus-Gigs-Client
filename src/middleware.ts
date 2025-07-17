@@ -39,6 +39,7 @@ const userRoutes = [
   ROUTES.USER.GIGS_CREATE,
   ROUTES.USER.PROVIDER,
   ROUTES.USER.CHAT,
+  ROUTES.USER.PAYMENT_HISTORY
 ];
 
 export async function middleware(request: NextRequest) {
@@ -121,5 +122,6 @@ export const config = {
     "/provider/:path*",
     "/chat/:path*",
     "/buy-subscription/:path*",
+    "/payment-history"
   ],
 };
