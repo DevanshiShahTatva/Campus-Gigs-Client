@@ -167,7 +167,6 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
 
     // Listen for bid/user notifications
     const handleUserNotification = (data: any) => {
-      console.log("SOMETHING NEW====>", data)
       showPushNotification(data.title || "Notification", {
         body: data.message || "You received a new notification.",
         link: data.link,
