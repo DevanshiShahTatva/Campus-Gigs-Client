@@ -68,6 +68,10 @@ export const API_ROUTES = {
   GIG_PIPELINE: "/gigs/gig-pipeline",
   GIG_STATUS_CHANGE: "/gigs/change-status",
   GIG_PRIORITY: "/gigs/priority",
+  SUBSCRIPTION_HISTORY: "/subscription-plan/history",
+  USER_SERVICE_REQUEST:"/contact-us/my-requests",
+  SKILLS_DROPDOWN:'/skills/dropdown',
+  CHANGE_PASSWORD:"/auth/change-password",
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
     AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",

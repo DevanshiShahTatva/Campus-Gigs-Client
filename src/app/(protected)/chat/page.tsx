@@ -78,7 +78,7 @@ function useSocket(token?: string): {
       }
 
       const namespace = "chat";
-      const socketUrl = `${wsUrl}/${namespace}`;
+      const socketUrl = `${wsUrl}${namespace}`;
 
       console.log("Connecting to WebSocket:", socketUrl);
 
