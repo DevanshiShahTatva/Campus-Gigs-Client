@@ -22,12 +22,6 @@ interface UserProviderHeaderProps {
 
 type RoleType = "user" | "provider";
 
-type Notification = {
-  id: number;
-  type: "info" | "success";
-  message: string;
-  read: boolean;
-};
 
 // Custom hook for optimistic role switching
 function useOptimisticRole(role: RoleType, setRole: (r: RoleType) => void, updateUserProfile: any, setLoading: (loading: boolean) => void) {
@@ -76,7 +70,6 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
   const { optimisticRole, handleRoleSwitch } = useOptimisticRole(role, setRole, updateUserProfile, setLoading);
   const currentRole: RoleType = optimisticRole ?? role;
   const userId = useSelector((state: any) => state.user?.user_id || state.user?.user?.id);
-  const token = useSelector((state: any) => state.user?.token);
   const { data: fetchedNotifications, refetch } = useGetUserNotificationsQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
@@ -99,7 +92,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
   const [markNotificationRead] = useMarkNotificationReadMutation();
   const [markAllNotificationsRead] = useMarkAllNotificationsReadMutation();
   const [markAllLoading, setMarkAllLoading] = useState(false);
-  const [toast, setToast] = useState<{ message: string; link?: string } | null>(null);
+  const [toast, setToast] = useState<{ message: string; link?: string; senderName?: string; senderAvatar?: string } | null>(null);
 
   // Get user initials for avatar fallback
   const initials = getAvatarName(user?.name || "", true);
@@ -168,18 +161,6 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
     setNotifOpen((open) => !open);
   };
 
-  React.useEffect(() => {
-    const handleVisibilityChange = () => {
-
-      console.log(document.visibilityState === "visible" ? "YESSSSSS IN ":"NOOO HERE NEVER")
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
 
   React.useEffect(() => {
     if (!socket) return;
@@ -196,42 +177,26 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
     socket.on("userNotification", handleUserNotification);
 
     // Listen for chat notifications
-    const handleChatNotification = (data: any) => {
-      console.log("SOCEKTID and USERID", userId, "=======");
-      
-
-      
+    const handleChatNotification = (data: any) => {      
       if (pathname !== `/chat`) {
-        if (typeof document !== "undefined") {
-          console.log(data,"SSSSSSSNotification received, visibilityState:", document.visibilityState, "hasFocus:", document.hasFocus && document.hasFocus());
-        }
-        if (
-          typeof document !== "undefined" &&
-          document.visibilityState === "visible" 
-          // && document.hasFocus && document.hasFocus()
-        ) {
-
-          setToast({ message: `${data.title}: ${data.message}`, link: data.link });
-
-          console.log("IN IFFF");
-          
-        } else{
-          console.log("IN ELSE");
-          
-        }
-        
-        // if (window.Notification && Notification.permission === "granted") {
-        //   console.log("IN ELSEEEE");
-          
-        //   const n = new Notification(data.title, {
-        //     body: data.message,
-        //     data: { url: data.link },
-        //   });
-        //   n.onclick = (event) => {
-        //     event.preventDefault();
-        //     window.open(data.link, "_blank");
-        //   };
-        // }
+          if (
+            typeof document !== "undefined" &&
+            (document.visibilityState !== "visible" || !document.hasFocus())
+          ) {
+            // Show push notification if not on the tab or browser is minimized
+            showPushNotification(data.senderName || data.title || "Notification", {
+              body: data.message || "You received a new message.",
+              link: `/chat?userId=` + data.senderId,
+              icon: data.senderAvatar,
+            });
+          } else {
+            setToast({
+              message: data.message || `${data.title}: ${data.message}`,
+              link: `/chat?userId=` + data.senderId,
+              senderName: data.senderName,
+              senderAvatar: data.senderAvatar,
+            });
+          }
       }
     };
     socket.on("chatNotification", handleChatNotification);
@@ -448,6 +413,8 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
           message={toast.message}
           link={toast.link}
           onClose={() => setToast(null)}
+          senderName={toast.senderName}
+          senderAvatar={toast.senderAvatar}
         />
       )}
     </header>

@@ -53,7 +53,7 @@ export function showPushNotification(
           const url = options.link!.startsWith("http")
             ? options.link
             : window.location.origin + options.link;
-          window.open(url, "_blank");
+          window.open(url, "_self"); // Open in the same tab
         };
       }
     };
