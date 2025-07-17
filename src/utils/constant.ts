@@ -74,6 +74,7 @@ export const API_ROUTES = {
   SKILLS_DROPDOWN:'/skills/dropdown',
   CHANGE_PASSWORD:"/auth/change-password",
   CREATE_AUTO_DEBIT_SUBSCRIPTION: "/subscription-plan/create-subscription-session",
+  PAYMENT_HISTORY: "/payment-history",
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
     AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",
@@ -125,6 +126,11 @@ export enum BID_STATUS {
     MEDIUM = 'medium',
     LOW = 'low'
   }
+
+export enum PAYMENT_HISTORY_TYPE {
+  SUBSCRIPTION = "subscription",
+  GIG_PAYMENt = "gig_payment"
+}
 
 export const USER_SIDEBAR_ITEMS = [
   {
