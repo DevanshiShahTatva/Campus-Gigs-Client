@@ -30,6 +30,7 @@ export interface ApiResponse {
       name: string;
       profile: string;
       id: string;
+      profile_type: string;
     };
   };
 }
