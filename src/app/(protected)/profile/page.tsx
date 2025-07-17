@@ -19,6 +19,7 @@ import moment from "moment";
 import { useSelector } from 'react-redux';
 import { useSocket } from '@/hooks/useSocket';
 import { RootState } from "@/redux/index";
+import { API_ROUTES } from "@/utils/constant";
 
 // Custom Profile Photo Component
 const ProfilePhotoUpload = ({
@@ -186,26 +187,30 @@ const Profile = () => {
     if (activeTab === "subscription") {
       setIsSubscriptionLoading(true);
       setSubscriptionError(null);
-      apiCall({ endPoint: "/subscription-plan/history", method: "GET" })
-        .then((res) => {
+      (async () => {
+        try {
+          const res = await apiCall({ endPoint: API_ROUTES.SUBSCRIPTION_HISTORY, method: "GET" });
           setSubscriptionHistory(res?.data || []);
-        })
-        .catch((err) => {
+        } catch (err) {
           setSubscriptionError("Failed to load subscription history");
-        })
-        .finally(() => setIsSubscriptionLoading(false));
+        } finally {
+          setIsSubscriptionLoading(false);
+        }
+      })();
     }
     if (activeTab === "support") {
       setIsSupportLoading(true);
       setSupportError(null);
-      apiCall({ endPoint: "/contact-us/my-requests", method: "GET" })
-        .then((res) => {
+      (async () => {
+        try {
+          const res = await apiCall({ endPoint: API_ROUTES.USER_SERVICE_REQUEST, method: "GET" });
           setSupportRequests(res?.data || []);
-        })
-        .catch((err) => {
+        } catch (err) {
           setSupportError("Failed to load support requests");
-        })
-        .finally(() => setIsSupportLoading(false));
+        } finally {
+          setIsSupportLoading(false);
+        }
+      })();
     }
   }, [activeTab]);
 
@@ -218,7 +223,7 @@ const Profile = () => {
           // Refetch support requests
           setIsSupportLoading(true);
           setSupportError(null);
-          apiCall({ endPoint: '/contact-us/my-requests', method: 'GET' })
+          apiCall({ endPoint: API_ROUTES.USER_SERVICE_REQUEST, method: 'GET' })
             .then((res) => {
               setSupportRequests(res?.data || []);
             })
@@ -239,7 +244,7 @@ const Profile = () => {
 
   const fetchSkillsDropdown = useCallback(async () => {
     try {
-      const res = await apiCall({ endPoint: '/skills/dropdown', method: 'GET' });
+      const res = await apiCall({ endPoint: API_ROUTES.SKILLS_DROPDOWN, method: 'GET' });
       if (res?.data?.length) {
         setSkillsDropdown(res.data || []);
       }
@@ -320,7 +325,7 @@ const Profile = () => {
     }
     try {
       const response = await apiCall({
-        endPoint: "/auth/change-password",
+        endPoint: API_ROUTES.CHANGE_PASSWORD,
         method: "POST",
         body: {
           currentPassword: values.currentPassword,
