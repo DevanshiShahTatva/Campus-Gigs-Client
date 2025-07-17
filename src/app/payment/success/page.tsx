@@ -21,12 +21,14 @@ const PaymentSuccess = () => {
   useEffect(() => {
     if (searchParams.size === 0) {
       router.push(ROUTES.GIGS);
+    } else if (searchParams.get("plan_buy_id") !== null) {
+      fetchPlanDetails();
     } else {
       const subscriptionId = sessionStorage.getItem("subscriptionId");
       const orderId = sessionStorage.getItem("orderId");
       const isAutoDebit = sessionStorage.getItem("isAutoDebit") === "true";
 
-      // // call buy plan
+      // call buy plan
       if (subscriptionId && orderId && isAutoDebit) {
         handleBuyPlan(subscriptionId, orderId, isAutoDebit);
       }
@@ -42,6 +44,25 @@ const PaymentSuccess = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const fetchPlanDetails = async () => {
+    try {
+      const response = await apiCall({
+        endPoint: `/subscription-plan/current`,
+        method: "GET",
+      });
+      if (response.success) {
+        setPlanResponse(response.data);
+      } else {
+        router.push(ROUTES.GIGS);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBuyPlan = async (

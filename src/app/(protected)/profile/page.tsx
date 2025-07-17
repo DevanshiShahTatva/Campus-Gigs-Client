@@ -551,7 +551,7 @@ const Profile = () => {
                                   <span className="ml-2 text-xs text-gray-400">({status})</span>
                                 </div>
                                 <div className="text-xs text-gray-500">
-                                  Price: ₹{planPrice} | Start: {startDate} | End: {endDate}
+                                  Price: $ {planPrice} | Start: {startDate} | End: {endDate}
                                 </div>
                                 {plan.transaction_id && (
                                   <div className="text-xs text-gray-400">Txn ID: {plan.transaction_id}</div>
@@ -561,7 +561,7 @@ const Profile = () => {
                                 {status}
                               </div>
                             </div>
-                            {!plan.subscription_expiry_date && <div>
+                            {plan.is_auto_debit && <div>
                               <Button variant={"destructive"} size={"sm"} onClick={() => handleCancelAutoDebit(plan)}>Cancel Auto Debit</Button>
                             </div>}
                             {features.length > 0 && (

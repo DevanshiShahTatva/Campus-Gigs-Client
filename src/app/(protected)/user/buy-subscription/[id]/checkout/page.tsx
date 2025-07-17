@@ -12,6 +12,7 @@ import { ISubscriptionPlan } from "@/utils/interface";
 import BuySubscriptionSkeleton from "./components/BuySubscriptionSkeleton";
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/common/Loader";
+import { API_ROUTES, ROUTES } from "@/utils/constant";
 
 interface PageProps {
   params: Promise<{ id: number }>;
@@ -46,6 +47,30 @@ const Checkout = ({ params }: PageProps) => {
     }
     setIsLoading(false);
   };
+
+  const handleAutoDebitPayment = async () => {
+    try {
+      setPaymentLoading(true);
+      const res = await apiCall({
+        endPoint: API_ROUTES.CREATE_AUTO_DEBIT_SUBSCRIPTION,
+        method: "POST",
+        body: {
+          subscriptionPlanId: unwrappedParams.id,
+        },
+      });
+
+      if (res?.data.subscriptionId && res?.data.approvalLink) {
+        sessionStorage.setItem("orderId", res.data.subscriptionId);
+        sessionStorage.setItem("subscriptionId", String(unwrappedParams.id));
+        sessionStorage.setItem("isAutoDebit", `${isAutoDebit}`);
+        window.location.href = res.data.approvalLink;
+      } 
+    } catch(error) {
+      toast.error("Failed to initiate PayPal subscription.");
+    } finally {
+      setPaymentLoading(false);
+    }
+  }
 
   const initialOptions = {
     clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
@@ -205,27 +230,7 @@ const Checkout = ({ params }: PageProps) => {
                 {/* {!isLoading && ( */}
                 {isAutoDebit ? (
                   <Button
-                    onClick={async () => {
-                      setPaymentLoading(true);
-                      const res = await apiCall({
-                        endPoint:
-                          "subscription-plan/create-subscription-session",
-                        method: "POST",
-                        body: {
-                          subscriptionPlanId: unwrappedParams.id,
-                        },
-                      });
-
-                      if (res?.data.subscriptionId && res?.data.approvalLink) {
-                        sessionStorage.setItem("orderId", res.data.subscriptionId);
-                        sessionStorage.setItem("subscriptionId", String(unwrappedParams.id));
-                        sessionStorage.setItem("isAutoDebit", `${isAutoDebit}`);
-                        window.location.href = res.data.approvalLink;
-                      } else {
-                        setPaymentLoading(false);
-                        toast.error("Failed to initiate PayPal subscription.");
-                      }
-                    }}
+                    onClick={handleAutoDebitPayment}
                     disabled={paymentLoading}
                     className="bg-[var(--base)] hover:bg-[var(--base-hover)] text-white font-medium py-2 px-4 rounded w-full"
                   >
@@ -265,7 +270,7 @@ const Checkout = ({ params }: PageProps) => {
                         toast.success(
                           "🎉 Subscription plan purchased successfully!"
                         );
-                        router.push("/gigs");
+                        router.push(ROUTES.PAYMENT_SUCCESS + `?plan_buy_id=${response.data.id}`)
                       } else {
                         toast.error(
                           "Payment completed but activation failed. Please contact support."
@@ -277,9 +282,11 @@ const Checkout = ({ params }: PageProps) => {
                       toast.error(
                         "An error occurred with PayPal checkout. Please try again."
                       );
+                      router.push(ROUTES.PAYMENT_CANCEL + `?cancel_error_plan=${unwrappedParams.id}`);
                     }}
                     onCancel={() => {
                       toast.info("Payment was cancelled.");
+                      router.push(ROUTES.PAYMENT_CANCEL + `?cancel_error_plan=${unwrappedParams.id}`);
                     }}
                   />
                 )}
@@ -287,13 +294,6 @@ const Checkout = ({ params }: PageProps) => {
                 {/* )} */}
               </PayPalScriptProvider>
             </div>
-
-            {/* {isLoading && (
-              <div className="flex items-center justify-center mt-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                <span className="ml-2 text-gray-600">Processing...</span>
-              </div>
-            )} */}
 
             {/* Trust indicators */}
             <div className="mt-8 pt-6 border-t">
