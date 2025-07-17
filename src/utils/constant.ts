@@ -72,6 +72,7 @@ export const API_ROUTES = {
   USER_SERVICE_REQUEST:"/contact-us/my-requests",
   SKILLS_DROPDOWN:'/skills/dropdown',
   CHANGE_PASSWORD:"/auth/change-password",
+  CREATE_AUTO_DEBIT_SUBSCRIPTION: "/subscription-plan/create-subscription-session",
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
     AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",
