@@ -367,7 +367,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
     if (data.message.sender_id === currentUserId) {
       setTimeout(() => scrollToBottom(), 100);
     } else {
-      toast.success("New message received");
+      // toast.success("New message received");
     }
   }, [selectedChat, currentUserId, formatMessageData, scrollToBottom]);
 
@@ -437,7 +437,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
     setAttachments((prev) => prev.filter((_, i) => i !== index));
     setAttachmentPreviews((prev) => prev.filter((_, i) => i !== index));
   };
-
+ 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim() === "" && attachments.length === 0) return;
@@ -453,18 +453,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
 
     setSending(true);
     try {
-      const response = await apiCall({
-        endPoint: `/chats/${selectedChat.id}/messages`,
-        method: "POST",
-        headers: { "Content-Type": "multipart/form-data" },
-        body: formData,
-        isFormData: true,
-      });
-
-      if (!response?.success) {
-        throw new Error(response?.message || "Failed to send message");
-      }
-
+        const response = await apiCall({
+          endPoint: `/chats/${selectedChat.id}/messages`,
+          method: "POST",
+          headers: { "Content-Type": "multipart/form-data" },
+          body: formData,
+          isFormData: true,
+        });
+        
+        if (!response?.success) {
+          throw new Error(response?.message || "Failed to send message");
+        }
+      
       setMessage("");
       setAttachments([]);
       setAttachmentPreviews([]);

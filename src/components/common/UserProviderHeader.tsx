@@ -2,12 +2,16 @@
 import React, { useState, useContext, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { FaBell, FaChevronDown, FaExchangeAlt, FaUser, FaCog, FaSignOutAlt, FaCheckCircle, FaInfoCircle, FaBars, FaStar } from "react-icons/fa";
 import { RoleContext } from "@/context/role-context";
-import { useGetUserProfileQuery, useUpdateUserProfileMutation } from "@/redux/api";
-import { useDispatch } from "react-redux";
+import { useGetUserProfileQuery, useUpdateUserProfileMutation, useGetUserNotificationsQuery, useMarkNotificationReadMutation, useMarkAllNotificationsReadMutation } from "@/redux/api";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/redux/slices/userSlice";
 import { getRoleLabel, getAvatarName } from "@/utils/helper";
+import { showPushNotification } from "@/utils/helper";
+import { useSocket } from "@/hooks/useSocket";
+import Toast from "./Toast";
 import { CentralLoader } from "./Loader";
 
 // Types
@@ -17,6 +21,7 @@ interface UserProviderHeaderProps {
 }
 
 type RoleType = "user" | "provider";
+
 
 // Custom hook for optimistic role switching
 function useOptimisticRole(role: RoleType, setRole: (r: RoleType) => void, updateUserProfile: any, setLoading: (loading: boolean) => void) {
@@ -55,6 +60,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
   const [loading, setLoading] = useState(false);
   const { role, setRole } = useContext(RoleContext);
   const router = useRouter();
+  const pathname = usePathname();
   const { data, isLoading } = useGetUserProfileQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
@@ -63,13 +69,30 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
   const [updateUserProfile] = useUpdateUserProfileMutation();
   const { optimisticRole, handleRoleSwitch } = useOptimisticRole(role, setRole, updateUserProfile, setLoading);
   const currentRole: RoleType = optimisticRole ?? role;
+  const userId = useSelector((state: any) => state.user?.user_id || state.user?.user?.id);
+  const { data: fetchedNotifications, refetch } = useGetUserNotificationsQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
+  // Use the correct data property from the API response
+  const notificationsRaw = Array.isArray(fetchedNotifications?.data)
+    ? fetchedNotifications.data
+    : Array.isArray(fetchedNotifications)
+      ? fetchedNotifications
+      : [];
 
-  // Placeholder notifications
-  const notifications = [
-    { id: 1, type: "info", message: "Your gig was approved!", read: false },
-    { id: 2, type: "success", message: "Payment received for completed gig.", read: false },
-    { id: 3, type: "info", message: "New message from Alice.", read: true },
-  ];
+  const notifications = notificationsRaw.map((notif:any) => ({
+    id: notif.id,
+    type: notif.notification_type || notif.type || "info",
+    message: notif.description || notif.message || notif.title || "",
+    read: notif.is_read ?? notif.read ?? false,
+    link: notif.link,
+  }));
+
+  const socket = useSocket(userId);
+  const [markNotificationRead] = useMarkNotificationReadMutation();
+  const [markAllNotificationsRead] = useMarkAllNotificationsReadMutation();
+  const [markAllLoading, setMarkAllLoading] = useState(false);
+  const [toast, setToast] = useState<{ message: string; link?: string; senderName?: string; senderAvatar?: string } | null>(null);
 
   // Get user initials for avatar fallback
   const initials = getAvatarName(user?.name || "", true);
@@ -86,7 +109,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
     router.push("/login");
   };
 
-  // Close dropdowns on outside click
+  // Close dropdowns on outside clickz
   React.useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (!(e.target as HTMLElement).closest(".notif-dropdown")) setNotifOpen(false);
@@ -106,6 +129,84 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
 
   // Determine if toggle should be shown based on subscription plan  
   const showRoleToggle = !!(user?.subscription && user.subscription.subscription_plan && user.subscription.subscription_plan.price > 0);
+
+  // Calculate if there are unread notifications
+  const hasUnread = notifications.some((notif:any) => !notif.read);
+
+  // Mark a single notification as read (UI + API)
+  const handleMarkAsRead = async (id: number) => {
+    try {
+      await markNotificationRead({ notificationId: id });
+      refetch();
+    } catch (e) {
+      console.error("Failed to mark notification as read", e);
+    }
+  };
+
+  // Mark all notifications as read (UI + API)
+  const handleMarkAllAsRead = async () => {
+    setMarkAllLoading(true);
+    try {
+      await markAllNotificationsRead();
+      refetch();
+    } catch (e) {
+      console.error("Failed to mark all notifications as read", e);
+    } finally {
+      setMarkAllLoading(false);
+    }
+  };
+
+  // Mark all as read logic removed from handleNotifOpen
+  const handleNotifOpen = () => {
+    setNotifOpen((open) => !open);
+  };
+
+
+  React.useEffect(() => {
+    if (!socket) return;
+
+    // Listen for bid/user notifications
+    const handleUserNotification = (data: any) => {
+      showPushNotification(data.title || "Notification", {
+        body: data.message || "You received a new notification.",
+        link: data.link,
+      });
+      refetch();
+    };
+    socket.on("userNotification", handleUserNotification);
+
+    // Listen for chat notifications
+    const handleChatNotification = (data: any) => {      
+      if (pathname !== `/chat`) {
+          if (
+            typeof document !== "undefined" &&
+            (document.visibilityState !== "visible" || !document.hasFocus())
+          ) {
+            // Show push notification if not on the tab or browser is minimized
+            showPushNotification(data.senderName || data.title || "Notification", {
+              body: data.message || "You received a new message.",
+              link: `/chat?userId=` + data.senderId,
+              icon: data.senderAvatar,
+            });
+          } else {
+            setToast({
+              message: data.message || `${data.title}: ${data.message}`,
+              link: `/chat?userId=` + data.senderId,
+              senderName: data.senderName,
+              senderAvatar: data.senderAvatar,
+            });
+          }
+      }
+    };
+    socket.on("chatNotification", handleChatNotification);
+
+    return () => {
+      socket.off("userNotification", handleUserNotification);
+      socket.off("chatNotification", handleChatNotification);
+    };
+  }, [socket, refetch, pathname]);
+
+
 
   return (
     <header className="w-full h-16 flex items-center justify-between border-b border-[var(--base)]/10 shadow bg-white sticky top-0 z-[40]">
@@ -134,35 +235,74 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
             <button
               className="relative p-2 rounded-full hover:bg-[var(--base)]/10 transition-colors focus:outline-none"
               title="Notifications"
-              onClick={() => setNotifOpen((open) => !open)}
+              onClick={handleNotifOpen}
             >
               <FaBell className="text-xl text-gray-400" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              {hasUnread && (
+                <span className="absolute top-1 right-1 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+              )}
             </button>
             {/* Notifications Dropdown */}
             <div
-              className={`notif-dropdown absolute right-0 mt-2 w-80 bg-white border border-[var(--base)]/20 rounded-xl shadow-2xl transition-all duration-200 z-40 overflow-hidden ${notifOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
+              className={`notif-dropdown absolute -right-5 sm:right-0 mt-2 w-64 sm:w-80 bg-white border border-[var(--base)]/20 rounded-xl shadow-2xl transition-all duration-200 z-40 overflow-hidden ${notifOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
                 }`}
               onMouseLeave={() => setNotifOpen(false)}
             >
-              <div className="px-5 py-4 border-b border-gray-100 bg-[var(--base)]/5 font-semibold text-gray-900 text-base">Notifications</div>
+              <div className="px-5 py-4 border-b border-gray-100 bg-[var(--base)]/5 font-semibold text-gray-900 text-base flex items-center justify-between">
+                <span>Notifications</span>
+                {hasUnread && (
+                  <button
+                    className="text-xs text-[var(--base)] hover:underline font-semibold ml-2 disabled:opacity-50"
+                    onClick={handleMarkAllAsRead}
+                    disabled={markAllLoading}
+                  >
+                    {markAllLoading ? "Marking..." : "Mark all as read"}
+                  </button>
+                )}
+              </div>
               <div className="max-h-64 overflow-y-auto divide-y divide-gray-100">
                 {notifications.length === 0 ? (
                   <div className="px-5 py-6 text-center text-gray-400">No notifications</div>
                 ) : (
-                  notifications.map((notif) => (
-                    <div key={notif.id} className={`flex items-start gap-3 px-5 py-4 ${notif.read ? "bg-gray-50" : "bg-white"}`}>
-                      <span className="mt-1">
-                        {notif.type === "success" ? (
-                          <FaCheckCircle className="text-green-500 text-lg" />
-                        ) : (
-                          <FaInfoCircle className="text-[var(--base)] text-lg" />
-                        )}
-                      </span>
-                      <div className="flex-1">
-                        <div className="text-sm text-gray-800">{notif.message}</div>
-                        {!notif.read && <button className="mt-2 text-xs text-[var(--base)] hover:underline">Mark as read</button>}
+                  notifications.map((notif:any) => (
+                    <div
+                      key={notif.id}
+                      className={`flex flex-col gap-2 px-5 py-4 ${notif.read ? "bg-gray-50" : "bg-white"} ${notif.link ? "cursor-pointer hover:bg-[var(--base)]/10 transition" : ""}`}
+                      onClick={async () => {
+                        if (notif.link) {
+                          if (!notif.read) {
+                            await handleMarkAsRead(notif.id);
+                          }
+                          router.push(notif.link);
+                        }
+                      }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="mt-1">
+                          {notif.type === "success" ? (
+                            <FaCheckCircle className="text-green-500 text-lg" />
+                          ) : (
+                            <FaInfoCircle className="text-[var(--base)] text-lg" />
+                          )}
+                        </span>
+                        <div className="flex-1">
+                          <div className="text-sm text-gray-800">{notif.message}</div>
+                        </div>
                       </div>
+                      {!notif.read && (
+                        <button
+                          className="text-xs text-[var(--base)] hover:underline self-start"
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleMarkAsRead(notif.id);
+                          }}
+                        >
+                          Mark as read
+                        </button>
+                      )}
                     </div>
                   ))
                 )}
@@ -267,7 +407,17 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
           </div>
         </div>
       </div>
+      {toast && (
+        <Toast
+          message={toast.message}
+          link={toast.link}
+          onClose={() => setToast(null)}
+          senderName={toast.senderName}
+          senderAvatar={toast.senderAvatar}
+        />
+      )}
     </header>
   );
 };
+
 export default UserProviderHeader;
