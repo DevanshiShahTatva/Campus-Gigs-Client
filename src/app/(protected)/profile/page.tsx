@@ -11,11 +11,13 @@ import {
   useGetUserProfileQuery,
   useUpdateUserProfileMutation,
 } from "@/redux/api";
-import { IDropdownOption } from "@/utils/interface";
+import { CurrentSubscriptionPlan, IDropdownOption } from "@/utils/interface";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import Link from "next/link";
 import moment from "moment";
+import { Button } from "@/components/ui/button";
+import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 
 // Custom Profile Photo Component
 const ProfilePhotoUpload = ({
@@ -176,19 +178,13 @@ const Profile = () => {
   const [isSupportLoading, setIsSupportLoading] = useState(false);
   const [supportError, setSupportError] = useState<string | null>(null);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<null | CurrentSubscriptionPlan>(null);
+  const [deleteModelOpen, setDeleteModelOpen] = useState<boolean>(false);
+  const [isCancellingAutoDebit, setIsCancellingAutoDebit] = useState<boolean>(false);
 
   useEffect(() => {
     if (activeTab === "subscription") {
-      setIsSubscriptionLoading(true);
-      setSubscriptionError(null);
-      apiCall({ endPoint: "/subscription-plan/history", method: "GET" })
-        .then((res) => {
-          setSubscriptionHistory(res?.data || []);
-        })
-        .catch((err) => {
-          setSubscriptionError("Failed to load subscription history");
-        })
-        .finally(() => setIsSubscriptionLoading(false));
+      handleFetchPaymentPlans();
     }
     if (activeTab === "support") {
       setIsSupportLoading(true);
@@ -308,6 +304,47 @@ const Profile = () => {
           err?.message ||
           "Failed to change password."
       );
+    }
+  };
+
+  const handleCancelAutoDebit = (plan: CurrentSubscriptionPlan) => {
+    setSelectedPlan(plan);
+    setDeleteModelOpen(true);
+  };
+
+  const handleFetchPaymentPlans = async () => {
+    setIsSubscriptionLoading(true);
+    setSubscriptionError(null);
+    apiCall({ endPoint: "/subscription-plan/history", method: "GET" })
+      .then((res) => {
+        setSubscriptionHistory(res?.data || []);
+      })
+      .catch((err) => {
+        setSubscriptionError("Failed to load subscription history");
+      })
+      .finally(() => setIsSubscriptionLoading(false));
+  };
+
+  const handleConfirmCancelAutoDebit = async () => {
+    const paypalSubscriptionId = selectedPlan?.transaction_id;
+    try {
+      setIsCancellingAutoDebit(true);
+      const res = await apiCall({
+        endPoint: `subscription-plan/cancel-subscription/${paypalSubscriptionId}`,
+        method: "PUT",
+      });
+
+      if (res?.status === 200) {
+        toast.success("Auto debit subscription cancelled");
+        setDeleteModelOpen(false);
+        handleFetchPaymentPlans();
+      } else {
+        toast.error("Failed to cancel subscription");
+      }
+    } catch (error) {
+      toast.error("Something went wrong while cancelling");
+    } finally {
+      setIsCancellingAutoDebit(false);
     }
   };
 
@@ -718,12 +755,14 @@ const Profile = () => {
                   <h3 className="text-lg font-semibold text-[var(--base)] mb-4">
                     Subscription Plan History
                   </h3>
+                  <Button>
                     <Link
-                      className="px-5 py-2 rounded-lg bg-[var(--base)] text-white font-semibold shadow hover:bg-[var(--base-hover)] transition"
+                      className="rounded-lg text-white font-semibold"
                       href={'/user/buy-subscription'}
                     >
                       Go to Subscription Page
                     </Link>
+                  </Button>
                   </div>
                   <div className="divide-y">
                     {isSubscriptionLoading ? (
@@ -738,7 +777,7 @@ const Profile = () => {
                         const planPrice = plan.subscription_plan?.price ?? plan.price;
                         const status = plan.status ? plan.status.charAt(0).toUpperCase() + plan.status.slice(1) : "-";
                         const startDate = plan.created_at ? moment(plan.created_at).format("DD/MM/YYYY") : "-";
-                        const endDate = plan.subscription_expiry_date ? moment(plan.subscription_expiry_date).format("DD/MM/YYYY") : "-";
+                        const endDate = plan.subscription_expiry_date ? moment(plan.subscription_expiry_date).format("DD/MM/YYYY") : "NA";
                         const isActive = plan.status === "active";
                         const isCancelled = plan.status === "cancelled";
                         const features = plan.subscription_plan?.features || [];
@@ -762,6 +801,9 @@ const Profile = () => {
                                 {status}
                               </div>
                             </div>
+                            {!plan.subscription_expiry_date && <div>
+                              <Button variant={"destructive"} size={"sm"} onClick={() => handleCancelAutoDebit(plan)}>Cancel Auto Debit</Button>
+                            </div>}
                             {features.length > 0 && (
                               <div>
                                 <button
@@ -852,6 +894,16 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmationDialog
+        isOpen={deleteModelOpen}
+        onClose={() => setDeleteModelOpen(false)}
+        onConfirm={handleConfirmCancelAutoDebit}
+        title="Cancel Auto Debit"
+        description="Are you sure you want to cancel auto debit?"
+        confirmText="Confirm"
+        isDeleting={isCancellingAutoDebit}
+      />
     </div>
   );
 };
