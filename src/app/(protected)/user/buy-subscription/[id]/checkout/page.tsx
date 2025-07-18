@@ -10,6 +10,9 @@ import { apiCall } from "@/utils/apiCall";
 import { Shield, CreditCard, Lock, CheckCircle, Star } from "lucide-react";
 import { ISubscriptionPlan } from "@/utils/interface";
 import BuySubscriptionSkeleton from "./components/BuySubscriptionSkeleton";
+import { Button } from "@/components/ui/button";
+import Loader from "@/components/common/Loader";
+import { API_ROUTES, ROUTES } from "@/utils/constant";
 
 interface PageProps {
   params: Promise<{ id: number }>;
@@ -19,7 +22,11 @@ const Checkout = ({ params }: PageProps) => {
   const unwrappedParams = use(params);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [planDetails, setPlanDetails] = useState<ISubscriptionPlan | null>(null);
+  const [paymentLoading, setPaymentLoading] = useState<boolean>(false);
+  const [isAutoDebit, setIsAutoDebit] = useState(false);
+  const [planDetails, setPlanDetails] = useState<ISubscriptionPlan | null>(
+    null
+  );
 
   useEffect(() => {
     fetchPlanDetails();
@@ -41,6 +48,30 @@ const Checkout = ({ params }: PageProps) => {
     setIsLoading(false);
   };
 
+  const handleAutoDebitPayment = async () => {
+    try {
+      setPaymentLoading(true);
+      const res = await apiCall({
+        endPoint: API_ROUTES.CREATE_AUTO_DEBIT_SUBSCRIPTION,
+        method: "POST",
+        body: {
+          subscriptionPlanId: unwrappedParams.id,
+        },
+      });
+
+      if (res?.data.subscriptionId && res?.data.approvalLink) {
+        sessionStorage.setItem("orderId", res.data.subscriptionId);
+        sessionStorage.setItem("subscriptionId", String(unwrappedParams.id));
+        sessionStorage.setItem("isAutoDebit", `${isAutoDebit}`);
+        window.location.href = res.data.approvalLink;
+      } 
+    } catch(error) {
+      toast.error("Failed to initiate PayPal subscription.");
+    } finally {
+      setPaymentLoading(false);
+    }
+  }
+
   const initialOptions = {
     clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
     currency: "USD",
@@ -61,7 +92,8 @@ const Checkout = ({ params }: PageProps) => {
           Complete Your <span className="text-[var(--base)]">Payment</span>
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          You're just one step away from unlocking premium features. Secure, fast, and trusted by millions worldwide.
+          You're just one step away from unlocking premium features. Secure,
+          fast, and trusted by millions worldwide.
         </p>
       </div>
 
@@ -72,28 +104,44 @@ const Checkout = ({ params }: PageProps) => {
           {/* Plan Summary */}
           <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-8 h-fit">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Order Summary</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Order Summary
+              </h2>
               <div className="flex items-center space-x-1">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  <Star
+                    key={i}
+                    className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                  />
                 ))}
                 <span className="text-sm text-gray-600 ml-2">4.9/5</span>
               </div>
             </div>
 
             <div className="bg-gradient-to-r from-[var(--base)] to-[var(--base-hover)] rounded-xl p-6 text-white mb-6">
-              <h3 className="text-xl font-semibold mb-2">{planDetails?.name}</h3>
-              <div className="text-3xl font-bold">${planDetails?.price.toFixed(2)}</div>
+              <h3 className="text-xl font-semibold mb-2">
+                {planDetails?.name}
+              </h3>
+              <div className="text-3xl font-bold">
+                ${planDetails?.price.toFixed(2)}
+              </div>
               <p className="text-blue-100 mt-1">per month</p>
-              <p className="text-blue-100 text-sm mt-2">{planDetails?.description}</p>
+              <p className="text-blue-100 text-sm mt-2">
+                {planDetails?.description}
+              </p>
             </div>
 
             <div className="space-y-4 mb-6">
-              <h4 className="font-semibold text-gray-900 mb-3">What's included:</h4>
+              <h4 className="font-semibold text-gray-900 mb-3">
+                What's included:
+              </h4>
               {isLoading ? (
                 <div className="space-y-3">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                    <div
+                      key={i}
+                      className="h-4 bg-gray-200 rounded animate-pulse"
+                    ></div>
                   ))}
                 </div>
               ) : (
@@ -123,7 +171,9 @@ const Checkout = ({ params }: PageProps) => {
 
           {/* Payment Section */}
           <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Method</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              Payment Method
+            </h2>
 
             {/* Payment Options */}
             <div className="mb-8">
@@ -131,76 +181,126 @@ const Checkout = ({ params }: PageProps) => {
                 <div className="w-12 h-8 bg-[var(--base)] rounded flex items-center justify-center">
                   <span className="text-white font-bold text-xs">PayPal</span>
                 </div>
-                <span className="text-gray-700 font-medium">Pay with PayPal</span>
+                <span className="text-gray-700 font-medium">
+                  Pay with PayPal
+                </span>
                 <div className="ml-auto">
-                  <span className="bg-green-100 text-[var(--base)] text-xs px-2 py-1 rounded-full">Recommended</span>
+                  <span className="bg-green-100 text-[var(--base)] text-xs px-2 py-1 rounded-full">
+                    Recommended
+                  </span>
                 </div>
               </div>
-              <p className="text-sm text-gray-600 mb-6">Pay safely and securely with your PayPal account or credit card. No account required.</p>
+              <p className="text-sm text-gray-600 mb-6">
+                Pay safely and securely with your PayPal account or credit card.
+                No account required.
+              </p>
             </div>
 
             {/* PayPal Buttons */}
-            <div className={`transition-opacity duration-300 ${isLoading ? "opacity-50 pointer-events-none" : ""}`}>
+            <div
+              className={`transition-opacity duration-300 ${
+                isLoading ? "opacity-50 pointer-events-none" : ""
+              }`}
+            >
               <PayPalScriptProvider options={initialOptions}>
+                <div className="mb-6">
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={isAutoDebit}
+                      onChange={() => setIsAutoDebit(!isAutoDebit)}
+                    />
+                    <div
+                      className={`w-11 h-6 flex items-cente rounded-full p-1 duration-300 ease-in-out ${
+                        isAutoDebit ? "bg-[var(--base)]" : "bg-gray-300"
+                      }`}
+                    >
+                      <div
+                        className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${
+                          isAutoDebit ? "translate-x-5" : ""
+                        }`}
+                      ></div>
+                    </div>
+                    <span className="ml-3 text-sm text-gray-700">
+                      Enable auto-debit (recurring subscription)
+                    </span>
+                  </label>
+                </div>
                 {/* {!isLoading && ( */}
-                <PayPalButtons
-                  style={{
-                    shape: "rect",
-                    layout: "vertical",
-                    color: "gold",
-                    label: "paypal",
-                    height: 50,
-                  }}
-                  createOrder={async () => {
-                    const response = await apiCall({
-                      endPoint: `subscription-plan/create-order/${unwrappedParams.id}`,
-                      method: "POST",
-                    });
+                {isAutoDebit ? (
+                  <Button
+                    onClick={handleAutoDebitPayment}
+                    disabled={paymentLoading}
+                    className="bg-[var(--base)] hover:bg-[var(--base-hover)] text-white font-medium py-2 px-4 rounded w-full"
+                  >
+                    {paymentLoading ? <Loader size={8} /> : "Proceed with Auto-Debit via PayPal"}
+                  </Button>
+                ) : (
+                  <PayPalButtons
+                    style={{
+                      shape: "rect",
+                      layout: "vertical",
+                      color: "gold",
+                      label: "paypal",
+                      height: 50,
+                    }}
+                    createOrder={async () => {
+                      const response = await apiCall({
+                        endPoint: `subscription-plan/create-order/${unwrappedParams.id}`,
+                        method: "POST",
+                      });
 
-                    if (response?.status === 201) {
-                      return response?.data?.orderId;
-                    } else {
-                      toast.error("Something went wrong, please try again later.");
-                      return null;
-                    }
-                  }}
-                  onApprove={async (data) => {
-                    const response = await apiCall({
-                      endPoint: `subscription-plan/buy-paid-plan/${unwrappedParams.id}/${data.orderID}`,
-                      method: "POST",
-                    });
+                      if (response?.status === 201) {
+                        return response?.data?.orderId;
+                      } else {
+                        toast.error(
+                          "Something went wrong, please try again later."
+                        );
+                        return null;
+                      }
+                    }}
+                    onApprove={async (data) => {
+                      const response = await apiCall({
+                        endPoint: `subscription-plan/buy-paid-plan/${unwrappedParams.id}/${data.orderID}`,
+                        method: "POST",
+                      });
 
-                    if (response?.status === 200) {
-                      toast.success("🎉 Subscription plan purchased successfully!");
+                      if (response?.status === 200) {
+                        toast.success(
+                          "🎉 Subscription plan purchased successfully!"
+                        );
+                        router.push(ROUTES.PAYMENT_SUCCESS + `?plan_buy_id=${response.data.id}`)
+                      } else {
+                        toast.error(
+                          "Payment completed but activation failed. Please contact support."
+                        );
+                      }
+                    }}
+                    onError={(err) => {
+                      console.error("PayPal Checkout onError", err);
+                      toast.error(
+                        "An error occurred with PayPal checkout. Please try again."
+                      );
+                      router.push(ROUTES.PAYMENT_CANCEL + `?cancel_error_plan=${unwrappedParams.id}`);
+                    }}
+                    onCancel={() => {
+                      toast.info("Payment was cancelled.");
+                      router.push(ROUTES.PAYMENT_CANCEL + `?cancel_error_plan=${unwrappedParams.id}`);
+                    }}
+                  />
+                )}
 
-                      router.push("/gigs");
-                    } else {
-                      toast.error("Payment completed but activation failed. Please contact support.");
-                    }
-                  }}
-                  onError={(err) => {
-                    console.error("PayPal Checkout onError", err);
-                    toast.error("An error occurred with PayPal checkout. Please try again.");
-                  }}
-                  onCancel={() => {
-                    toast.info("Payment was cancelled.");
-                  }}
-                />
                 {/* )} */}
               </PayPalScriptProvider>
             </div>
 
-            {/* {isLoading && (
-              <div className="flex items-center justify-center mt-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                <span className="ml-2 text-gray-600">Processing...</span>
-              </div>
-            )} */}
-
             {/* Trust indicators */}
             <div className="mt-8 pt-6 border-t">
               <div className="text-center">
-                <p className="text-sm text-gray-600 mb-3">Trusted by over 100,000+ customers worldwide</p>
+                <p className="text-sm text-gray-600 mb-3">
+                  Trusted by over 100,000+ customers worldwide
+                </p>
               </div>
             </div>
           </div>
@@ -211,7 +311,10 @@ const Checkout = ({ params }: PageProps) => {
       <div className="mt-12 mb-4 text-center">
         <p className="text-gray-600">
           Need help?{" "}
-          <Link href="/ContactUs" className="text-[var(--base)] hover:text-[var(--base-hover)] font-medium">
+          <Link
+            href="/ContactUs"
+            className="text-[var(--base)] hover:text-[var(--base-hover)] font-medium"
+          >
             Contact our support team
           </Link>
         </p>

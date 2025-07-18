@@ -11,6 +11,8 @@ const publicRoutes = [
   ROUTES.SIGN_UP,
   ROUTES.FORGOT_PASSWORD,
   ROUTES.RESET_PASSWORD,
+  ROUTES.PAYMENT_SUCCESS,
+  ROUTES.PAYMENT_CANCEL
 ];
 
 const adminRoutes = [
@@ -37,6 +39,7 @@ const userRoutes = [
   ROUTES.USER.GIGS_CREATE,
   ROUTES.USER.PROVIDER,
   ROUTES.USER.CHAT,
+  ROUTES.USER.PAYMENT_HISTORY
 ];
 
 export async function middleware(request: NextRequest) {
@@ -119,5 +122,6 @@ export const config = {
     "/provider/:path*",
     "/chat/:path*",
     "/buy-subscription/:path*",
+    "/payment-history"
   ],
 };

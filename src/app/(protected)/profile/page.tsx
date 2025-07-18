@@ -11,7 +11,7 @@ import {
   useGetUserProfileQuery,
   useUpdateUserProfileMutation,
 } from "@/redux/api";
-import { IDropdownOption } from "@/utils/interface";
+import { CurrentSubscriptionPlan, IDropdownOption } from "@/utils/interface";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import Link from "next/link";
@@ -20,142 +20,8 @@ import { useSelector } from 'react-redux';
 import { useSocket } from '@/hooks/useSocket';
 import { RootState } from "@/redux/index";
 import { API_ROUTES } from "@/utils/constant";
-
-// Custom Profile Photo Component
-const ProfilePhotoUpload = ({
-  value,
-  onChange,
-  name,
-}: {
-  value: File | null;
-  onChange: (file: File | null) => void;
-  name: string;
-}) => {
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Generate preview URL when file is selected
-  React.useEffect(() => {
-    if (value) {
-      const url = URL.createObjectURL(value);
-      setPreviewUrl(url);
-      return () => URL.revokeObjectURL(url);
-    } else {
-      setPreviewUrl(null);
-    }
-  }, [value]);
-
-  const handleDragEnter = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(false);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.dataTransfer.dropEffect = "copy";
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(false);
-
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      const file = files[0];
-      if (file.type.startsWith("image/")) {
-        onChange(file);
-      }
-    }
-  };
-
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      if (file.type.startsWith("image/")) {
-        onChange(file);
-      }
-    }
-    // Reset input value
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  return (
-    <div className="flex flex-col items-center">
-      <div
-        className="relative w-32 h-32 rounded-full cursor-pointer"
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        onClick={handleClick}
-      >
-        {previewUrl ? (
-          // Show uploaded image
-          <img
-            src={previewUrl}
-            alt="Profile"
-            className="w-full h-full rounded-full object-cover"
-          />
-        ) : (
-          // Show initials by default
-          <div className="w-full h-full rounded-full bg-blue-500 flex items-center justify-center">
-            <span className="text-white text-2xl font-semibold">
-              {getInitials(name)}
-            </span>
-          </div>
-        )}
-
-        {/* Hover overlay for change photo option */}
-        {isHovered && !isDragOver && (
-          <div className="absolute inset-0 rounded-full bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="text-center">
-              <FiUpload className="w-6 h-6 text-white mx-auto mb-1" />
-              <p className="text-xs text-white">Change Photo</p>
-            </div>
-          </div>
-        )}
-
-        {/* Drag overlay */}
-        {isDragOver && (
-          <div className="absolute inset-0 rounded-full bg-blue-500 bg-opacity-20 flex items-center justify-center">
-            <FiUpload className="w-6 h-6 text-blue-600" />
-          </div>
-        )}
-      </div>
-
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileInputChange}
-        className="hidden"
-        aria-label="Upload profile photo"
-        title="Upload profile photo"
-      />
-    </div>
-  );
-};
+import { Button } from "@/components/ui/button";
+import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 
 const Profile = () => {
   const [success, setSuccess] = React.useState(false);
@@ -182,21 +48,15 @@ const Profile = () => {
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const userId = useSelector((state: RootState) => state.user?.user_id || state.user?.user?.id);
   const socket = useSocket(userId ? String(userId) : null);
+  const [selectedPlan, setSelectedPlan] = useState<null | CurrentSubscriptionPlan>(null);
+  const [deleteModelOpen, setDeleteModelOpen] = useState<boolean>(false);
+  const [isCancellingAutoDebit, setIsCancellingAutoDebit] = useState<boolean>(false);
 
   useEffect(() => {
     if (activeTab === "subscription") {
       setIsSubscriptionLoading(true);
       setSubscriptionError(null);
-      (async () => {
-        try {
-          const res = await apiCall({ endPoint: API_ROUTES.SUBSCRIPTION_HISTORY, method: "GET" });
-          setSubscriptionHistory(res?.data || []);
-        } catch (err) {
-          setSubscriptionError("Failed to load subscription history");
-        } finally {
-          setIsSubscriptionLoading(false);
-        }
-      })();
+      handleFetchPaymentPlans();
     }
     if (activeTab === "support") {
       setIsSupportLoading(true);
@@ -344,6 +204,47 @@ const Profile = () => {
           err?.message ||
           "Failed to change password."
       );
+    }
+  };
+
+  const handleCancelAutoDebit = (plan: CurrentSubscriptionPlan) => {
+    setSelectedPlan(plan);
+    setDeleteModelOpen(true);
+  };
+
+  const handleFetchPaymentPlans = async () => {
+    setIsSubscriptionLoading(true);
+    setSubscriptionError(null);
+    apiCall({ endPoint: "/subscription-plan/history", method: "GET" })
+      .then((res) => {
+        setSubscriptionHistory(res?.data || []);
+      })
+      .catch((err) => {
+        setSubscriptionError("Failed to load subscription history");
+      })
+      .finally(() => setIsSubscriptionLoading(false));
+  };
+
+  const handleConfirmCancelAutoDebit = async () => {
+    const paypalSubscriptionId = selectedPlan?.transaction_id;
+    try {
+      setIsCancellingAutoDebit(true);
+      const res = await apiCall({
+        endPoint: `subscription-plan/cancel-subscription/${paypalSubscriptionId}`,
+        method: "PUT",
+      });
+
+      if (res?.status === 200) {
+        toast.success("Auto debit subscription cancelled");
+        setDeleteModelOpen(false);
+        handleFetchPaymentPlans();
+      } else {
+        toast.error("Failed to cancel subscription");
+      }
+    } catch (error) {
+      toast.error("Something went wrong while cancelling");
+    } finally {
+      setIsCancellingAutoDebit(false);
     }
   };
 
@@ -565,33 +466,6 @@ const Profile = () => {
               >
                 Profile Details
               </button>
-              {/* Hiding My Gigs and Gig History tabs for now */}
-              {/*
-              {profileMode === "provider" && (
-                <>
-                  <button
-                    className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${
-                      activeTab === "gigs"
-                        ? "border-[var(--base)] text-[var(--base)]"
-                        : "border-transparent text-gray-500 hover:text-[var(--base)]"
-                    }`}
-                    onClick={() => setActiveTab("gigs")}
-                  >
-                    My Gigs
-                  </button>
-                  <button
-                    className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${
-                      activeTab === "history"
-                        ? "border-[var(--base)] text-[var(--base)]"
-                        : "border-transparent text-gray-500 hover:text-[var(--base)]"
-                    }`}
-                    onClick={() => setActiveTab("history")}
-                  >
-                    Gig History
-                  </button>
-                </>
-              )}
-              */}
               <button
                 className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${
                   activeTab === "support"
@@ -635,83 +509,6 @@ const Profile = () => {
                   enableReinitialize
                 />
               )}
-              {/* Hiding My Gigs and Gig History content for now */}
-              {/*
-              {profileMode === "provider" && activeTab === "gigs" && (
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-[var(--base)]">
-                      My Gigs
-                    </h3>
-                    <button
-                      className="text-[var(--base)] font-medium hover:underline"
-                      onClick={() => (window.location.href = "/profile/my-gigs")}
-                    >
-                      View All
-                    </button>
-                  </div>
-                  <div className="divide-y">
-                    {USER_PROFILE.GIGS.map((gig) => (
-                      <div
-                        key={gig.id}
-                        className="py-3 flex items-center justify-between"
-                      >
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {gig.title}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            Posted: {gig.date}
-                          </div>
-                        </div>
-                        <div
-                          className={`text-xs font-semibold px-2 py-1 rounded ${
-                            gig.status === "Active"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-500"
-                          }`}
-                        >
-                          {gig.status}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {profileMode === "provider" && activeTab === "history" && (
-                <div>
-                  <h3 className="text-lg font-semibold text-[var(--base)] mb-4">
-                    Gig History
-                  </h3>
-                  <div className="divide-y">
-                    {USER_PROFILE.HISTORY.map((gig) => (
-                      <div
-                        key={gig.id}
-                        className="py-3 flex items-center justify-between"
-                      >
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {gig.title}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {gig.status} on {gig.date}
-                          </div>
-                        </div>
-                        <div
-                          className={`text-xs font-semibold px-2 py-1 rounded ${
-                            gig.status === "Completed"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
-                          }`}
-                        >
-                          {gig.status}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              */}
               {activeTab === "support" && (
                 <div>
                   <h3 className="text-lg font-semibold text-[var(--base)] mb-4">
@@ -754,12 +551,14 @@ const Profile = () => {
                   <h3 className="text-lg font-semibold text-[var(--base)] mb-4">
                     Subscription Plan History
                   </h3>
+                  <Button>
                     <Link
-                      className="px-5 py-2 rounded-lg bg-[var(--base)] text-white font-semibold shadow hover:bg-[var(--base-hover)] transition"
+                      className="rounded-lg text-white font-semibold"
                       href={'/user/buy-subscription'}
                     >
                       Go to Subscription Page
                     </Link>
+                  </Button>
                   </div>
                   <div className="divide-y">
                     {isSubscriptionLoading ? (
@@ -774,7 +573,7 @@ const Profile = () => {
                         const planPrice = plan.subscription_plan?.price ?? plan.price;
                         const status = plan.status ? plan.status.charAt(0).toUpperCase() + plan.status.slice(1) : "-";
                         const startDate = plan.created_at ? moment(plan.created_at).format("DD/MM/YYYY") : "-";
-                        const endDate = plan.subscription_expiry_date ? moment(plan.subscription_expiry_date).format("DD/MM/YYYY") : "-";
+                        const endDate = plan.subscription_expiry_date ? moment(plan.subscription_expiry_date).format("DD/MM/YYYY") : "NA";
                         const isActive = plan.status === "active";
                         const isCancelled = plan.status === "cancelled";
                         const features = plan.subscription_plan?.features || [];
@@ -788,7 +587,7 @@ const Profile = () => {
                                   <span className="ml-2 text-xs text-gray-400">({status})</span>
                                 </div>
                                 <div className="text-xs text-gray-500">
-                                  Price: ₹{planPrice} | Start: {startDate} | End: {endDate}
+                                  Price: $ {planPrice} | Start: {startDate} | End: {endDate}
                                 </div>
                                 {plan.transaction_id && (
                                   <div className="text-xs text-gray-400">Txn ID: {plan.transaction_id}</div>
@@ -798,6 +597,9 @@ const Profile = () => {
                                 {status}
                               </div>
                             </div>
+                            {plan.is_auto_debit && <div>
+                              <Button variant={"destructive"} size={"sm"} onClick={() => handleCancelAutoDebit(plan)}>Cancel Auto Debit</Button>
+                            </div>}
                             {features.length > 0 && (
                               <div>
                                 <button
@@ -888,6 +690,16 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmationDialog
+        isOpen={deleteModelOpen}
+        onClose={() => setDeleteModelOpen(false)}
+        onConfirm={handleConfirmCancelAutoDebit}
+        title="Cancel Auto Debit"
+        description="Are you sure you want to cancel auto debit?"
+        confirmText="Confirm"
+        isDeleting={isCancellingAutoDebit}
+      />
     </div>
   );
 };
