@@ -5,6 +5,7 @@ import { FaStar, FaCertificate, FaTag, FaLayerGroup, FaDollarSign, FaCrown } fro
 import { useGetProviderPublicProfileQuery } from "@/redux/api";
 import { useParams } from "next/navigation";
 import ProfileSkeleton from "@/components/skeleton/ProfileSkeleton";
+import { getAvatarName } from "@/utils/helper";
 
 // Mock completed gigs data
 const completedGigs = [
@@ -116,7 +117,7 @@ const ProviderPortfolioPage = () => {
   }
   if (error || !provider) {
     return <div className="flex justify-center items-center min-h-[40vh] text-red-500">Failed to load provider profile.</div>;
-  }
+  }  
   return (
     <div className="">
       <div className="">
@@ -176,30 +177,6 @@ const ProviderPortfolioPage = () => {
           </div>
         </div>
 
-        {/* Tiers Section */}
-        <div className="mx-auto mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
-          {(provider?.tiers || dummyTiers).map((tier: any) => (
-            <div
-              key={tier.name}
-              className="bg-white rounded-xl shadow p-6 flex flex-col hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-[var(--base)]/10"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <Badge className="bg-[var(--base)] text-white font-semibold px-3 py-1 text-xs border-0">{tier.name}</Badge>
-                <span className="text-2xl font-bold text-[var(--base)]">${tier.price}</span>
-              </div>
-              <div className="text-gray-600 mb-3">{tier.description}</div>
-              <ul className="mb-4 space-y-1 text-sm text-gray-700">
-                {(tier?.features || []).map((f: any, i: any) => (
-                  <li key={i}>• {f}</li>
-                ))}
-              </ul>
-              <button className="mt-auto bg-[var(--base)] text-white rounded-lg px-4 py-2 font-medium hover:bg-[var(--base-hover)] transition">
-                Book
-              </button>
-            </div>
-          ))}
-        </div>
-
         {/* Portfolio Section */}
         <div className="mx-auto mt-12">
           <h3 className="text-xl font-bold mb-4 text-gray-900">Portfolio</h3>
@@ -224,63 +201,103 @@ const ProviderPortfolioPage = () => {
         </div>
 
         {/* Reviews Section */}
-        <div className="max-w-8xl mx-auto mt-12 mb-10">
+        {provider.gigs_provider.length > 0 && <div className="max-w-8xl mx-auto mt-12 mb-10">
           <h3 className="text-xl font-bold mb-4 text-gray-900">Ratings & Reviews</h3>
-          <div className="space-y-4">
-            {(provider?.reviews || dummyReviews).map((review: any, idx: any) => (
+         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(provider?.gigs_provider.slice(0, 3)).map((review: any, idx: number) => (
               <div
                 key={idx}
-                className="bg-white rounded-xl shadow p-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-[var(--base)]/10"
+                className="border border-[var(--base)]/10 bg-[var(--light-bg)] text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-102 flex flex-col items-center text-center space-y-2"
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-yellow-500 font-bold">★ {review.rating}</span>
-                  <span className="font-semibold text-gray-800">{review.name}</span>
+                {/* Profile Picture */}
+                {review?.user?.profile ? (
+                  <img
+                    src={review?.user?.profile}
+                    alt={review?.user?.name}
+                    className="w-14 h-14 rounded-full object-cover border-2 border-white"
+                  />
+                ) : (
+                  <div className="flex justify-center items-center relative bg-[var(--base)] w-14 h-14 rounded-full">
+                    <div className="text-lg">
+                      {getAvatarName(review?.rating?.user?.name, true)}
+                    </div>
+                  </div>
+                )}
+
+                {/* Reviewer Name */}
+                <div className="text-[var(--text-dark)] font-semibold">
+                  {review?.rating?.user?.name}
                 </div>
-                <div className="text-gray-700 text-sm">{review.comment}</div>
+
+                {/* Stars */}
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <svg
+                      key={i}
+                      className={`w-4 h-4 ${i < review?.rating?.rating ? 'text-yellow-400' : 'text-gray-400'
+                        }`}
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.285 3.943a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.36 2.44a1 1 0 00-.364 1.118l1.285 3.943c.3.921-.755 1.688-1.54 1.118l-3.36-2.44a1 1 0 00-1.176 0l-3.36 2.44c-.785.57-1.84-.197-1.54-1.118l1.285-3.943a1 1 0 00-.364-1.118L2.326 9.37c-.783-.57-.38-1.81.588-1.81h4.15a1 1 0 00.95-.69l1.285-3.943z" />
+                    </svg>
+                  ))}
+                </div>
+
+                {/* Feedback Text */}
+                <p
+                  className="text-sm italic text-[var(--text-dark)] max-h-[72px] overflow-hidden text-ellipsis line-clamp-3"
+                  title={review?.rating?.rating_feedback} // show full text on hover
+                >
+                  "{review?.rating?.rating_feedback}"
+                </p>
               </div>
             ))}
           </div>
-        </div>
+        </div>}
 
         {/* Completed Gigs Section */}
         <div className="max-w-8xl mx-auto mt-12 mb-16">
           <h3 className="text-xl font-bold mb-6 text-gray-900 flex items-center gap-2">Completed Gigs</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {completedGigs.map((gig) => (
+            {provider?.gigs_provider?.slice(0,3)?.map((gig:any, id:any) => (
               <div
-                key={gig.id}
+                key={id}
                 className="bg-white rounded-2xl shadow-lg p-6 flex flex-col gap-3 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-[var(--base)]/10 relative"
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge className="bg-[var(--base)] text-white font-semibold px-3 py-1 text-xs border-0">{gig.tier}</Badge>
-                  <span className="flex-1 text-right text-[var(--base)] font-semibold">{gig.price}</span>
+                  <Badge className="bg-[var(--base)] text-white font-semibold px-3 py-1 text-xs border-0">{gig?.gig_category?.name}</Badge>
+                  <span className="flex-1 text-right text-[var(--base)] font-semibold">${gig?.price}</span>
                 </div>
-                <h4 className="text-lg font-bold text-gray-900 mb-1">{gig.title}</h4>
-                <p className="text-gray-600 text-sm mb-2 line-clamp-2">{gig.description}</p>
+                <h4 className="text-lg font-bold text-gray-900 mb-1">{gig?.title}</h4>
+                <p className="text-gray-600 text-sm mb-2 line-clamp-2">{gig?.description}</p>
                 <div className="flex items-center gap-4 mb-2">
                   <span className="flex items-center gap-1 text-yellow-500 font-bold">
-                    <FaStar /> {gig.rating}
+                    <FaStar /> {gig?.rating?.rating}
                   </span>
                 </div>
-                <div className="italic text-gray-500 text-xs mb-2">"{gig.review}"</div>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {gig.keywords.map((kw, i) => (
-                    <span key={i} className="bg-[var(--base)]/10 text-[var(--base)] px-2 py-0.5 rounded text-xs font-medium">
-                      #{kw}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {gig.skills.map((skill, i) => (
-                    <span key={i} className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1">
-                      {skill}
-                    </span>
-                  ))}
-                  {gig.certifications.map((cert, i) => (
-                    <span key={i} className="bg-[var(--base)]/10 text-[var(--base)] px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1">
-                      {cert}
-                    </span>
-                  ))}
+                <div className="italic text-gray-500 text-xs mb-2 overflow-hidden text-ellipsis line-clamp-2">"{gig?.rating?.rating_feedback}"</div>
+                <div >
+                  <div className="mb-4">
+                    <div className="text-xs mb-2">Skills</div>
+                    <div className="flex flex-wrap gap-2">
+                      {gig?.skills?.map((skill: any, i: any) => (
+                        <span key={i} className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1">
+                          {skill?.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  {gig?.certifications?.length > 0 && <div>
+                    <div className="text-xs mb-2">Certificates</div>
+                    <div className="flex flex-wrap gap-2">
+                      {gig?.certifications?.map((cert: string, i: number) => (
+                        <span key={i} className="bg-[var(--base)]/10 text-[var(--base)] px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1">
+                          {cert}
+                        </span>
+                      ))}
+                    </div>
+                  </div>}
                 </div>
               </div>
             ))}
