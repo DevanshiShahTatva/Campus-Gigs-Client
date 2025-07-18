@@ -60,7 +60,7 @@ function useSocket(token?: string): {
       return;
     }
 
-    const wsUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/^https?/, "ws");
+    const wsUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/^http/, "ws");
     if (!wsUrl) {
       console.warn("WebSocket URL not defined");
       setConnectionError("WebSocket URL not configured");
