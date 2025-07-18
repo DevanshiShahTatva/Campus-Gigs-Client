@@ -92,3 +92,18 @@ export const formatTime = (dateString: string) => {
     hour12: true,
   });
 };
+
+export function getAverageRating(ratings: number[]): number {
+  if (!ratings.length) return 0; // No ratings? Return 0
+
+  const total = ratings.reduce((sum, rating) => sum + rating, 0);
+  const average = total / ratings.length;
+
+  return parseFloat(average.toFixed(1)); // Round to 1 decimal
+}
+export function getProviderBadge(isMostRated: boolean, isTopRated: boolean, planAmount: number, restritionAmount: number = 10) {
+  if (planAmount < restritionAmount) {
+    return false
+  }
+  return isTopRated ? "Top Rated" : isMostRated ? "Most Rated" : false
+}

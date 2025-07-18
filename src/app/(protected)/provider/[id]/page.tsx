@@ -1,51 +1,23 @@
 "use client";
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { FaStar, FaCertificate, FaTag, FaLayerGroup, FaDollarSign, FaCrown } from "react-icons/fa";
+import { FaStar, FaCrown } from "react-icons/fa";
 import { useGetProviderPublicProfileQuery } from "@/redux/api";
 import { useParams } from "next/navigation";
 import ProfileSkeleton from "@/components/skeleton/ProfileSkeleton";
-import { getAvatarName } from "@/utils/helper";
+import { getAvatarName, getAverageRating, getProviderBadge } from "@/utils/helper";
+import { ImageIcon } from "lucide-react";
 
 // Mock completed gigs data
-const completedGigs = [
-  {
-    id: 1,
-    title: "Advanced Algorithms Tutoring",
-    description: "Expert help with advanced algorithms and data structures.",
-    tier: "Tier 3",
-    price: "$45/hour",
-    rating: 5,
-    review: "Sarah was amazing! Helped me ace my exam.",
-    keywords: ["algorithms", "data structures", "exam prep"],
-    skills: ["Python", "C++", "Problem Solving"],
-    certifications: ["Google Certified Educator"],
-  },
-  {
-    id: 2,
-    title: "Resume Review & Optimization",
-    description: "Professional resume review with optimization tips.",
-    tier: "Tier 2",
-    price: "$30",
-    rating: 4,
-    review: "Great feedback and quick turnaround!",
-    keywords: ["resume", "career", "review"],
-    skills: ["Editing", "Career Coaching"],
-    certifications: ["Certified Career Coach"],
-  },
-  {
-    id: 3,
-    title: "Campus Food Delivery",
-    description: "Quick and reliable food delivery across campus.",
-    tier: "Tier 1",
-    price: "$8",
-    rating: 4,
-    review: "Fast and friendly service!",
-    keywords: ["delivery", "food", "campus"],
-    skills: ["Time Management"],
-    certifications: [],
-  },
-];
+
+const PlaceholderImage = () => (
+  <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+    <div className="text-center">
+      <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+      <p className="text-gray-500 text-sm">No Image</p>
+    </div>
+  </div>
+);
 
 const ProviderPortfolioPage = () => {
   const params = useParams();
@@ -53,54 +25,7 @@ const ProviderPortfolioPage = () => {
   const { data, isLoading, error } = useGetProviderPublicProfileQuery(id, { skip: !id, refetchOnMountOrArgChange: true });
   const provider = data?.data;
   // Dummy data for missing fields
-  const dummyCoverImage = "/assets/hero.jpg";
-  const dummyProfileImage = "/profile1.jpg";
-  const dummyTiers = [
-    {
-      name: "Basic",
-      price: 99,
-      description: "Basic website with up to 3 pages.",
-      features: ["Responsive Design", "Contact Form", "SEO Setup"],
-    },
-    {
-      name: "Standard",
-      price: 199,
-      description: "Standard website with up to 7 pages and blog.",
-      features: ["Everything in Basic", "Blog Integration", "Custom Animations"],
-    },
-    {
-      name: "Premium",
-      price: 399,
-      description: "Premium website with unlimited pages and e-commerce.",
-      features: ["Everything in Standard", "E-commerce", "Priority Support"],
-    },
-  ];
-  const dummyPortfolio = [
-    {
-      title: "E-commerce Store",
-      image: "/profile2.jpg",
-      description: "A modern e-commerce platform.",
-    },
-    {
-      title: "Portfolio Site",
-      image: "/profile3.jpg",
-      description: "Personal branding website.",
-    },
-    {
-      title: "Blog Platform",
-      image: "/profile1.jpg",
-      description: "A scalable blog solution.",
-    },
-  ];
-  const dummyReviews = [
-    { name: "Alice", rating: 5, comment: "Great work! Highly recommended." },
-    { name: "Bob", rating: 4, comment: "Very professional and timely." },
-    { name: "Charlie", rating: 5, comment: "Exceeded expectations!" },
-  ];
-  const dummyLocation = "Unknown";
-  const dummyRating = 4.5;
-  const dummyReviewsCount = 10;
-
+  
   // Helper for initials
   const getInitials = (name: string | undefined) =>
     name
@@ -112,6 +37,7 @@ const ProviderPortfolioPage = () => {
       : "";
   const initials = getInitials(provider?.name);
 
+  const badgeValidation = getProviderBadge(provider?.isMostRated, provider?.isTopRated, provider?.subscription?.price);
   if (isLoading) {
     return <ProfileSkeleton />;
   }
@@ -147,64 +73,50 @@ const ProviderPortfolioPage = () => {
               <div>
                 <div className="flex items-center gap-3 mb-1">
                   <h2 className="text-2xl font-bold text-gray-900">{provider?.name}</h2>
-                  <Badge className="bg-[var(--base)]/10 text-[var(--base)] font-semibold px-4 py-1 text-sm rounded-full border border-[var(--base)]/30 shadow-sm tracking-wide flex items-center gap-1">
+                  {badgeValidation && <Badge className="bg-[var(--base)]/10 text-[var(--base)] font-semibold px-4 py-1 text-sm rounded-full border border-[var(--base)]/30 shadow-sm tracking-wide flex items-center gap-1">
                     <FaCrown className="text-[var(--base)] text-base mb-0.5" />
-                    Most Rated
-                  </Badge>
+                    {badgeValidation}
+                  </Badge>}
                 </div>
                 {/* More provider details for appeal */}
-                <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600">
-                  <span className="bg-gray-100 rounded px-2 py-1 font-medium">Top Skill: React.js</span>
-                  <span className="bg-gray-100 rounded px-2 py-1 font-medium">Completed Projects: 120+</span>
-                  <span className="bg-gray-100 rounded px-2 py-1 font-medium">Avg. Response: 1hr</span>
-                  <span className="bg-gray-100 rounded px-2 py-1 font-medium">Verified</span>
+                <div className="flex flex-col gap-3 mt-2 text-sm text-gray-600">
+                  <div className="text-base text-gray-600">
+                  {provider?.headline || provider?.title || "CampusGig user"}
                 </div>
-                <div className="text-gray-600 mt-1">
-                  {provider?.headline || provider?.title || "No headline"} • {provider?.location || dummyLocation}
+                <div className="text-base text-gray-700  max-w-2xl">{provider?.bio}</div>
+                  <div>
+                    {
+                      provider?.skills?.map((skill: any, id: number) => <span key={id} className="bg-gray-100 rounded px-2 py-1 font-medium">{skill?.name}</span>)
+                    }
+                  </div>
+                  <div className="flex flx-wrap gap-3">
+                    <span className="bg-gray-100 rounded px-2 py-1 font-medium">Completed Projects: {provider?.gigs_provider?.length > 40 ? '40+' : provider?.gigs_provider?.length}</span>
+                    {/* <span className="bg-gray-100 rounded px-2 py-1 font-medium">Avg. Response: 1hr</span> */}
+                    <span className="bg-gray-100 rounded px-2 py-1 font-medium">Verified</span>
                 </div>
-                <div className="text-base text-gray-700 mt-2 max-w-2xl">{provider?.bio || "No bio available."}</div>
+                
+                  </div>
               </div>
               {/* Rating Card */}
               <div className="mt-6 sm:mt-0 flex flex-col items-center bg-[var(--base)]/10 rounded-xl px-8 py-4 min-w-[160px] shadow border border-[var(--base)]/20">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-3xl font-bold text-[var(--base)]">{provider?.rating || dummyRating}</span>
+                  <span className="text-3xl font-bold text-[var(--base)]">{getAverageRating(provider?.gigs_provider?.map((item:any)=> item?.rating?.rating)) || 0}</span>
                   <FaStar className="text-yellow-400 text-2xl" />
                 </div>
                 <div className="text-gray-700 text-sm font-medium">Provider Rating</div>
-                <div className="text-gray-500 text-xs">{provider?.reviewsCount || dummyReviewsCount} reviews</div>
+                <div className="text-gray-500 text-xs">{provider?.gigs_provider?.length || 0} reviews</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Portfolio Section */}
-        <div className="mx-auto mt-12">
-          <h3 className="text-xl font-bold mb-4 text-gray-900">Portfolio</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {(provider?.portfolio || dummyPortfolio).map((item: any, idx: any) => (
-              <div
-                key={idx}
-                className="bg-white rounded-xl shadow p-4 flex flex-col hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-[var(--base)]/10"
-              >
-                <img src={item.image} alt={item.title} className="rounded-lg h-48 w-full object-cover mb-2" />
-                <div className="font-semibold text-gray-800 mb-1">{item.title}</div>
-                <div className="text-gray-500 text-sm mb-2">{item.description}</div>
-                {/* Mock extra info */}
-                <div className="flex flex-wrap gap-2 text-xs text-gray-500 mb-1">
-                  <span className="bg-[var(--base)]/10 text-[var(--base)] px-2 py-0.5 rounded">Web App</span>
-                  <span className="bg-[var(--base)]/10 text-[var(--base)] px-2 py-0.5 rounded">React.js</span>
-                  <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded">2024</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      
 
         {/* Reviews Section */}
-        {provider.gigs_provider.length > 0 && <div className="max-w-8xl mx-auto mt-12 mb-10">
+        {provider?.gigs_provider?.length > 0 && <div className="max-w-8xl mx-auto mt-12 mb-10">
           <h3 className="text-xl font-bold mb-4 text-gray-900">Ratings & Reviews</h3>
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(provider?.gigs_provider.slice(0, 3)).map((review: any, idx: number) => (
+            {(provider?.gigs_provider?.slice(0, 3)).map((review: any, idx: number) => (
               <div
                 key={idx}
                 className="border border-[var(--base)]/10 bg-[var(--light-bg)] text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-102 flex flex-col items-center text-center space-y-2"
@@ -257,52 +169,80 @@ const ProviderPortfolioPage = () => {
         </div>}
 
         {/* Completed Gigs Section */}
-        <div className="max-w-8xl mx-auto mt-12 mb-16">
+       {provider?.gigs_provider && <div className="max-w-8xl mx-auto mt-12 mb-16">
           <h3 className="text-xl font-bold mb-6 text-gray-900 flex items-center gap-2">Completed Gigs</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {provider?.gigs_provider?.slice(0,3)?.map((gig:any, id:any) => (
+            {provider?.gigs_provider?.slice(0, 3)?.map((gig: any, id: any) => (
               <div
                 key={id}
-                className="bg-white rounded-2xl shadow-lg p-6 flex flex-col gap-3 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-[var(--base)]/10 relative"
+                className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition transform hover:-translate-y-1 hover:scale-[1.03] border border-gray-200"
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge className="bg-[var(--base)] text-white font-semibold px-3 py-1 text-xs border-0">{gig?.gig_category?.name}</Badge>
-                  <span className="flex-1 text-right text-[var(--base)] font-semibold">${gig?.price}</span>
-                </div>
-                <h4 className="text-lg font-bold text-gray-900 mb-1">{gig?.title}</h4>
-                <p className="text-gray-600 text-sm mb-2 line-clamp-2">{gig?.description}</p>
-                <div className="flex items-center gap-4 mb-2">
-                  <span className="flex items-center gap-1 text-yellow-500 font-bold">
-                    <FaStar /> {gig?.rating?.rating}
+                {/* Image or Placeholder */}
+                <div className="relative w-full h-48">
+                  {gig?.images?.length > 0 ? (
+                    <img
+                      src={gig?.images[0]}
+                      alt={gig?.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <PlaceholderImage />
+                  )}
+
+                  {/* Price Badge (over image) */}
+                  <span className="absolute top-3 right-3 bg-[var(--base)] text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
+                    ${gig?.price}
                   </span>
                 </div>
-                <div className="italic text-gray-500 text-xs mb-2 overflow-hidden text-ellipsis line-clamp-2">"{gig?.rating?.rating_feedback}"</div>
-                <div >
-                  <div className="mb-4">
-                    <div className="text-xs mb-2">Skills</div>
-                    <div className="flex flex-wrap gap-2">
-                      {gig?.skills?.map((skill: any, i: any) => (
-                        <span key={i} className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1">
-                          {skill?.name}
-                        </span>
-                      ))}
-                    </div>
+
+                {/* Content */}
+                <div className="p-4 flex flex-col space-y-2">
+                  {/* Title & Rating */}
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-base font-bold text-gray-800 truncate">{gig?.title}</h4>
+                    {gig?.rating && (
+                      <div className="flex items-center text-yellow-500 text-sm font-medium">
+                        <FaStar className="mr-1" /> {gig?.rating?.rating?.toFixed(1)}
+                      </div>
+                    )}
                   </div>
-                  {gig?.certifications?.length > 0 && <div>
-                    <div className="text-xs mb-2">Certificates</div>
-                    <div className="flex flex-wrap gap-2">
-                      {gig?.certifications?.map((cert: string, i: number) => (
-                        <span key={i} className="bg-[var(--base)]/10 text-[var(--base)] px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1">
-                          {cert}
-                        </span>
-                      ))}
-                    </div>
-                  </div>}
+
+                  {/* Description */}
+                  <p className="text-gray-600 text-sm line-clamp-2">
+                    {gig?.description}
+                  </p>
+
+                  {/* Feedback */}
+                  {gig?.rating?.rating_feedback && (
+                    <p className="italic text-gray-500 text-xs line-clamp-1">
+                      "{gig?.rating?.rating_feedback}"
+                    </p>
+                  )}
+
+                  {/* Tags (Skills & Certificates) */}
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {gig?.skills?.map((skill: any, i: number) => (
+                      <span
+                        key={i}
+                        className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs font-medium"
+                      >
+                        {skill?.name}
+                      </span>
+                    ))}
+                    {gig?.certifications?.map((cert: string, i: number) => (
+                      <span
+                        key={i}
+                        className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs font-medium"
+                      >
+                        {cert}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   );
