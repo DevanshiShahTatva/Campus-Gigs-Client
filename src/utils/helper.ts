@@ -34,3 +34,76 @@ export const renderBaseOnCondition = (
 export function getRoleLabel(role: "user" | "provider") {
   return role === "user" ? "User" : "Provider";
 }
+
+
+/**
+ * Shows a browser notification and optionally redirects to a link when clicked.
+ * @param {string} title - The notification title.
+ * @param {NotificationOptions & { link?: string }} options - Notification options. If 'link' is provided, clicking the notification opens it in a new tab.
+ */
+export function showPushNotification(
+  title: string = "Notification",
+  options?: NotificationOptions & { link?: string }
+) {
+  if (typeof window !== "undefined" && "Notification" in window) {
+    const showBrowserNotification = () => {
+      const n = new Notification(title, options);
+      if (options && options.link) {
+        n.onclick = () => {
+          const url = options.link!.startsWith("http")
+            ? options.link
+            : window.location.origin + options.link;
+          window.open(url, "_self"); // Open in the same tab
+        };
+      }
+    };
+    if (Notification.permission === "granted") {
+      showBrowserNotification();
+    } else if (Notification.permission !== "denied") {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          showBrowserNotification();
+        } else {
+          alert("Notification permission denied.");
+        }
+      });
+    } else {
+      alert("Notification permission denied.");
+    }
+  } else {
+    alert("This browser does not support notifications.");
+  }
+}
+
+export const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+export const formatTime = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
+export function getAverageRating(ratings: number[]): number {
+  if (!ratings.length) return 0; // No ratings? Return 0
+
+  const total = ratings.reduce((sum, rating) => sum + rating, 0);
+  const average = total / ratings.length;
+
+  return parseFloat(average.toFixed(1)); // Round to 1 decimal
+}
+export function getProviderBadge(isMostRated: boolean, isTopRated: boolean, planAmount: number, restritionAmount: number = 10) {
+  if (planAmount < restritionAmount) {
+    return false
+  }
+  return isTopRated ? "Top Rated" : isMostRated ? "Most Rated" : false
+}

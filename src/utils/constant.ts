@@ -24,12 +24,15 @@ export const ROUTES = {
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
   PROFILE: "/profile",
+  CONTACT: "/contact-us",
   PREVIEW_PROFILE: "/provider",
   GIGS: "/gigs",
   GIGS_CREATE: "/gigs/create",
   MY_GIGS: "/my-gigs",
   GIGS_PIPELINE: "/gig-pipeline",
   BUY_PLAN_SUBSCRIPTION: "/user/buy-subscription",
+  PAYMENT_SUCCESS: "/payment/success",
+  PAYMENT_CANCEL: "/payment/cancel",
   ADMIN: {
     DASHBOARD: "/admin/dashboard",
     SUBSCRIPTION: "/admin/subscription-plan",
@@ -53,6 +56,7 @@ export const ROUTES = {
     GIGS_CREATE: "/gigs/create",
     PROVIDER: "/provider",
     CHAT: "/chat",
+    PAYMENT_HISTORY: "/payment-history"
   },
 };
 
@@ -65,6 +69,12 @@ export const API_ROUTES = {
   GIG_PIPELINE: "/gigs/gig-pipeline",
   GIG_STATUS_CHANGE: "/gigs/change-status",
   GIG_PRIORITY: "/gigs/priority",
+  SUBSCRIPTION_HISTORY: "/subscription-plan/history",
+  USER_SERVICE_REQUEST:"/contact-us/my-requests",
+  SKILLS_DROPDOWN:'/skills/dropdown',
+  CHANGE_PASSWORD:"/auth/change-password",
+  CREATE_AUTO_DEBIT_SUBSCRIPTION: "/subscription-plan/create-subscription-session",
+  PAYMENT_HISTORY: "/payment-history",
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
     AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",
@@ -116,6 +126,11 @@ export enum BID_STATUS {
     MEDIUM = 'medium',
     LOW = 'low'
   }
+
+export enum PAYMENT_HISTORY_TYPE {
+  SUBSCRIPTION = "subscription",
+  GIG_PAYMENt = "gig_payment"
+}
 
 export const USER_SIDEBAR_ITEMS = [
   {

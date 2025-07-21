@@ -42,6 +42,13 @@ export const SkeletonCard = () => (
               <div className="h-3 bg-gray-100 rounded w-14"></div>
             </div>
           </div>
+          <div className="flex items-center space-x-3">
+            <div className="bg-gray-200 p-2 rounded-lg w-9 h-9"></div>
+            <div>
+              <div className="h-5 bg-gray-200 rounded w-12 mb-2"></div>
+              <div className="h-3 bg-gray-100 rounded w-14"></div>
+            </div>
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <div className="h-7 bg-gray-100 rounded-full w-16"></div>
@@ -65,8 +72,8 @@ export const SkeletonCard = () => (
 
 const GigListingSkeleton = () => {
   return (
-    <div className="mt-[25px] min-h-screen bg-gray-50">
-      <div className="container mx-auto px-6 py-16">
+    <div className="mt-2 min-h-screen bg-gray-50">
+      <div className="container mx-auto px-3">
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>

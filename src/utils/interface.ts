@@ -1,4 +1,4 @@
-import { BID_STATUS, PRIORITY } from "./constant";
+import { BID_STATUS, PAYMENT_HISTORY_TYPE, PRIORITY } from "./constant";
 
 export type SortOrder = "asc" | "desc";
 
@@ -111,7 +111,7 @@ export interface CurrentSubscriptionPlan {
   status: string;
   subscription_expiry_date: Date;
   transaction_id: string;
-  created_at: string;
+  created_at: Date;
   updated_at: string;
   is_deleted: boolean;
   subscription_plan: ISubscriptionPlan;
@@ -238,5 +238,17 @@ export interface Message {
   time: string;
   timestamp: Date;
   attachments: Attachment[];
+  is_deleted: boolean;
+}
+
+export interface PaymentTransaction {
+  id: number;
+  user_id: number;
+  transaction_id: string;
+  amount: number;
+  type: PAYMENT_HISTORY_TYPE;
+  paid_at: string;
+  description: string;
+  created_at: string;
   is_deleted: boolean;
 }
