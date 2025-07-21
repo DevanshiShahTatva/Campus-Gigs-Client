@@ -133,7 +133,7 @@ const GigCard = ({
                   >
                     {getStatusText(pipelineStage)}
                   </Badge>
-                  {(gig.priority && pipelineStage === "in_progress") && (
+                  {gig.priority && pipelineStage === "in_progress" && (
                     <Badge
                       className={`${getPriorityColor(
                         gig.priority
@@ -208,7 +208,7 @@ const GigCard = ({
           )}
         </div>
 
-        {pipelineStage === BID_STATUS.ACCEPTED && (
+        {pipelineStage === BID_STATUS.ACCEPTED && gig.gig_payment !== null && (
           <div className="border-t pt-4">
             <Button
               onClick={() => onStartGig?.(gig.id, "in_progress")}
@@ -217,6 +217,16 @@ const GigCard = ({
             >
               🚀 Start Working on This Gig
             </Button>
+          </div>
+        )}
+
+        {pipelineStage === BID_STATUS.ACCEPTED && gig.gig_payment === null && (
+          <div className="border-t pt-4 bg-green-50 rounded-lg p-4 mt-4">
+            <p className="text-sm text-green-700">
+              <strong>Payment Pending:</strong> Congratulaton 🚀, Your bid has
+              been accepted. Once Owner will pay for this gig you can able to
+              work on this gig.
+            </p>
           </div>
         )}
 

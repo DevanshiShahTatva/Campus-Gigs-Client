@@ -170,6 +170,15 @@ export interface Bid {
   updated_at: Date;
 }
 
+export interface GigPayment {
+  id: number;
+  gig_id: number;
+  transaction_id: string;
+  payment_status: any;
+  created_at: Date;
+  updated_at: Date;
+}
+
 export interface Gigs {
   id: number;
   user_id: number;
@@ -198,6 +207,7 @@ export interface Gigs {
   _count?: {
     bids: number;
   };
+  gig_payment: GigPayment | null;
 }
 
 export interface Attachment {

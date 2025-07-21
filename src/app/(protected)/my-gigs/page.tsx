@@ -46,7 +46,9 @@ const MyGigs = () => {
     total: 1,
   });
 
-  const profileType = useSelector((state: RootState) => state.user.profile_type);
+  const profileType = useSelector(
+    (state: RootState) => state.user.profile_type
+  );
 
   const fetchGigs = async (page = 1, status = "") => {
     setActiveTab(status);
@@ -129,6 +131,11 @@ const MyGigs = () => {
     router.push(newUrl);
   };
 
+  const handlePaymentForGig = (event: React.SyntheticEvent, gigId: number) => {
+    event.stopPropagation();
+    console.log(gigId);
+  };
+
   const handleNavigateToView = (id: number) => {
     router.push(`gigs/${id}`);
   };
@@ -173,10 +180,11 @@ const MyGigs = () => {
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
-                  ? "border-teal-500 text-teal-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
+                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
+                  activeTab === tab.id
+                    ? "border-teal-500 text-teal-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
               >
                 {tab.label}
               </button>
@@ -265,20 +273,23 @@ const MyGigs = () => {
                               })}
                             </div>
                           </div>
-                          {activeTab === "un_started" && (
-                            <div className="flex gap-2 ml-4">
-                              <Edit
-                                onClick={(event) =>
-                                  handleNavigateToEdit(event, gig.id)
-                                }
-                                className="cursor-pointer h-5 w-5 text-teal-600 hover:text-teal-600"
-                              />
-                              <Trash2
-                                onClick={(event) => handleDelete(event, gig.id)}
-                                className="cursor-pointer h-5 w-5 text-red-600 hover:text-red-600"
-                              />
-                            </div>
-                          )}
+                          {gig.provider_id == null &&
+                            activeTab === "un_started" && (
+                              <div className="flex gap-2 ml-4">
+                                <Edit
+                                  onClick={(event) =>
+                                    handleNavigateToEdit(event, gig.id)
+                                  }
+                                  className="cursor-pointer h-5 w-5 text-teal-600 hover:text-teal-600"
+                                />
+                                <Trash2
+                                  onClick={(event) =>
+                                    handleDelete(event, gig.id)
+                                  }
+                                  className="cursor-pointer h-5 w-5 text-red-600 hover:text-red-600"
+                                />
+                              </div>
+                            )}
                         </div>
 
                         <CardDescription className="text-gray-600 mb-3 line-clamp-2 leading-relaxed">
@@ -310,6 +321,38 @@ const MyGigs = () => {
                             </span>
                           </div>
                         </div>
+
+                        {gig.provider_id !== null &&
+                          activeTab === "un_started" && (
+                            <div className="border-t pt-4 bg-red-50 rounded-lg p-4 mt-4 flex items-center justify-between">
+                              <p className="text-sm text-red-700">
+                                <strong>⏳ Waiting for payment:</strong> You
+                                have been accepted the gig but did not pay at.
+                                Please pay soon as possible so the provider can
+                                start soon.
+                              </p>
+                              <Button
+                                variant={"outline"}
+                                onClick={(event) =>
+                                  handlePaymentForGig(event, gig.id)
+                                }
+                              >
+                                Pay Now
+                              </Button>
+                            </div>
+                          )}
+
+                        {gig.provider_id !== null &&
+                          activeTab === "in_progress" && (
+                            <div className="border-t pt-4 bg-yellow-50 rounded-lg p-4 mt-4 flex items-center justify-between">
+                              <p className="text-sm text-yellow-700">
+                                <strong>⏳ In Progress:</strong> Your gig in
+                                progress provider will complete soon. If you
+                                have any query fill free to contact your
+                                provider.
+                              </p>
+                            </div>
+                          )}
 
                         {activeTab === "completed" && (
                           <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
