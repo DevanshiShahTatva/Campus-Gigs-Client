@@ -42,6 +42,7 @@ export interface DynamicTableProps<T extends { id: number }> {
 export interface ISubscriptionPlan {
   id: number;
   name: string;
+  base_plan_id: number;
   description: string;
   price: number;
   is_pro: boolean;

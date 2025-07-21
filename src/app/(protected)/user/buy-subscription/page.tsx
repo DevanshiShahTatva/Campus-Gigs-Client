@@ -90,6 +90,8 @@ const BuySubscription = () => {
     router.push("/user/dashboard");
   };
 
+  console.log("selectedPlanId::", selectedPlanId?.base_plan_id)
+
   return (
     <>
       <CentralLoader loading={isCentralLoading} />
@@ -119,7 +121,7 @@ const BuySubscription = () => {
                 onMouseEnter={() => setHoveredPlan(index)}
                 onMouseLeave={() => setHoveredPlan(null)}
               >
-                {selectedPlanId?.id === plan.id && (
+                {selectedPlanId?.base_plan_id === plan.id && (
                   <div className="absolute top-0 left-0 bg-gradient-to-r from-[var(--base)] to-[var(--base-hover)] text-white px-4 sm:px-6 py-2 text-xs sm:text-sm font-semibold rounded-tl-2xl rounded-br-2xl shadow-lg">
                     Current Plan
                   </div>
@@ -170,10 +172,10 @@ const BuySubscription = () => {
 
                   {/* CTA Button - This will always be at the bottom */}
                   <button
-                    disabled={selectedPlanId?.id === plan.id}
-                    className={`w-full py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 mt-auto text-sm sm:text-base bg-[var(--base)] text-white hover:bg-[var(--base-hover)] shadow-lg ${selectedPlanId?.id === plan.id ? "opacity-70 cursor-not-allowed" : ""
+                    disabled={selectedPlanId?.base_plan_id === plan.id}
+                    className={`w-full py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 mt-auto text-sm sm:text-base bg-[var(--base)] text-white hover:bg-[var(--base-hover)] shadow-lg ${selectedPlanId?.base_plan_id === plan.id ? "opacity-70 cursor-not-allowed" : ""
                       }`}
-                    onClick={() => selectedPlanId?.id !== plan.id && handleSelectPlan(plan)}
+                    onClick={() => selectedPlanId?.base_plan_id !== plan.id && handleSelectPlan(plan)}
                   >
                     {plan.button_text}
                   </button>
