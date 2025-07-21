@@ -99,13 +99,30 @@ const DynamicForm = ({
     field.subfields.forEach((subfield) => {
       if (subfield.required) {
         let validator;
-        const label = subfield.label || subfield.name;
-
+        const label = subfield.label || subfield.name;        
         switch (subfield.type) {
           case "text":
+            validator = Yup.string();
+            if (subfield.id === "headline") {
+              validator = validator.max(
+                50,
+                `${label} cannot exceed 50 characters`
+              );
+            } else {
+              validator = Yup.string();
+            }
+            break;
           case "textarea":
             validator = Yup.string()
               .trim(`${label} is required`);
+              if (subfield.id === "bio") {
+              validator = validator.max(
+                180,
+                `${label} cannot exceed 180 characters`
+              );
+            } else {
+              validator = Yup.string();
+            }
             break;
           case "number":
             validator = Yup.number()

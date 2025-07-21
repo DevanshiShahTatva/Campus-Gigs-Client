@@ -99,8 +99,8 @@ export const profileFormConfig =(skillDropdown:IDropdownOption[]) => [
     groupSize: 1 as 1,
     section: true,
     subfields: [
-      { id: "headline", name: "headline", label: "Headline", type: "text" as const, errorMessage: "Headline is required", placeholder: "e.g. Web Developer, Marketing Enthusiast, etc." },
-      { id: "bio", name: "bio", label: "Short Bio", type: "textarea" as const, errorMessage: "Short bio is required", placeholder: "Write a short bio (max 300 chars)" },
+      { id: "headline", name: "headline", label: "Headline",required:true, type: "text" as const, errorMessage: "Headline is required", placeholder: "e.g. Web Developer, Marketing Enthusiast, etc." },
+      { id: "bio", name: "bio", label: "Short Bio", required:true, type: "textarea" as const, errorMessage: "Short bio is required", placeholder: "Write a short bio (max 300 chars)" },
     ],
   },
 ];
