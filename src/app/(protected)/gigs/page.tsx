@@ -17,6 +17,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux';
 import GigFilterModal from "./filterModel";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import GigListingSkeleton from "@/components/skeleton/gigListingSkeleton";
@@ -106,9 +108,14 @@ const GigListing = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [appliedFilters, setAppliedFilters] = useState<any>({});
+  const filters = useSelector((state: RootState) => state.filter);
+  const [appliedFilters, setAppliedFilters] = useState(filters);
+  const [activeFilterCount, setActiveFilterCount] = useState(0);
 
   const debounceSearch = useDebounce(searchQuery, 700);
+
+console.log(appliedFilters,"APPLIED FILTERS");
+
 
   const fetchGigs = async (
     page = 1,
@@ -119,6 +126,7 @@ const GigListing = () => {
       priceRange?: number[]
       startDate?: string,
       endDate?: string,
+      category?: string[]
     },
   ) => {
     try {
@@ -128,13 +136,16 @@ const GigListing = () => {
         const minRating = filters.rating;
         url += `&minRating=${minRating}`;
       }
-       if (filters?.paymentType && filters?.paymentType?.length > 0) {
+      if (filters?.paymentType && filters?.paymentType?.length > 0) {
         url += `&paymentType=${filters?.paymentType?.join(',')}`;
       }
       if (filters?.priceRange && Array.isArray(filters?.priceRange) && (filters?.priceRange?.length == 2)) {
         url += `&minPrice=${filters?.priceRange[0]}&maxPrice=${filters?.priceRange[1]}`;
       }
-       if (filters?.startDate) {
+      if (filters?.category && Array.isArray(filters.category) && filters.category.length > 0) {
+        url += `&category=${filters.category.join(',')}`;
+      }
+      if (filters?.startDate) {
         url += `&startDate=${encodeURIComponent(filters.startDate)}`;
       }
       if (filters?.endDate) {
@@ -158,15 +169,18 @@ const GigListing = () => {
     }
   };
   const handleClearFilters = () => {
-    setAppliedFilters({});
+    // setAppliedFilters({});
     setLoading(true);
     fetchGigs(1, searchQuery, {});
   };
+  useEffect(() => {
+    setAppliedFilters(filters);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
-    fetchGigs(1, debounceSearch);
-  }, [debounceSearch]);
+    fetchGigs(1, debounceSearch, appliedFilters);
+  }, [debounceSearch, appliedFilters]);
 
   const fetchNextPage = () => {
     if (currentPage < meta.totalPages && !loading) {
@@ -174,11 +188,12 @@ const GigListing = () => {
     }
   };
 
-  const handleApplyFilters = (filters: any) => {
-    console.log("Applied filters:", filters);
+  const handleApplyFilters = () => {
+    // console.log("Applied filters:", filters);
+    // setAppliedFilters(filters);
+    // setLoading(true);
+    // fetchGigs(1, searchQuery, filters);
     setAppliedFilters(filters);
-    setLoading(true);
-    fetchGigs(1, searchQuery, filters);
   };
 
   const handleSubmitBid = (data: any) => {
@@ -315,7 +330,7 @@ const GigListing = () => {
             <Button
               size="lg"
               onClick={() => setIsFilterOpen(true)}
-              className="px-6 h-12 bg-teal-800 hover:bg-teal-900"
+              className="px-6 h-12 bg-[var(--base)] hover:bg-[var(--base-hover)] relative"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -330,6 +345,9 @@ const GigListing = () => {
                 />
               </svg>
               Filter
+              {activeFilterCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-600 rounded-full border-2 border-white"></span>
+              )}
             </Button>
             <Link href="/gigs/create">
               <Button className="px-6 h-12" size="lg">
@@ -428,6 +446,7 @@ const GigListing = () => {
         onClose={() => setIsFilterOpen(false)}
         onApplyFilters={handleApplyFilters}
         onClearFilter={handleClearFilters}
+         onActiveFilterCountChange={setActiveFilterCount}
       />
       <CommonFormModal
         width="600px"

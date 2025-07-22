@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '@/redux';
+import { setFilters, clearFilters } from '@/redux/slices/filterSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -9,87 +12,55 @@ import { MultiSelectDropdown } from '@/components/common/ui/MultiSelectDropdown'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { categories, educationLevels, IFilter, ratingList, tierOptions, paymentTypeOptions } from './helper';
+import { API_ROUTES } from '@/utils/constant';
+import { toast } from 'react-toastify';
+import { apiCall } from '@/utils/apiCall';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
 
-const GigFilterModal = ({ isOpen, onClose, onApplyFilters, onClearFilter }: { isOpen: boolean; onClose: () => void; onApplyFilters: (filters: IFilter) => void; onClearFilter: ()=> void; }) => {
-  const [filters, setFilters] = useState<IFilter>({
-    tier: [],
-    rating: 0,
-    minReviews: '',
-    priceRange: [],
-    educationLevel: [],
-    category: [],
-    duration: '',
-    location: '',
-    paymentType:[],
-    startDate: '',
-    endDate: '',
-  });
+const GigFilterModal = ({ isOpen, onClose, onApplyFilters, onClearFilter, onActiveFilterCountChange }: { isOpen: boolean; onClose: () => void; onApplyFilters: (filters: IFilter) => void; onClearFilter: () => void; onActiveFilterCountChange?: (count: number) => void; }) => {
+  const dispatch = useDispatch();
+  const filters = useSelector((state: RootState) => state.filter);
   const [priceError, setPriceError] = useState<string>("");
+  const [dateError, setDateError] = useState<string>("");
+  const [gigCategoryDropdown, setGigCategoryDropdown] = useState<{id: string, label: string}[]>([]);
 
 
   const handleTierToggle = (tierId: string) => {
-    setFilters(prev => ({
-      ...prev,
-      tier: prev.tier.includes(tierId)
-        ? prev.tier.filter(t => t !== tierId)
-        : [...prev.tier, tierId]
-    }));
+    const newTier = filters.tier.includes(tierId)
+      ? filters.tier.filter(t => t !== tierId)
+      : [...filters.tier, tierId];
+    dispatch(setFilters({ tier: newTier }));
   };
 
   const handleRatingClick = (rating: number) => {
-    setFilters(prev => ({
-      ...prev,
-      rating: prev.rating === rating ? 0 : rating
-    }));
+    dispatch(setFilters({ rating: filters.rating === rating ? 0 : rating }));
   };
 
   const handlePriceRangeChange = (index: number, value: string) => {
-    // setFilters(prev => ({
-    //   ...prev,
-    //   priceRange: prev.priceRange.map((price, i) => i === index ? parseInt(value) : price)
-    // }));
-
     let newValue = Math.max(0, parseInt(value) || 0);
-    setFilters(prev => {
-      let newRange = [...prev.priceRange];
-      newRange[index] = newValue;
-      if ((newRange[0] > 0 && newRange[1] === 0)) {
-        setPriceError("Please fill both min and max price.");
-      } else if (newRange[0] > newRange[1]) {
-        setPriceError("Min price cannot be greater than max price.");
-      } else {
-        setPriceError("");
-      }
-      return { ...prev, priceRange: newRange };
-    });
+    let newRange = [...filters.priceRange];
+    newRange[index] = newValue;
+    if ((newRange[0] > 0 && newRange[1] === 0)) {
+      setPriceError("Please fill both min and max price.");
+    } else if (newRange[0] > newRange[1]) {
+      setPriceError("Min price cannot be greater than max price.");
+    } else {
+      setPriceError("");
+    }
+    dispatch(setFilters({ priceRange: newRange }));
   };
 
   const handlePaymentTypeToggle = (type: string) => {
-    setFilters((prev:any) => ({
-      ...prev,
-      paymentType: prev?.paymentType.includes(type)
-        ? prev.paymentType.filter((t:any) => t !== type)
-        : [...prev.paymentType, type]
-    }));
+    const newPaymentType = filters.paymentType.includes(type)
+      ? filters.paymentType.filter((t: any) => t !== type)
+      : [...filters.paymentType, type];
+    dispatch(setFilters({ paymentType: newPaymentType }));
   };
 
   const clearAllFilters = () => {
-    setFilters({
-      tier: [],
-      rating: 0,
-      minReviews: '',
-      priceRange: [ ],
-      educationLevel: [],
-      category: [],
-      duration: '',
-      location: '',
-      paymentType:[],
-      startDate: '',
-      endDate: '',
-    });
+    dispatch(clearFilters());
     onClearFilter();
     onClose();
   };
@@ -122,6 +93,10 @@ const GigFilterModal = ({ isOpen, onClose, onApplyFilters, onClearFilter }: { is
       newFilters.priceRange = priceRange;
     }
     
+    if (Array.isArray(newFilters.category) && newFilters.category.length > 0) {
+      newFilters.category = newFilters.category.map((cat: any) => typeof cat === 'object' && cat.id ? cat.id : cat);
+    }
+    
     onApplyFilters(newFilters);
     onClose();
   };
@@ -141,6 +116,48 @@ const GigFilterModal = ({ isOpen, onClose, onApplyFilters, onClearFilter }: { is
     if (filters.endDate) count++;
     return count;
   };
+
+  
+
+  // Notify parent of active filter count
+  React.useEffect(() => {
+    if (onActiveFilterCountChange) {
+      onActiveFilterCountChange(getActiveFiltersCount());
+    }
+  }, [filters]);
+
+  React.useEffect(() => {
+    if (filters.startDate && filters.endDate) {
+      if (new Date(filters.endDate) < new Date(filters.startDate)) {
+        setDateError("End date cannot be before start date.");
+      } else {
+        setDateError("");
+      }
+    } else {
+      setDateError("");
+    }
+  }, [filters.startDate, filters.endDate]);
+
+  React.useEffect(() => {
+    const fetchGigCategories = async () => {
+      try {
+        const resp = await apiCall({
+          endPoint: API_ROUTES.GIG_CATEGORY,
+          method: "GET",
+        });
+        if (resp?.success) {
+          const options = resp.data.map((opt: { id: number; name: string }) => ({
+            id: String(opt.id),
+            label: opt.name,
+          }));
+          setGigCategoryDropdown(options);
+        }
+      } catch (error) {
+        toast.error("Failed to fetch categories");
+      }
+    };
+    fetchGigCategories();
+  }, []);
 
   if (!isOpen) return null;
 
@@ -274,10 +291,12 @@ const GigFilterModal = ({ isOpen, onClose, onApplyFilters, onClearFilter }: { is
                   disabled={false}
                   placeholder="Select Category"
                   value={filters.category || []}
-                  options={(categories || []).map((opt) => ({ id: opt, label: opt }))}
-                  onValueChange={(val) => setFilters((prev) => ({ ...prev, category: val }))}
+                  // options={(categories || []).map((opt) => ({ id: opt, label: opt }))}
+                  options={gigCategoryDropdown}
+                  onValueChange={(val) => dispatch(setFilters({ category: val }))}
                 />
               </div>
+
               <div className="space-y-3 sm:space-y-4">
                 <div className="text-base sm:text-lg font-semibold text-gray-900 flex items-center gap-2">
                   <Users className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
@@ -285,7 +304,7 @@ const GigFilterModal = ({ isOpen, onClose, onApplyFilters, onClearFilter }: { is
                 </div>
                 <Select
                   value={filters.minReviews}
-                  onValueChange={(val) => setFilters(prev => ({ ...prev, minReviews: val }))}
+                  onValueChange={(val) => dispatch(setFilters({ minReviews: val }))}
                 >
                   <SelectTrigger className="h-9 sm:h-10 text-sm sm:text-base">
                     <SelectValue placeholder="Select Minimum Reviews" />
@@ -329,7 +348,7 @@ const GigFilterModal = ({ isOpen, onClose, onApplyFilters, onClearFilter }: { is
                   <div className="relative">
                     <DatePicker
                       selected={filters.startDate ? new Date(filters.startDate) : null}
-                      onChange={date => setFilters(prev => ({ ...prev, startDate: date ? date.toISOString().split('T')[0] : '' }))}
+                      onChange={date => dispatch(setFilters({ startDate: date ? date.toISOString().split('T')[0] : '' }))}
                       dateFormat="yyyy-MM-dd"
                       placeholderText="Start Date"
                       className={`w-full pr-10 px-4 border text-black disabled:bg-gray-100 disabled:text-gray-500 border-gray-300 rounded-lg h-11 py-2 focus:outline-none focus:ring-1 focus:ring-[var(--base)] focus:border-[var(--base)]`}
@@ -340,7 +359,7 @@ const GigFilterModal = ({ isOpen, onClose, onApplyFilters, onClearFilter }: { is
                   <div className="relative">
                     <DatePicker
                       selected={filters.endDate ? new Date(filters.endDate) : null}
-                      onChange={date => setFilters(prev => ({ ...prev, endDate: date ? date.toISOString().split('T')[0] : '' }))}
+                      onChange={date => dispatch(setFilters({ endDate: date ? date.toISOString().split('T')[0] : '' }))}
                       dateFormat="yyyy-MM-dd"
                       placeholderText="End Date"
                       className={`w-full pr-10 px-4 border text-black disabled:bg-gray-100 disabled:text-gray-500 border-gray-300 rounded-lg h-11 py-2 focus:outline-none focus:ring-1 focus:ring-[var(--base)] focus:border-[var(--base)]`}
@@ -349,6 +368,9 @@ const GigFilterModal = ({ isOpen, onClose, onApplyFilters, onClearFilter }: { is
                     <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5 pointer-events-none" />
                   </div>
                 </div>
+                {dateError && (
+                  <div className="text-red-500 text-xs mt-1">{dateError}</div>
+                )}
               </div>
 
               {getActiveFiltersCount() > 0 && (
@@ -396,22 +418,22 @@ const GigFilterModal = ({ isOpen, onClose, onApplyFilters, onClearFilter }: { is
                           Price: ₹{filters.priceRange[0] == null ? filters.priceRange[1] : filters.priceRange[0]}-₹{filters.priceRange[1] == null ? filters.priceRange[0] : filters.priceRange[1]}
                         </Badge>
                       )} */}
-                      {
-  (() => {
-    const [min, max] = filters.priceRange;
-    if (min > 0 || max > 0) {
-      // If one is null/undefined, use the other value
-      const displayMin = min ?? max;
-      const displayMax = max ?? min;
-      return (
-        <Badge className="bg-green-100 text-green-800 border-green-200 text-xs">
-          Price: ₹{displayMin}-₹{displayMax}
-        </Badge>
-      );
-    }
-    return null;
-  })()
-}
+                    {
+                      (() => {
+                        const [min, max] = filters.priceRange;
+                        if (min > 0 || max > 0) {
+                          // If one is null/undefined, use the other value
+                          const displayMin = min ?? max;
+                          const displayMax = max ?? min;
+                          return (
+                            <Badge className="bg-green-100 text-green-800 border-green-200 text-xs">
+                              Price: ₹{displayMin}-₹{displayMax}
+                            </Badge>
+                          );
+                        }
+                        return null;
+                      })()
+                    }
                     {filters.paymentType.length > 0 && (
                       <Badge className="bg-blue-100 text-blue-800 border-blue-200 text-xs">
                         Payment Type: {filters.paymentType.join(', ')}
@@ -447,7 +469,7 @@ const GigFilterModal = ({ isOpen, onClose, onApplyFilters, onClearFilter }: { is
             </DialogClose>
             <Button
               type="submit"
-              disabled={!!priceError}
+              disabled={!!priceError || !!dateError}
               onClick={applyFilters}
               className="w-full sm:w-auto text-sm sm:text-base h-9 sm:h-10"
             >
