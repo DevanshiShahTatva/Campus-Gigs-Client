@@ -106,13 +106,43 @@ const GigListing = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [appliedFilters, setAppliedFilters] = useState<any>({});
 
   const debounceSearch = useDebounce(searchQuery, 700);
 
-  const fetchGigs = async (page = 1, search = "") => {
+  const fetchGigs = async (
+    page = 1,
+    search = "",
+    filters?: {
+      rating?: number,
+      paymentType?: string[],
+      priceRange?: number[]
+      startDate?: string,
+      endDate?: string,
+    },
+  ) => {
     try {
+
+      let url = `${API_ROUTES.GIGS}?page=${page}&pageSize=9&search=${search}`;
+      if (filters?.rating) {
+        const minRating = filters.rating;
+        url += `&minRating=${minRating}`;
+      }
+       if (filters?.paymentType && filters?.paymentType?.length > 0) {
+        url += `&paymentType=${filters?.paymentType?.join(',')}`;
+      }
+      if (filters?.priceRange && Array.isArray(filters?.priceRange) && (filters?.priceRange?.length == 2)) {
+        url += `&minPrice=${filters?.priceRange[0]}&maxPrice=${filters?.priceRange[1]}`;
+      }
+       if (filters?.startDate) {
+        url += `&startDate=${encodeURIComponent(filters.startDate)}`;
+      }
+      if (filters?.endDate) {
+        url += `&endDate=${encodeURIComponent(filters.endDate)}`;
+      }
+
       const resp = await apiCall({
-        endPoint: `${API_ROUTES.GIGS}?page=${page}&pageSize=9&search=${search}`,
+        endPoint: url,
         method: "GET",
       });
 
@@ -126,6 +156,11 @@ const GigListing = () => {
     } finally {
       setLoading(false);
     }
+  };
+  const handleClearFilters = () => {
+    setAppliedFilters({});
+    setLoading(true);
+    fetchGigs(1, searchQuery, {});
   };
 
   useEffect(() => {
@@ -141,6 +176,9 @@ const GigListing = () => {
 
   const handleApplyFilters = (filters: any) => {
     console.log("Applied filters:", filters);
+    setAppliedFilters(filters);
+    setLoading(true);
+    fetchGigs(1, searchQuery, filters);
   };
 
   const handleSubmitBid = (data: any) => {
@@ -237,9 +275,12 @@ const GigListing = () => {
                 <CheckCircle className="w-4 h-4 text-green-500" />
               </div>
               <div className="flex items-center space-x-1 text-sm text-gray-500">
-                <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                <span>4.6</span>
-                <span>•</span>
+                {gig?.user?.averageRating > 0 && <>
+                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                  <span>{gig?.user?.averageRating}</span>
+                  <span>•</span>
+                </>
+                }
                 <span>{moment(gig.created_at).fromNow()}</span>
               </div>
             </div>
@@ -386,6 +427,7 @@ const GigListing = () => {
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onApplyFilters={handleApplyFilters}
+        onClearFilter={handleClearFilters}
       />
       <CommonFormModal
         width="600px"

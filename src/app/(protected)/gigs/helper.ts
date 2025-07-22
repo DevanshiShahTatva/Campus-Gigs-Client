@@ -7,6 +7,9 @@ export interface IFilter {
   category: string[];
   duration: string;
   location: string;
+  paymentType: string[]; // 'hourly' | 'fixed'
+  startDate?: string;
+  endDate?: string;
 }
 
 export const tierOptions = [
@@ -37,6 +40,11 @@ export const educationLevels = [
 export const categories = [
   'Technology', 'Design', 'Marketing', 'Writing', 'Business',
   'Photography', 'Video', 'Music', 'Programming', 'Consulting'
+];
+
+export const paymentTypeOptions = [
+  { id: 'hourly', label: 'Hourly' },
+  { id: 'fixed', label: 'Fixed' },
 ];
 
 export function formatTimeDifference(start: Date, end: Date): string {
