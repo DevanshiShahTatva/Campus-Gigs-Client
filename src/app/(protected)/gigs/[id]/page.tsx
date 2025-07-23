@@ -335,13 +335,7 @@ const GigDetail = () => {
           <div className="text-xs sm:text-sm text-gray-500">in {gigDetails.payment_type === "fixed" ? "Fixed Price" : "Range"}</div>
         </div>
       </div>
-      {(gigDetails?.user_id !== user_id && gigDetails?.profile_type === "provider" && userProfile?.data?.profile_type === "user") ? (
-        <Button
-          className="px-3 py-2 sm:px-4 sm:py-6 text-sm sm:text-md rounded-lg font-semibold"
-        >
-          Pay Now
-        </Button>
-      ) : (gigDetails?.user_id !== user_id && !gigDetails.hasBid && gigDetails?.profile_type === "user" && userProfile?.data?.profile_type === "provider") && (
+      {(gigDetails?.user_id !== user_id && !gigDetails.hasBid && userProfile?.data?.profile_type === "provider") && (
         <Button
           onClick={() => setIsModalOpen(true)}
           className="px-3 py-2 sm:px-4 sm:py-6 text-sm sm:text-md rounded-lg font-semibold"
