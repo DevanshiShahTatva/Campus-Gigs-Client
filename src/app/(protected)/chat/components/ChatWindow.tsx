@@ -818,12 +818,17 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
               accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar"
             />
             <div className="flex-1 relative">
-              <input
-                type="text"
-                className="w-full border border-gray-200 rounded-full pl-4 pr-10 py-2 focus:outline-none focus:border-[var(--base)] text-sm"
+              <textarea
+                rows={1}
+                className="w-full border border-gray-200 rounded-xl pl-4 pr-10 py-2 focus:outline-none focus:border-[var(--base)] text-sm resize-none overflow-y-auto"
                 placeholder="Type a message..."
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                  e.target.style.height = "auto";
+                  const maxHeight = e.target.scrollHeight > 3 * 24 ? 3 * 24 : e.target.scrollHeight;
+                  e.target.style.height = `${maxHeight}px`;
+                }}
                 onFocus={() => setShowEmojiPicker(false)}
                 disabled={sending}
               />
