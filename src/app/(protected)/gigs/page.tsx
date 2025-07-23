@@ -31,13 +31,15 @@ import { toast } from "react-toastify";
 import { apiCall } from "@/utils/apiCall";
 import { API_ROUTES } from "@/utils/constant";
 import { IPagination, Gigs } from "@/utils/interface";
-import { formatTimeDifference } from "./helper";
+import { formatTimeDifference, IFilter } from "./helper";
 import { getAvatarName, renderBaseOnCondition } from "@/utils/helper";
 import moment from "moment";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Loader from "@/components/common/Loader";
 import useDebounce from "@/hooks/useDebounce";
 import React from "react";
+import FilterChips from "./FilterChips";
+
 const PlaceholderImage = () => (
   <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
     <div className="text-center">
@@ -109,13 +111,9 @@ const GigListing = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const filters = useSelector((state: RootState) => state.filter);
-  const [appliedFilters, setAppliedFilters] = useState(filters);
-  const [activeFilterCount, setActiveFilterCount] = useState(0);
+  const [appliedFilters, setAppliedFilters] = useState<IFilter>(filters);
 
   const debounceSearch = useDebounce(searchQuery, 700);
-
-console.log(appliedFilters,"APPLIED FILTERS");
-
 
   const fetchGigs = async (
     page = 1,
@@ -169,13 +167,12 @@ console.log(appliedFilters,"APPLIED FILTERS");
     }
   };
   const handleClearFilters = () => {
-    // setAppliedFilters({});
     setLoading(true);
     fetchGigs(1, searchQuery, {});
   };
   useEffect(() => {
     setAppliedFilters(filters);
-  }, []);
+  }, [filters]);
 
   useEffect(() => {
     setLoading(true);
@@ -188,12 +185,8 @@ console.log(appliedFilters,"APPLIED FILTERS");
     }
   };
 
-  const handleApplyFilters = () => {
-    // console.log("Applied filters:", filters);
-    // setAppliedFilters(filters);
-    // setLoading(true);
-    // fetchGigs(1, searchQuery, filters);
-    setAppliedFilters(filters);
+  const handleApplyFilters = (localFilters: IFilter) => {    
+    setAppliedFilters(localFilters);
   };
 
   const handleSubmitBid = (data: any) => {
@@ -345,9 +338,6 @@ console.log(appliedFilters,"APPLIED FILTERS");
                 />
               </svg>
               Filter
-              {activeFilterCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-600 rounded-full border-2 border-white"></span>
-              )}
             </Button>
             <Link href="/gigs/create">
               <Button className="px-6 h-12" size="lg">
@@ -357,7 +347,9 @@ console.log(appliedFilters,"APPLIED FILTERS");
           </div>
         </div>
       </div>
-
+      <div>
+        <FilterChips />
+      </div>
       {renderBaseOnCondition(
         loading,
         <div className="h-20 mt-14 w-full text-center">
@@ -446,7 +438,6 @@ console.log(appliedFilters,"APPLIED FILTERS");
         onClose={() => setIsFilterOpen(false)}
         onApplyFilters={handleApplyFilters}
         onClearFilter={handleClearFilters}
-         onActiveFilterCountChange={setActiveFilterCount}
       />
       <CommonFormModal
         width="600px"
