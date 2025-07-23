@@ -17,6 +17,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux';
 import GigFilterModal from "./filterModel";
 import CommonFormModal from "@/components/common/form/CommonFormModal";
 import GigListingSkeleton from "@/components/skeleton/gigListingSkeleton";
@@ -29,13 +31,15 @@ import { toast } from "react-toastify";
 import { apiCall } from "@/utils/apiCall";
 import { API_ROUTES } from "@/utils/constant";
 import { IPagination, Gigs } from "@/utils/interface";
-import { formatTimeDifference } from "./helper";
+import { formatTimeDifference, IFilter } from "./helper";
 import { getAvatarName, renderBaseOnCondition } from "@/utils/helper";
 import moment from "moment";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Loader from "@/components/common/Loader";
 import useDebounce from "@/hooks/useDebounce";
 import React from "react";
+import FilterChips from "./FilterChips";
+
 const PlaceholderImage = () => (
   <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
     <div className="text-center">
@@ -106,13 +110,48 @@ const GigListing = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const filters = useSelector((state: RootState) => state.filter);
+  const [appliedFilters, setAppliedFilters] = useState<IFilter>(filters);
 
   const debounceSearch = useDebounce(searchQuery, 700);
 
-  const fetchGigs = async (page = 1, search = "") => {
+  const fetchGigs = async (
+    page = 1,
+    search = "",
+    filters?: {
+      rating?: number,
+      paymentType?: string[],
+      priceRange?: number[]
+      startDate?: string,
+      endDate?: string,
+      category?: string[]
+    },
+  ) => {
     try {
+
+      let url = `${API_ROUTES.GIGS}?page=${page}&pageSize=9&search=${search}`;
+      if (filters?.rating) {
+        const minRating = filters.rating;
+        url += `&minRating=${minRating}`;
+      }
+      if (filters?.paymentType && filters?.paymentType?.length > 0) {
+        url += `&paymentType=${filters?.paymentType?.join(',')}`;
+      }
+      if (filters?.priceRange && Array.isArray(filters?.priceRange) && (filters?.priceRange?.length == 2)) {
+        url += `&minPrice=${filters?.priceRange[0]}&maxPrice=${filters?.priceRange[1]}`;
+      }
+      if (filters?.category && Array.isArray(filters.category) && filters.category.length > 0) {
+        url += `&category=${filters.category.join(',')}`;
+      }
+      if (filters?.startDate) {
+        url += `&startDate=${encodeURIComponent(filters.startDate)}`;
+      }
+      if (filters?.endDate) {
+        url += `&endDate=${encodeURIComponent(filters.endDate)}`;
+      }
+
       const resp = await apiCall({
-        endPoint: `${API_ROUTES.GIGS}?page=${page}&pageSize=9&search=${search}`,
+        endPoint: url,
         method: "GET",
       });
 
@@ -127,11 +166,18 @@ const GigListing = () => {
       setLoading(false);
     }
   };
+  const handleClearFilters = () => {
+    setLoading(true);
+    fetchGigs(1, searchQuery, {});
+  };
+  useEffect(() => {
+    setAppliedFilters(filters);
+  }, [filters]);
 
   useEffect(() => {
     setLoading(true);
-    fetchGigs(1, debounceSearch);
-  }, [debounceSearch]);
+    fetchGigs(1, debounceSearch, appliedFilters);
+  }, [debounceSearch, appliedFilters]);
 
   const fetchNextPage = () => {
     if (currentPage < meta.totalPages && !loading) {
@@ -139,8 +185,8 @@ const GigListing = () => {
     }
   };
 
-  const handleApplyFilters = (filters: any) => {
-    console.log("Applied filters:", filters);
+  const handleApplyFilters = (localFilters: IFilter) => {    
+    setAppliedFilters(localFilters);
   };
 
   const handleSubmitBid = (data: any) => {
@@ -237,9 +283,12 @@ const GigListing = () => {
                 <CheckCircle className="w-4 h-4 text-green-500" />
               </div>
               <div className="flex items-center space-x-1 text-sm text-gray-500">
-                <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                <span>4.6</span>
-                <span>•</span>
+                {gig?.user?.averageRating > 0 && <>
+                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                  <span>{gig?.user?.averageRating}</span>
+                  <span>•</span>
+                </>
+                }
                 <span>{moment(gig.created_at).fromNow()}</span>
               </div>
             </div>
@@ -274,7 +323,7 @@ const GigListing = () => {
             <Button
               size="lg"
               onClick={() => setIsFilterOpen(true)}
-              className="px-6 h-12 bg-teal-800 hover:bg-teal-900"
+              className="px-6 h-12 bg-[var(--base)] hover:bg-[var(--base-hover)] relative"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -298,7 +347,9 @@ const GigListing = () => {
           </div>
         </div>
       </div>
-
+      <div>
+        <FilterChips />
+      </div>
       {renderBaseOnCondition(
         loading,
         <div className="h-20 mt-14 w-full text-center">
@@ -386,6 +437,7 @@ const GigListing = () => {
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onApplyFilters={handleApplyFilters}
+        onClearFilter={handleClearFilters}
       />
       <CommonFormModal
         width="600px"
