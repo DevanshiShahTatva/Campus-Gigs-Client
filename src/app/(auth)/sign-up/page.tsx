@@ -177,7 +177,7 @@ const SignUpPage: React.FC = () => {
 
   const handleRemoveImage = (setFieldValue: (field: string, value: any) => void) => {
     setProfileImage(null);
-    setFieldValue("profilePicture", null);
+    setFieldValue("profile", null);
   };
 
   const handleSkillsChange = (tags: string[], setFieldValue: (field: string, value: any) => void) => {
@@ -254,7 +254,7 @@ const SignUpPage: React.FC = () => {
         <div>
           <div>
             <div className="mb-6 flex gap-3 lg:gap-6 items items-center">
-              <div className="relative min-w-16 h-16 lg:w-23 lg:h-23">
+              <div className="relative min-w-16 max-w-16 h-16 lg:w-23 lg:max-w-23 lg:h-23">
                 <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
                   {profileImage ? (
                     <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />

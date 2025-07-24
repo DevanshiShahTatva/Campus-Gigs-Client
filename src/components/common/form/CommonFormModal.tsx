@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import {
@@ -21,10 +21,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MultiSelectDropdown } from "../ui/MultiSelectDropdown";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 export type FieldOption = { id: string | number; label: string };
 type FieldType =
   | "text"
+  | "password"
   | "textarea"
   | "number"
   | "select"
@@ -83,6 +85,17 @@ function getYupSchema(fields: CommonFormField[]) {
             `${label} must be at most ${field.maxLength} characters`
           );
         }
+        break;
+      }
+      case "password": {
+        validator = Yup.string()
+          .required("Password is required")
+          .min(8, "Password must be at least 8 characters")
+          .max(50, "Password must be no more than 50 characters")
+          .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+          .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+          .matches(/\d/, "Password must contain at least one number")
+          .matches(/[!@#$%^&*(),.?":{}|<>]/, "Password must contain at least one special character");
         break;
       }
       case "number": {
@@ -156,6 +169,8 @@ const CommonFormModal: React.FC<CommonFormModalProps> = ({
   initialValues,
   width = "32rem",
 }) => {
+  const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
+
   const defaultInitials: Record<string, any> = {};
   fields.forEach((f) => {
     if (initialValues && initialValues[f.name] !== undefined) {
@@ -222,6 +237,34 @@ const CommonFormModal: React.FC<CommonFormModalProps> = ({
                           }
                           placeholder={field.placeholder}
                           rows={field.type === "textarea" ? 4 : undefined}
+                        />
+                      );
+                    case "password":
+                      return (
+                        <FormikTextField
+                          key={field.name}
+                          name={field.name}
+                          label={field.label}
+                          placeholder={field.placeholder}
+                          type={showPassword[field.name] ? "text" : "password"}
+                          endIcon={
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setShowPassword((prev) => ({
+                                  ...prev,
+                                  [field.name]: !prev[field.name],
+                                }))
+                              }
+                              className="text-gray-500 hover:text-gray-700 transition-colors"
+                            >
+                              {showPassword[field.name] ? (
+                                <FiEyeOff className="h-5 w-5" />
+                              ) : (
+                                <FiEye className="h-5 w-5" />
+                              )}
+                            </button>
+                          }
                         />
                       );
                     case "select":

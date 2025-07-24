@@ -64,10 +64,6 @@ const SupportRequestsPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchRequests();
-  }, []);
-
   const allVisibleIds = useMemo(() => requests.map((r) => r.id), [requests]);
   const allSelected = useMemo(() => allVisibleIds.length > 0 && allVisibleIds.every((id) => selected.includes(id)), [selected, allVisibleIds]);
   const isSelected = (id: number) => selected.includes(id);
