@@ -76,6 +76,7 @@ export const API_ROUTES = {
   CREATE_AUTO_DEBIT_SUBSCRIPTION: "/subscription-plan/create-subscription-session",
   PAYMENT_HISTORY: "/payment-history",
   PROVIDER_ONBOARD: "/payment/provider/onboard",
+  GIG_PAYMENT_SESSION: "/payment/gig/checkout-session",
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
     AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",

@@ -33,6 +33,7 @@ const MyGigs = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [ratingLoading, setRatingLoading] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [isPaymentLoading, setIsPaymentLoading] = useState<boolean>(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [gigIdForDelete, setGigIdForDelete] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -131,9 +132,29 @@ const MyGigs = () => {
     router.push(newUrl);
   };
 
-  const handlePaymentForGig = (event: React.SyntheticEvent, gigId: number) => {
+  const handlePaymentForGig = async (event: React.SyntheticEvent, gig: Gigs) => {
     event.stopPropagation();
-    console.log(gigId);
+    try {
+      setIsPaymentLoading(true);
+      const resp = await apiCall({
+        endPoint: `${API_ROUTES.GIG_PAYMENT_SESSION}`,
+        method: "POST",
+        body: {
+          amount: gig.price,
+          gigId: gig.id,
+          userId: gig.user_id,
+          gigTitle: gig.title,
+        },
+      });
+
+      if (resp?.success) {
+        window.location.href = resp.data.url;
+      };
+    } catch (error) {
+      toast.error("Failed to create payment session");
+    } finally {
+      setIsPaymentLoading(false);
+    }
   };
 
   const handleNavigateToView = (id: number) => {
@@ -333,11 +354,12 @@ const MyGigs = () => {
                               </p>
                               <Button
                                 variant={"outline"}
+                                disabled={isPaymentLoading}
                                 onClick={(event) =>
-                                  handlePaymentForGig(event, gig.id)
+                                  handlePaymentForGig(event, gig)
                                 }
                               >
-                                Pay Now
+                                {isPaymentLoading ? <Loader size={10} /> : "Pay Now"}
                               </Button>
                             </div>
                           )}
