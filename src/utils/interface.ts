@@ -134,6 +134,7 @@ export interface Skill {
 }
 
 export interface User {
+  [x: string]: any;
   id: number;
   email: string;
   name: string;

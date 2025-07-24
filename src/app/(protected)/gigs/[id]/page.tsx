@@ -335,16 +335,14 @@ const GigDetail = () => {
           <div className="text-xs sm:text-sm text-gray-500">in {gigDetails.payment_type === "fixed" ? "Fixed Price" : "Range"}</div>
         </div>
       </div>
-      {gigDetails?.user_id !== user_id &&
-        !gigDetails.hasBid &&
-          userProfile?.data?.profile_type === "provider" && (
-          <Button
-            onClick={() => setIsModalOpen(true)}
-            className="px-3 py-2 sm:px-4 sm:py-6 text-sm sm:text-md rounded-lg font-semibold"
-          >
-            Submit Bid
-          </Button>
-        )}
+      {(gigDetails?.user_id !== user_id && !gigDetails.hasBid && userProfile?.data?.profile_type === "provider") && (
+        <Button
+          onClick={() => setIsModalOpen(true)}
+          className="px-3 py-2 sm:px-4 sm:py-6 text-sm sm:text-md rounded-lg font-semibold"
+        >
+          Submit Bid
+        </Button>
+      )}
     </div>
   );
 
@@ -400,8 +398,8 @@ const GigDetail = () => {
   const renderCertificatesTab = () => (
     <div className="pt-4 sm:pt-6">
       <div className="space-y-3">
-        {gigDetails.certifications.length > 0 ?
-          gigDetails.certifications.map((cert: string, i: number) => (
+        {gigDetails.certifications.length > 0 && gigDetails.certifications?.filter((item: string) => item.trim() !== "").length ?
+          gigDetails.certifications?.filter((item: string) => item.trim() !== "")?.map((cert: string, i: number) => (
             <div key={`${i + 1}`} className="flex items-start gap-3">
               <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mt-0.5 flex-shrink-0" />
               <span className="text-gray-700 text-sm sm:text-base">{cert}</span>

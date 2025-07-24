@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import userReducer from './slices/userSlice';
+import filterReducer from './slices/filterSlice';
 import { api } from './api';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
@@ -13,6 +14,7 @@ const persistConfig = {
 import { combineReducers } from 'redux';
 const rootReducer = combineReducers({
   user: userReducer,
+  filter: filterReducer,
   [api.reducerPath]: api.reducer,
 });
 
