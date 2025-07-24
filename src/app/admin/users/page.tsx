@@ -68,13 +68,13 @@ function Users() {
 
   const handleSearchSort = (
     searchTerm: string,
-    key: string,
+    key: keyof User,
     order: SortOrder
   ) => {
     setQueryParams((prev) => ({
       ...prev,
       search: searchTerm,
-      sortKey: key || "name",
+      sortKey: key as string || "name",
       sortOrder: order,
       page: 1,
     }));
