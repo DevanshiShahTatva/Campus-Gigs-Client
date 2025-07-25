@@ -494,6 +494,18 @@ const MyGigs = () => {
                               </p>
                             </div>
                           )}
+
+                        {activeTab === "un_started" &&
+                          gig.provider_id !== null &&
+                          gig.gig_payment !== null && (
+                            <div className="pt-4 bg-green-50 rounded-lg p-4 mt-2">
+                              <p className="text-sm text-green-700">
+                                <strong>Payment Completed:</strong> Provider
+                                will soon start working on the gig. Meanwhile if
+                                you have any query message to provider.
+                              </p>
+                            </div>
+                          )}
                       </div>
                     </Card>
                   );

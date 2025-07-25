@@ -237,7 +237,7 @@ const GigCard = ({
             </Badge>
 
             {bid?.bid_amount && (
-              <div className="flex items-center gap-1 text-sm text-teal-600 bg-teal-50 px-2 py-1 rounded-md text-xs">
+              <div className="flex items-center gap-1 text-teal-600 bg-teal-50 px-2 py-1 rounded-md text-xs">
                 <TrendingUp className="h-3 w-3" />
                 <span className="font-medium">
                   Your bid: ${Number(bid?.bid_amount).toFixed(2)}
