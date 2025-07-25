@@ -284,7 +284,7 @@ const GigCard = ({
         </div>
 
         {/* CTA / Status Sections */}
-        {pipelineStage === BID_STATUS.ACCEPTED && (
+        {pipelineStage === BID_STATUS.ACCEPTED && gig.gig_payment !== null && (
           <div className="pt-4">
             <Button
               onClick={() => onStartGig?.(gig.id, "in_progress")}

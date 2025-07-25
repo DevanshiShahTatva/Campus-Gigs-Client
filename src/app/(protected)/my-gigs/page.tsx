@@ -10,7 +10,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Calendar, DollarSign, Star, ImageIcon, Users } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  Calendar,
+  DollarSign,
+  Star,
+  ImageIcon,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { apiCall } from "@/utils/apiCall";
 import { API_ROUTES, MY_GIGS_TABS } from "@/utils/constant";
@@ -28,10 +36,8 @@ import { useRouter } from "next/navigation";
 import GigRatingModal from "./GigRatingModal";
 import Slider from "react-slick";
 
-
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-
 
 const MyGigs = () => {
   const router = useRouter();
@@ -53,8 +59,6 @@ const MyGigs = () => {
     total: 1,
   });
 
-
-
   const PlaceholderImage = () => (
     <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
       <div className="text-center">
@@ -63,9 +67,16 @@ const MyGigs = () => {
       </div>
     </div>
   );
-  
-  
-  const ImageWithFallback = ({ src, alt, className }: { src: string; alt: string, className?: string }) => {
+
+  const ImageWithFallback = ({
+    src,
+    alt,
+    className,
+  }: {
+    src: string;
+    alt: string;
+    className?: string;
+  }) => {
     const [hasError, setHasError] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -96,17 +107,16 @@ const MyGigs = () => {
           alt={alt}
           onError={handleError}
           onLoad={handleLoad}
-          style={{ display: isLoading ? 'none' : 'block' }}
+          style={{ display: isLoading ? "none" : "block" }}
           className="min-h-[250px] h-[250px] w-full object-contain"
         />
       </div>
     );
   };
 
-
-  
-
-  const profileType = useSelector((state: RootState) => state.user.profile_type);
+  const profileType = useSelector(
+    (state: RootState) => state.user.profile_type
+  );
 
   const fetchGigs = async (page = 1, status = "") => {
     setActiveTab(status);
@@ -189,7 +199,10 @@ const MyGigs = () => {
     router.push(newUrl);
   };
 
-  const handlePaymentForGig = async (event: React.SyntheticEvent, gig: Gigs) => {
+  const handlePaymentForGig = async (
+    event: React.SyntheticEvent,
+    gig: Gigs
+  ) => {
     event.stopPropagation();
     try {
       setIsPaymentLoading(true);
@@ -206,7 +219,7 @@ const MyGigs = () => {
 
       if (resp?.success) {
         window.location.href = resp.data.url;
-      };
+      }
     } catch (error) {
       toast.error("Failed to create payment session");
     } finally {
@@ -236,7 +249,7 @@ const MyGigs = () => {
     }
   };
 
-  const renderImageSlider = (images:string[]) => (
+  const renderImageSlider = (images: string[]) => (
     <div className="lg:col-span-2 order-1">
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <div className="h-auto ">
@@ -252,11 +265,7 @@ const MyGigs = () => {
             >
               {images && images.length > 0 ? (
                 images.map((image: string, i: number) => (
-                  <ImageWithFallback
-                    key={`${i + 1}`}
-                    src={image}
-                    alt={'img'}
-                  />
+                  <ImageWithFallback key={`${i + 1}`} src={image} alt={"img"} />
                 ))
               ) : (
                 <div className="h-[250px]">
@@ -364,22 +373,23 @@ const MyGigs = () => {
                             <h3 className="font-bold text-lg text-gray-900 line-clamp-1">
                               {gig.title}
                             </h3>
-                            {activeTab === "un_started" && (
-                              <div className="flex gap-2 ml-4">
-                                <Edit
-                                  onClick={(event) =>
-                                    handleNavigateToEdit(event, gig.id)
-                                  }
-                                  className="cursor-pointer h-5 w-5 text-teal-600 hover:text-teal-800"
-                                />
-                                <Trash2
-                                  onClick={(event) =>
-                                    handleDelete(event, gig.id)
-                                  }
-                                  className="cursor-pointer h-5 w-5 text-red-600 hover:text-red-800"
-                                />
-                              </div>
-                            )}
+                            {activeTab === "un_started" &&
+                              gig.provider_id == null && (
+                                <div className="flex gap-2 ml-4">
+                                  <Edit
+                                    onClick={(event) =>
+                                      handleNavigateToEdit(event, gig.id)
+                                    }
+                                    className="cursor-pointer h-5 w-5 text-teal-600 hover:text-teal-800"
+                                  />
+                                  <Trash2
+                                    onClick={(event) =>
+                                      handleDelete(event, gig.id)
+                                    }
+                                    className="cursor-pointer h-5 w-5 text-red-600 hover:text-red-800"
+                                  />
+                                </div>
+                              )}
                           </div>
 
                           {/* Description */}
@@ -423,6 +433,23 @@ const MyGigs = () => {
                           </div>
                         </div>
 
+                        {activeTab === "un_started" &&
+                          gig.provider_id !== null &&
+                          gig.gig_payment == null && (
+                            <Button
+                              onClick={(event) =>
+                                handlePaymentForGig(event, gig)
+                              }
+                              className="w-full mt-4"
+                            >
+                              {isPaymentLoading ? (
+                                <Loader size={8} />
+                              ) : (
+                                "Pay Now"
+                              )}
+                            </Button>
+                          )}
+
                         {/* Status */}
                         {gig.status === "completed" &&
                           (gig.rating ? (
@@ -434,7 +461,9 @@ const MyGigs = () => {
                                 getRatingDetail(gig.id);
                               }}
                             >
-                              <span className="text-sm">⭐ {gig?.rating?.rating}</span>
+                              <span className="text-sm">
+                                ⭐ {gig?.rating?.rating}
+                              </span>
                               <span className="italic text-green-700 line-clamp-1 text-sm">
                                 "{gig.rating?.rating_feedback}"
                               </span>
@@ -453,8 +482,20 @@ const MyGigs = () => {
                               </button>
                             </div>
                           ))}
+
+                        {activeTab === "un_started" &&
+                          gig.provider_id !== null &&
+                          gig.gig_payment == null && (
+                            <div className="pt-4 bg-red-50 rounded-lg p-4 mt-2">
+                              <p className="text-sm text-red-700">
+                                <strong>Payment Pending:</strong> You have
+                                accepted bid of provider. Your payment is
+                                pending for this gig.
+                              </p>
+                            </div>
+                          )}
                       </div>
-Z                    </Card>
+                    </Card>
                   );
                 })}
               </div>

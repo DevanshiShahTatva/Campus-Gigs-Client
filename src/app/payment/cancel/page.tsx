@@ -47,7 +47,7 @@ const PaymentCancel = () => {
 
           <div className="space-y-3">
             <Button
-              onClick={() => router.push(ROUTES.BUY_PLAN_SUBSCRIPTION)}
+              onClick={() => router.push(ROUTES.MY_GIGS)}
               className="w-full bg-red-500 hover:bg-red-600"
             >
               <RotateCcw className="mr-2 h-4 w-4" />
