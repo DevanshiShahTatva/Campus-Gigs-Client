@@ -220,7 +220,8 @@ const Profile = () => {
           newPassword: values.newPassword,
         },
       });
-      if (response && response.success) {
+
+      if (response?.success) {
         setChangePasswordOpen(false);
         toast.success("Password changed successfully!");
       } else {
@@ -765,14 +766,14 @@ const Profile = () => {
                           {
                             name: "currentPassword",
                             label: "Current Password",
-                            type: "text",
+                            type: "password",
                             required: true,
                             placeholder: "Enter current password",
                           },
                           {
                             name: "newPassword",
                             label: "New Password",
-                            type: "text",
+                            type: "password",
                             required: true,
                             placeholder: "Enter new password",
                             minLength: 6,
@@ -780,7 +781,7 @@ const Profile = () => {
                           {
                             name: "confirmNewPassword",
                             label: "Confirm New Password",
-                            type: "text",
+                            type: "password",
                             required: true,
                             placeholder: "Re-enter new password",
                             minLength: 6,

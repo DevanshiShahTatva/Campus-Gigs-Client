@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Calendar, DollarSign } from "lucide-react";
+import { Edit, Trash2, Calendar, DollarSign, Star, ImageIcon, Users } from "lucide-react";
 import Link from "next/link";
 import { apiCall } from "@/utils/apiCall";
 import { API_ROUTES, MY_GIGS_TABS } from "@/utils/constant";
@@ -26,6 +26,12 @@ import MyGigSkelton from "@/components/skeleton/MyGigSkelton";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 import { useRouter } from "next/navigation";
 import GigRatingModal from "./GigRatingModal";
+import Slider from "react-slick";
+
+
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
 
 const MyGigs = () => {
   const router = useRouter();
@@ -47,9 +53,60 @@ const MyGigs = () => {
     total: 1,
   });
 
-  const profileType = useSelector(
-    (state: RootState) => state.user.profile_type
+
+
+  const PlaceholderImage = () => (
+    <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+      <div className="text-center">
+        <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+        <p className="text-gray-500 text-sm">No Image</p>
+      </div>
+    </div>
   );
+  
+  
+  const ImageWithFallback = ({ src, alt, className }: { src: string; alt: string, className?: string }) => {
+    const [hasError, setHasError] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const handleError = () => {
+      setHasError(true);
+      setIsLoading(false);
+    };
+
+    const handleLoad = () => {
+      setIsLoading(false);
+    };
+
+    if (hasError || !src) {
+      return <PlaceholderImage />;
+    }
+
+    return (
+      <div className={`relative w-full bg-gray-300 h-auto ${className}`}>
+        {isLoading && (
+          <div className="h-full w-full object-contain">
+            <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+              <div className="w-8 h-8 border-4 border-gray-300 border-t-gray-500 rounded-full animate-spin"></div>
+            </div>
+          </div>
+        )}
+        <img
+          src={src}
+          alt={alt}
+          onError={handleError}
+          onLoad={handleLoad}
+          style={{ display: isLoading ? 'none' : 'block' }}
+          className="min-h-[250px] h-[250px] w-full object-contain"
+        />
+      </div>
+    );
+  };
+
+
+  
+
+  const profileType = useSelector((state: RootState) => state.user.profile_type);
 
   const fetchGigs = async (page = 1, status = "") => {
     setActiveTab(status);
@@ -179,6 +236,40 @@ const MyGigs = () => {
     }
   };
 
+  const renderImageSlider = (images:string[]) => (
+    <div className="lg:col-span-2 order-1">
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="h-auto ">
+          <div className="slider h-[250px]">
+            <Slider
+              speed={3000}
+              autoplay={true}
+              dots={images && images.length > 1}
+              infinite={images.length > 1}
+              customPaging={() => (
+                <div className="w-[7px] h-[7px] bg-gray-400 rounded-full transition" />
+              )}
+            >
+              {images && images.length > 0 ? (
+                images.map((image: string, i: number) => (
+                  <ImageWithFallback
+                    key={`${i + 1}`}
+                    src={image}
+                    alt={'img'}
+                  />
+                ))
+              ) : (
+                <div className="h-[250px]">
+                  <PlaceholderImage />
+                </div>
+              )}
+            </Slider>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <>
       <div className="mb-8 flex items-center justify-between">
@@ -244,157 +335,126 @@ const MyGigs = () => {
               scrollableTarget="scrollableDiv"
               className="py-4"
             >
-              <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {gigs.map((gig) => {
                   return (
                     <Card
                       key={gig.id}
-                      className="hover:shadow-lg transition-shadow border-l-4 border-l-[var(--base)] cursor-pointer"
+                      className="p-0 flex flex-col h-full hover:shadow-md transition-shadow border border-gray-200 rounded-lg cursor-pointer overflow-hidden"
                       onClick={() => handleNavigateToView(gig.id)}
                     >
-                      <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <CardTitle className="flex justify-between text-lg text-gray-900 mb-2">
-                              <div className="flex items-center gap-2">
-                                {gig.title}{" "}
-                                <Badge
-                                  variant={"secondary"}
-                                  className="bg-[var(--base)] text-white"
-                                >
-                                  {gig.gig_category.name}
-                                </Badge>
-                              </div>
-                              {gig.status === "completed" && (
-                                <div>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setGigIdForRating(gig.id);
-                                      getRatingDetail(gig.id);
-                                    }}
-                                    className="bg-[var(--base)] text-white px-3 py-1 rounded"
-                                  >
-                                    Review
-                                  </button>
-                                </div>
-                              )}
-                            </CardTitle>
-                            <div className="flex flex-wrap gap-2 mb-2">
-                              {gig.skills.map((data) => {
-                                return (
-                                  <Badge
-                                    key={data.id}
-                                    variant="secondary"
-                                    className="bg-teal-50 text-teal-700 border-teal-200"
-                                  >
-                                    {data.name}
-                                  </Badge>
-                                );
-                              })}
-                            </div>
-                          </div>
-                          {gig.provider_id == null &&
-                            activeTab === "un_started" && (
+                      {/* Top: Image */}
+                      <div className="relative h-[250px] w-full">
+                        {renderImageSlider(gig?.images)}
+                        <div className="absolute top-3 left-3 z-10">
+                          <Badge
+                            variant="secondary"
+                            className="bg-[var(--base)] text-white px-3 py-1 rounded-full shadow-sm text-xs"
+                          >
+                            {gig.gig_category.name}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Bottom: Content */}
+                      <div className="p-4 flex flex-col justify-between flex-1">
+                        <div className="mb-3">
+                          {/* Title + Edit/Delete */}
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-bold text-lg text-gray-900 line-clamp-1">
+                              {gig.title}
+                            </h3>
+                            {activeTab === "un_started" && (
                               <div className="flex gap-2 ml-4">
                                 <Edit
                                   onClick={(event) =>
                                     handleNavigateToEdit(event, gig.id)
                                   }
-                                  className="cursor-pointer h-5 w-5 text-teal-600 hover:text-teal-600"
+                                  className="cursor-pointer h-5 w-5 text-teal-600 hover:text-teal-800"
                                 />
                                 <Trash2
                                   onClick={(event) =>
                                     handleDelete(event, gig.id)
                                   }
-                                  className="cursor-pointer h-5 w-5 text-red-600 hover:text-red-600"
+                                  className="cursor-pointer h-5 w-5 text-red-600 hover:text-red-800"
                                 />
                               </div>
                             )}
-                        </div>
-
-                        <CardDescription className="text-gray-600 mb-3 line-clamp-2 leading-relaxed">
-                          {gig.description}
-                        </CardDescription>
-                      </CardHeader>
-
-                      <CardContent className="pt-0">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                          <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-md">
-                            <DollarSign className="h-4 w-4 text-teal-600" />
-                            <span className="font-medium">
-                              {Number(gig.price).toFixed(2)}/{gig.payment_type}
-                            </span>
                           </div>
 
-                          <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-md">
-                            <span className="font-semibold">Bids: </span>
-                            <span className="font-medium">
-                              {gig.bids.length}
-                            </span>
-                          </div>
+                          {/* Description */}
+                          <p className="text-gray-600 text-sm line-clamp-3 mb-3">
+                            {gig.description}
+                          </p>
 
-                          <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-md">
-                            <Calendar className="h-4 w-4 text-teal-600" />
-                            <span className="font-semibold">End Date:</span>
-                            <span>
-                              {moment(gig.start_date_time).format("DD/MM/yyyy")}
-                            </span>
-                          </div>
-                        </div>
-
-                        {gig.provider_id !== null &&
-                          activeTab === "un_started" && (
-                            <div className="border-t pt-4 bg-red-50 rounded-lg p-4 mt-4 flex items-center justify-between">
-                              <p className="text-sm text-red-700">
-                                <strong>⏳ Waiting for payment:</strong> You
-                                have been accepted the gig but did not pay at.
-                                Please pay soon as possible so the provider can
-                                start soon.
-                              </p>
-                              <Button
-                                variant={"outline"}
-                                disabled={isPaymentLoading}
-                                onClick={(event) =>
-                                  handlePaymentForGig(event, gig)
-                                }
+                          {/* Skills */}
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {gig.skills.slice(0, 3).map((data) => (
+                              <Badge
+                                key={data.id}
+                                variant="secondary"
+                                className="bg-teal-50 text-teal-700 border border-teal-200 text-xs"
                               >
-                                {isPaymentLoading ? <Loader size={10} /> : "Pay Now"}
-                              </Button>
-                            </div>
-                          )}
+                                {data.name}
+                              </Badge>
+                            ))}
 
-                        {gig.provider_id !== null &&
-                          activeTab === "in_progress" && (
-                            <div className="border-t pt-4 bg-yellow-50 rounded-lg p-4 mt-4 flex items-center justify-between">
-                              <p className="text-sm text-yellow-700">
-                                <strong>⏳ In Progress:</strong> Your gig in
-                                progress provider will complete soon. If you
-                                have any query fill free to contact your
-                                provider.
-                              </p>
-                            </div>
-                          )}
-
-                        {activeTab === "completed" && (
-                          <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-medium text-green-800">
-                                Completed Successfully
+                            {gig.skills.length > 3 && (
+                              <span className="text-teal-700 text-xs flex items-center">
+                                +{gig.skills.length - 3}
                               </span>
-                              <div className="flex items-center gap-1">
-                                <span className="text-sm font-medium text-green-800">
-                                  ★ 5
-                                </span>
-                              </div>
-                            </div>
-                            <p className="text-sm text-green-700 italic">
-                              Nice job very good work
-                            </p>
+                            )}
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-700">
+                          <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded">
+                            <DollarSign className="h-4 w-4 text-green-600" />₹
+                            {Number(gig.price)} / {gig.payment_type}
+                          </div>
+                          <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded">
+                            <span className="font-semibold">Bids:</span>{" "}
+                            {gig.bids.length}
+                          </div>
+                          <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded">
+                            <Calendar className="h-4 w-4 text-blue-600" />
+                            {moment(gig.start_date_time).format("DD/MM/yyyy")}
+                          </div>
+                        </div>
+
+                        {/* Status */}
+                        {gig.status === "completed" &&
+                          (gig.rating ? (
+                            <div
+                              className="bg-green-50 flex  px-2 py-1 rounded gap-3"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setGigIdForRating(gig.id);
+                                getRatingDetail(gig.id);
+                              }}
+                            >
+                              <span className="text-sm">⭐ {gig?.rating?.rating}</span>
+                              <span className="italic text-green-700 line-clamp-1 text-sm">
+                                "{gig.rating?.rating_feedback}"
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="mt-4">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setGigIdForRating(gig.id);
+                                  getRatingDetail(gig.id);
+                                }}
+                                className="bg-[var(--base)] text-white px-2 py-1 rounded w-full"
+                              >
+                                Review
+                              </button>
+                            </div>
+                          ))}
+                      </div>
+Z                    </Card>
                   );
                 })}
               </div>
