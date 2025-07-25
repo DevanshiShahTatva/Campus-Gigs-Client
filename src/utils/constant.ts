@@ -36,6 +36,8 @@ export const ROUTES = {
   ADMIN: {
     DASHBOARD: "/admin/dashboard",
     SUBSCRIPTION: "/admin/subscription-plan",
+    DISPUTE_MANAGEMENT: "/admin/dispute-management",
+    CHAT: "/admin/chat",
     SUPPORT_REQUESTS: "/admin/support-requests",
     FAQS: "/admin/faqs",
     USERS: "/admin/users",
@@ -151,12 +153,18 @@ export const USER_SIDEBAR_ITEMS = [
     route: ROUTES.ADMIN.SERVICE_MANAGEMENT,
     icon: "/assets/services.svg",
   },
-  // {
-  //   id: 4,
-  //   title: "Gig Category",
-  //   route: ROUTES.ADMIN.GIGCATEGORY,
-  //   icon: "/assets/gigcategory.svg",
-  // },
+  {
+    id: 9,
+    title: "Dispute Management",
+    route: ROUTES.ADMIN.DISPUTE_MANAGEMENT,
+    icon: "/assets/gigcategory.svg",
+  },
+  {
+    id: 9,
+    title: "Chat",
+    route: ROUTES.ADMIN.CHAT,
+    icon: "/assets/gigcategory.svg",
+  },
   {
     id: 4,
     title: "Support Requests",

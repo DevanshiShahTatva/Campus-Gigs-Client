@@ -59,7 +59,7 @@ const GigRatingModal = ({ gigId, existingRating, isReadonly = false, onClose }: 
       if (isReadonly) {
         setStep('rating');
       } else {
-        if (existingRating.userRating < 4 && existingRating.userIssue) {
+        if (existingRating.userRating < 3 && existingRating.userIssue) {
           setStep('unsatisfied');
         } else {
           setStep('rating');
@@ -80,8 +80,8 @@ const GigRatingModal = ({ gigId, existingRating, isReadonly = false, onClose }: 
           gig_id: gigId,
           rating: rating,
           rating_feedback: feedback,
-          issue_text: rating < 4 ? formData.issue : undefined,
-          what_provider_done: rating < 4 ? formData.shouldHaveDone : undefined,
+          issue_text: rating < 3 ? formData.issue : undefined,
+          what_provider_done: rating < 3 ? formData.shouldHaveDone : undefined,
         }
       });
 
@@ -100,7 +100,7 @@ const GigRatingModal = ({ gigId, existingRating, isReadonly = false, onClose }: 
   const handleRatingClick = (rating: number) => {
     if (isReadonly) return;
     setRating(rating);
-    if (rating >= 4) {
+    if (rating >= 3) {
       setFormData({
         issue: '',
         shouldHaveDone: '',
@@ -113,7 +113,7 @@ const GigRatingModal = ({ gigId, existingRating, isReadonly = false, onClose }: 
     if (isReadonly) return;
     if (rating < 1) return;
 
-    if (rating >= 4) {
+    if (rating >= 3) {
       submitRating();
     } else {
       setStep('unsatisfied');
@@ -205,7 +205,7 @@ const GigRatingModal = ({ gigId, existingRating, isReadonly = false, onClose }: 
                   className={`w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[var(--base)] focus:border-[var(--base)] transition-colors resize-none text-black ${isReadonly ? 'bg-gray-50 cursor-default' : ''}`}
                 />
               </div>
-              {isReadonly && rating < 4 && (existingRating?.userIssue || existingRating?.userExpectation) && (
+              {isReadonly && rating < 3 && (existingRating?.userIssue || existingRating?.userExpectation) && (
                 <div className="mb-6 space-y-4">
                   {existingRating?.userIssue && (
                     <div>
@@ -254,7 +254,7 @@ const GigRatingModal = ({ gigId, existingRating, isReadonly = false, onClose }: 
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }`}
                 >
-                  {rating >= 4 ? 'Submit Review' : 'Next'}
+                  {rating >= 3 ? 'Submit Review' : 'Next'}
                 </button>
               )}
             </div>
@@ -323,17 +323,17 @@ const GigRatingModal = ({ gigId, existingRating, isReadonly = false, onClose }: 
             <div className="p-6">
               <div className="text-center">
                 <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  {rating >= 4 ? (
+                  {rating >= 3 ? (
                     <ThumbsUp className="text-teal-600" size={24} />
                   ) : (
                     <CheckCircle className="text-teal-600" size={24} />
                   )}
                 </div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  {rating >= 4 ? 'Thank you for your feedback!' : 'Report submitted successfully'}
+                  {rating >= 3 ? 'Thank you for your feedback!' : 'Report submitted successfully'}
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  {rating >= 4
+                  {rating >= 3
                     ? 'Your positive review helps other users find quality service providers.'
                     : 'We have received your report and will review it promptly. Thank you for helping us maintain service quality.'
                   }
