@@ -798,17 +798,21 @@ const Profile = () => {
                         Edit
                       </button>
                     </div>
-                    {
+                    {userProfile.profile_type == "provider" && (
                       <div className="py-3">
                         <div className="font-medium text-gray-900 mb-1">
                           Stripe KYC
                         </div>
-                        {userProfile.profile_type == "provider" &&
-                          !userProfile.stripe_account_id ? (
-                            <OnboardStripeButton providerId={userProfile.id} />
-                          ) : <p className="font-600 text-[var(--base)]">KYC Done</p>}
+                        {userProfile.stripe_account_id &&
+                        userProfile.completed_stripe_kyc ? (
+                          <p className="font-600 text-[var(--base)]">
+                            KYC Done
+                          </p>
+                        ) : (
+                          <OnboardStripeButton providerId={userProfile.id} />
+                        )}
                       </div>
-                    }
+                    )}
                   </div>
                 </div>
               )}

@@ -23,5 +23,5 @@ export function OnboardStripeButton({ providerId }: { providerId: number }) {
     }
   };
 
-  return <Button onClick={handleOnboard}>Connect Stripe Account</Button>;
+  return <Button onClick={handleOnboard}>Complete your KYC</Button>;
 }
