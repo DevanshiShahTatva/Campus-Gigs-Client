@@ -88,7 +88,8 @@ export const API_ROUTES = {
     TIRE: "/tire",
     GIG_CATEGORY: "/gig-category",
     USERS: "/admin/users",
-    USER_DETAILS: "/admin/user/"
+    USER_DETAILS: "/admin/user/",
+    DASHBOARD:"/admin/dashboard/summary"
   },
 };
 
