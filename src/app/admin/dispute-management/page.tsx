@@ -4,14 +4,14 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from "next/navigation";
 import { toast } from 'react-toastify';
 import moment from 'moment';
-import { MessageCircle, Eye, CheckCircle, Clock, Star, User, Briefcase, ArrowLeft } from 'lucide-react';
+import { MessageCircle, Eye, CheckCircle, Clock, Star, User, Briefcase, ArrowLeft, XCircle } from 'lucide-react';
 import { CustomTable } from '@/components/common/CustomTable';
 import { apiCall } from '@/utils/apiCall';
 import { Button } from '@/components/ui/button';
 import { FiEye } from 'react-icons/fi';
 
-type DisputeStatus = 'pending' | 'in_review' | 'resolved';
-type DisputeDecision = 'favor_user' | 'favor_provider' | null;
+type DisputeStatus = 'pending' | 'under_review' | 'resolved';
+type DisputeDecision = 'user_won' | 'provider_won' | null;
 type Column<T> = {
   key: keyof T;
   label: string;
@@ -43,7 +43,7 @@ interface IDispute {
   adminNotes?: string;
 }
 
-const tabs = ["All", "Pending", "In Review", "Resolved"];
+const tabs = ["All", "Pending", "Under Review", "Resolved"];
 
 export default function AdminDisputeDashboard() {
   const router = useRouter();
@@ -52,22 +52,24 @@ export default function AdminDisputeDashboard() {
   const [selectedDispute, setSelectedDispute] = useState<IDispute | null>(null);
   const [tab, setTab] = useState<string>("All");
 
-  useEffect(() => {
-    const fetchDisputes = async () => {
-      try {
-        const response = await apiCall({
-          method: "GET",
-          endPoint: "/rating/get-all",
-        });
-        if (response?.data) {
-          setDisputes(response.data);
-        }
-      } catch (err) {
-        toast.error("Failed to fetch disputes. Please try again.");
+  const fetchDisputes = async (tab: string) => {
+    try {
+      const response = await apiCall({
+        method: "GET",
+        endPoint: `/rating/get-depute-gigs?status=${tab.toLowerCase().replace(/\s+/g, '_')}`,
+      });
+      if (response?.data) {
+        setDisputes(response.data);
+      } else if (!response?.success) {
+        toast.error(response.message);
       }
-    };
+    } catch (err) {
+      toast.error("Failed to fetch disputes. Please try again.");
+    }
+  };
 
-    fetchDisputes();
+  useEffect(() => {
+    fetchDisputes('all');
   }, []);
 
   const handleStartChat = async (otherUserId: string) => {
@@ -87,10 +89,62 @@ export default function AdminDisputeDashboard() {
     }
   };
 
+  const markUnderReview = async (complaintId: string) => {
+    try {
+      const response = await apiCall({
+        method: "POST",
+        endPoint: `/rating/mark-under-review/${complaintId}`,
+      });
+      if (response?.success) {
+        toast.success("Marked under review successfully!");
+        setSelectedDispute(prev => ({
+          ...prev!,
+          status: 'under_review'
+        }));
+      } else if (!response?.success) {
+        toast.error(response.message);
+      }
+    } catch (err) {
+      toast.error("Failed to mark under review. Please try again.");
+    }
+  };
+
+  const markResolvedDispute = async (complaintId: string) => {
+    try {
+      const response = await apiCall({
+        method: "POST",
+        body: {
+          admin_notes: selectedDispute?.adminNotes,
+          outcome: selectedDispute?.decision
+        },
+        endPoint: `/rating/mark-dispute-resolved/${complaintId}`,
+      });
+      if (response?.success) {
+        toast.success("Marked resolved successfully!");
+      } else if (!response?.success) {
+        toast.error(response.message);
+      }
+    } catch (err) {
+      toast.error("Failed to mark resolved. Please try again.");
+    }
+  };
+
+  const handleTabChange = (tab: string) => {
+    setTab(tab);
+    fetchDisputes(tab);
+  };
+
+  const handleDecision = (decision: DisputeDecision) => {
+    setSelectedDispute(prev => ({
+      ...prev!,
+      decision
+    }));
+  };
+
   const getStatusColor = (status: DisputeStatus) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'in_review': return 'bg-blue-100 text-blue-800';
+      case 'under_review': return 'bg-blue-100 text-blue-800';
       case 'resolved': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
@@ -99,7 +153,7 @@ export default function AdminDisputeDashboard() {
   const getStatusIcon = (status: DisputeStatus) => {
     switch (status) {
       case 'pending': return <Clock className="w-4 h-4" />;
-      case 'in_review': return <Eye className="w-4 h-4" />;
+      case 'under_review': return <Eye className="w-4 h-4" />;
       case 'resolved': return <CheckCircle className="w-4 h-4" />;
       default: return <Clock className="w-4 h-4" />;
     }
@@ -107,37 +161,6 @@ export default function AdminDisputeDashboard() {
 
   const formatDate = (dateString: string) => {
     return moment(dateString).format('DD/MM/YYYY hh:mm A');
-  };
-
-  const resolveDispute = (decision: DisputeDecision) => {
-    if (!selectedDispute) return;
-
-    setDisputes(prev => prev.map(dispute =>
-      dispute.id === selectedDispute.id
-        ? {
-          ...dispute,
-          status: 'resolved',
-          decision,
-          resolvedAt: new Date().toISOString(),
-          adminNotes: `Resolved in favor of ${decision === 'favor_user' ? 'user' : 'provider'}`
-        }
-        : dispute
-    ));
-
-    setSelectedDispute(prev => ({
-      ...prev!,
-      status: 'resolved',
-      decision,
-      resolvedAt: new Date().toISOString()
-    }));
-  };
-
-  const markInReview = (disputeId: string) => {
-    setDisputes(prev => prev.map(dispute =>
-      dispute.id === disputeId
-        ? { ...dispute, status: 'in_review' }
-        : dispute
-    ));
   };
 
   const renderTabUI = () => {
@@ -148,7 +171,7 @@ export default function AdminDisputeDashboard() {
             {tabs.map((tabItem, index) => (
               <button
                 key={index}
-                onClick={() => setTab(tabItem)}
+                onClick={() => handleTabChange(tabItem)}
                 className={`relative pb-3 px-3 sm:px-4 text-sm sm:text-base font-medium transition-all duration-200 cursor-pointer whitespace-nowrap flex-shrink-0 ${tab === tabItem
                   ? "text-[var(--base)] after:content-[''] after:absolute after:-bottom-[1px] after:left-0 after:w-full after:h-[2px] after:bg-[var(--base)]"
                   : "text-gray-600 hover:text-[var(--base)]"
@@ -184,12 +207,12 @@ export default function AdminDisputeDashboard() {
               {getStatusIcon(selectedDispute.status)}
               <span className="capitalize">{selectedDispute.status.replace('_', ' ')}</span>
             </span>
-            {selectedDispute.status !== 'resolved' && (
+            {selectedDispute.status === 'pending' && (
               <button
-                onClick={() => markInReview(selectedDispute.id)}
+                onClick={() => markUnderReview(selectedDispute.id)}
                 className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
               >
-                Mark In Review
+                Mark Under Review
               </button>
             )}
           </div>
@@ -265,15 +288,15 @@ export default function AdminDisputeDashboard() {
           </Button>
         </div>
         <div className='mb-4'>
-          <p className="text-sm text-gray-500 mb-2">User Feedback</p>
+          <p className="text-sm text-gray-500 mb-2">User feedback</p>
           <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{selectedDispute.userFeedback}</p>
         </div>
         <div className='mb-4'>
-          <p className="text-sm text-gray-500 mb-2">Issue Reported</p>
+          <p className="text-sm text-gray-500 mb-2">Issue reported</p>
           <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{selectedDispute.userIssue}</p>
         </div>
         <div>
-          <p className="text-sm text-gray-500 mb-2">What Should Have Been Done By Provider</p>
+          <p className="text-sm text-gray-500 mb-2">What should have been done by provider</p>
           <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{selectedDispute.userExpectation}</p>
         </div>
       </div>
@@ -320,7 +343,7 @@ export default function AdminDisputeDashboard() {
             <div className="flex items-center space-x-2 mb-2">
               <CheckCircle className="w-5 h-5 text-green-600" />
               <span className="font-medium text-green-900">
-                Resolved in favor of {selectedDispute.decision === 'favor_user' ? 'User' : 'Provider'}
+                Resolved in favor of {selectedDispute.decision === 'user_won' ? 'User' : 'Provider'}
               </span>
             </div>
             <p className="text-green-800">Resolved on {formatDate(selectedDispute.resolvedAt!)}</p>
@@ -336,23 +359,45 @@ export default function AdminDisputeDashboard() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Make Decision</h3>
           <div className="flex space-x-4">
             <button
-              onClick={() => resolveDispute('favor_user')}
-              className="flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              onClick={() => handleDecision('user_won')}
+              className={`justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-gray-100 hover:bg-gray-200 hover:text-gray-900 h-10 px-4 py-2 flex items-center gap-2
+                ${selectedDispute.decision === "user_won" && "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"}
+              `}
             >
               <CheckCircle className="w-5 h-5" />
               <span>Favor User</span>
             </button>
             <button
-              onClick={() => resolveDispute('favor_provider')}
-              className="flex items-center space-x-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              onClick={() => handleDecision('provider_won')}
+              className={`justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-gray-100 hover:bg-gray-200 hover:text-gray-900 h-10 px-4 py-2 flex items-center gap-2
+                ${selectedDispute.decision === "provider_won" && "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"}
+              `}
             >
               <CheckCircle className="w-5 h-5" />
               <span>Favor Provider</span>
             </button>
           </div>
-          <p className="text-sm text-gray-500 mt-2">
-            This decision will be final and will determine payment release and gig visibility.
-          </p>
+          <div className='mt-4'>
+            <div className="text-sm font-medium mb-2">Resolution Notes (Required)</div>
+            <textarea
+              rows={3}
+              name="adminNotes"
+              value={selectedDispute?.adminNotes}
+              onChange={(e) => setSelectedDispute({ ...selectedDispute!, adminNotes: e.target.value })}
+              className="w-full bg-gray-50 px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[var(--base)] focus:border-[var(--base)] transition-colors resize-none text-black"
+              placeholder="Explain your decision and any action taken..."
+            />
+          </div>
+          <div className='flex gap-2 mt-4'>
+            <button
+              disabled={!(!!selectedDispute.decision && selectedDispute.adminNotes?.trim())}
+              onClick={() => markResolvedDispute(selectedDispute.id)}
+              className="justify-center whitespace-nowrap rounded-md text-white text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input h-10 px-4 py-2 flex items-center gap-2 bg-green-500 hover:bg-green-600"
+            >
+              <CheckCircle className="w-5 h-5" />
+              <span>Resolve Dispute</span>
+            </button>
+          </div>
         </div>
       );
     }
