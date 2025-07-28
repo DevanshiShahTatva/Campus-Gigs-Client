@@ -77,6 +77,9 @@ export const API_ROUTES = {
   PAYMENT_HISTORY: "/payment-history",
   PROVIDER_ONBOARD: "/payment/provider/onboard",
   GIG_PAYMENT_SESSION: "/payment/gig/checkout-session",
+  PUBLIC_GIGS_SEARCH:"/gigsdata/public",
+  PUBLIC_TOP_PROVIDERS: "/portfolios/top",
+  TIRE:'/tire',
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
     AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",
