@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { BID_STATUS, PAYMENT_HISTORY_TYPE, PRIORITY } from "./constant";
 
 export type SortOrder = "asc" | "desc";
@@ -252,4 +253,66 @@ export interface PaymentTransaction {
   description: string;
   created_at: string;
   is_deleted: boolean;
+}
+
+export interface BarChartProps {
+  data: LastSevenDaysRevenue[];
+  color?: string;
+  height?: number;
+}
+
+export interface CategoryGigData {
+  categoryId: number;
+  categoryName: string;
+  count: number;
+  color?: string;
+}
+
+export interface PieChartProps {
+  data: CategoryGigData[];
+  size?: number;
+}
+
+export interface StatCardProps {
+  title: string;
+  icon: ReactNode;
+  bgColor: string;
+  textColor: string;
+  value: string | number;
+  percentage?: string;
+  percentageTextColor?: string;
+  subtext?: string;
+  isCurrency?: boolean;
+  isDualStat?: boolean;
+  secondValue?: string | number;
+  secondLabel?: string;
+  secondTextColor?: string;
+}
+
+export interface LastSevenDaysRevenue {
+  data: string;
+  day: string;
+  amount: number;
+}
+
+export interface GigCategories {
+  categoryId: number;
+  categoryName: string;
+  count: number;
+}
+
+export interface DashboardData {
+  totalUsers: number;
+  percentageIncrease: number;
+  bannedUsers: number;
+  bannedUserPercentage: number;
+  totalGigs: number;
+  percentageIncreaseGigs: number;
+  totalComplaints: number;
+  pendingComplaintsCount: number;
+  respondedComplaintsCount: number;
+  gigsByCategories: GigCategories[];
+  totalRevenue: number;
+  percentageIncreaseRevenue: number;
+  lastSevenDaysRevenue: LastSevenDaysRevenue[];
 }
