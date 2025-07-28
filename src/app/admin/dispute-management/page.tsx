@@ -1,27 +1,28 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from "next/navigation";
 import { toast } from 'react-toastify';
 import moment from 'moment';
 import { MessageCircle, Eye, CheckCircle, Clock, Star, User, Briefcase, ArrowLeft, XCircle } from 'lucide-react';
-import { CustomTable } from '@/components/common/CustomTable';
 import { apiCall } from '@/utils/apiCall';
 import { Button } from '@/components/ui/button';
 import { FiEye } from 'react-icons/fi';
+import { DynamicTable } from '@/components/common/DynamicTables';
 
 type DisputeStatus = 'pending' | 'under_review' | 'resolved';
 type DisputeDecision = 'user_won' | 'provider_won' | null;
-type Column<T> = {
+
+interface Column<T> {
   key: keyof T;
   label: string;
   sortable?: boolean;
-  textAlign?: 'left' | 'center' | 'right';
-  render?: (value: any, row: T, index: number) => React.ReactNode;
+  render?: (value: T[keyof T], row: T, index: number) => React.ReactNode;
+  textAlign?: "left" | "center" | "right";
 }
 
 interface IDispute {
-  id: string;
+  id: number;
   gigId: string;
   gigTitle: string;
   userId: string;
@@ -43,6 +44,13 @@ interface IDispute {
   adminNotes?: string;
 }
 
+interface IPagination {
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  total: number;
+}
+
 const tabs = ["All", "Pending", "Under Review", "Resolved"];
 
 export default function AdminDisputeDashboard() {
@@ -51,26 +59,43 @@ export default function AdminDisputeDashboard() {
   const [disputes, setDisputes] = useState<IDispute[]>([]);
   const [selectedDispute, setSelectedDispute] = useState<IDispute | null>(null);
   const [tab, setTab] = useState<string>("All");
+  const [loading, setLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [queryParams, setQueryParams] = useState({
+    page: 1,
+    pageSize: 10,
+    search: "",
+    sortKey: "created_at",
+    sortOrder: "desc",
+  });
+
+  const queryParamsRef = useRef(queryParams);
+  queryParamsRef.current = queryParams;
 
   const fetchDisputes = async (tab: string) => {
+    setLoading(true);
+
+    const { page, pageSize, search, sortKey, sortOrder } = queryParamsRef.current;
     try {
       const response = await apiCall({
         method: "GET",
-        endPoint: `/rating/get-depute-gigs?status=${tab.toLowerCase().replace(/\s+/g, '_')}`,
+        endPoint: `/rating/get-depute-gigs?status=${tab.toLowerCase().replace(/\s+/g, '_')}&page=${page}&pageSize=${pageSize}&search=${search}&sortKey=${sortKey}&sortOrder=${sortOrder}`,
       });
       if (response?.data) {
         setDisputes(response.data);
+        setTotalPages(response.meta.totalPages);
       } else if (!response?.success) {
         toast.error(response.message);
       }
     } catch (err) {
       toast.error("Failed to fetch disputes. Please try again.");
     }
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchDisputes('all');
-  }, []);
+  }, [queryParams]);
 
   const handleStartChat = async (otherUserId: string) => {
     try {
@@ -89,7 +114,7 @@ export default function AdminDisputeDashboard() {
     }
   };
 
-  const markUnderReview = async (complaintId: string) => {
+  const markUnderReview = async (complaintId: number) => {
     try {
       const response = await apiCall({
         method: "POST",
@@ -109,7 +134,7 @@ export default function AdminDisputeDashboard() {
     }
   };
 
-  const markResolvedDispute = async (complaintId: string) => {
+  const markResolvedDispute = async (complaintId: number) => {
     try {
       const response = await apiCall({
         method: "POST",
@@ -121,12 +146,34 @@ export default function AdminDisputeDashboard() {
       });
       if (response?.success) {
         toast.success("Marked resolved successfully!");
+        setSelectedDispute(prev => ({
+          ...prev!,
+          status: 'resolved'
+        }));
       } else if (!response?.success) {
         toast.error(response.message);
       }
     } catch (err) {
       toast.error("Failed to mark resolved. Please try again.");
     }
+  };
+
+  const handleSearchSort = (searchTerm: string, key: string, order: string) => {
+    setQueryParams((prev) => ({
+      ...prev,
+      page: 1,
+      sortOrder: order,
+      search: searchTerm,
+      sortKey: key ? key : "created_at",
+    }));
+  };
+
+  const handlePageChange = (page: number) => {
+    setQueryParams((prev) => ({ ...prev, page }));
+  };
+
+  const handlePageSizeChange = (pageSize: number) => {
+    setQueryParams((prev) => ({ ...prev, pageSize, page: 1 }));
   };
 
   const handleTabChange = (tab: string) => {
@@ -223,7 +270,7 @@ export default function AdminDisputeDashboard() {
 
   const renderGigInfoSection = (selectedDispute: IDispute) => {
     return (
-      <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
+      <div className="bg-white rounded-lg shadow-sm border p-6 pt-4 pb-4 mb-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Gig Information</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -264,14 +311,42 @@ export default function AdminDisputeDashboard() {
     );
   }
 
+  const AvatarWithFallback = ({ src, alt, className, name }: { src?: string; alt: string; className: string; name: string }) => {
+    const [hasError, setHasError] = useState(false);
+
+    const handleError = () => {
+      setHasError(true);
+    };
+
+    if (hasError || !src) {
+      return (
+        <div className={`${className} bg-[var(--base)] text-white rounded-full flex items-center justify-center font-semibold text-lg sm:text-2xl flex-shrink-0`}>
+          {name.charAt(0).toUpperCase()}
+        </div>
+      );
+    }
+
+    return (
+      <img
+        src={src}
+        alt={alt}
+        className={className}
+        onError={handleError}
+      />
+    );
+  };
+
   const renderUserDetails = (selectedDispute: IDispute) => {
     return (
       <div className="bg-white rounded-lg shadow-sm border p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <User className="w-5 h-5 text-blue-600" />
-            </div>
+            <AvatarWithFallback
+              className="w-12 h-12 rounded-full"
+              src={selectedDispute.userImage}
+              alt={selectedDispute.userName}
+              name={selectedDispute.userName}
+            />
             <div>
               <h3 className="font-semibold text-gray-900">User (Complainant)</h3>
               <p className="text-gray-600">{selectedDispute.userName}</p>
@@ -308,9 +383,12 @@ export default function AdminDisputeDashboard() {
       <div className="bg-white rounded-lg shadow-sm border p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Briefcase className="w-5 h-5 text-green-600" />
-            </div>
+            <AvatarWithFallback
+              className="w-12 h-12 rounded-full"
+              src={selectedDispute.providerImage}
+              alt={selectedDispute.providerName}
+              name={selectedDispute.providerName}
+            />
             <div>
               <h3 className="font-semibold text-gray-900">Provider (Defendant)</h3>
               <p className="text-gray-600">{selectedDispute.providerName}</p>
@@ -337,7 +415,7 @@ export default function AdminDisputeDashboard() {
   const renderResolutionSection = (selectedDispute: IDispute) => {
     if (selectedDispute.status === 'resolved') {
       return (
-        <div className="bg-white rounded-lg shadow-sm border p-6">
+        <div className="bg-white rounded-lg shadow-sm border p-6 pt-4">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Resolution</h3>
           <div className="bg-green-50 p-4 rounded-lg">
             <div className="flex items-center space-x-2 mb-2">
@@ -355,7 +433,7 @@ export default function AdminDisputeDashboard() {
       );
     } else {
       return (
-        <div className="bg-white rounded-lg shadow-sm border p-6">
+        <div className="bg-white rounded-lg shadow-sm border p-6 pt-4">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Make Decision</h3>
           <div className="flex space-x-4">
             <button
@@ -480,12 +558,20 @@ export default function AdminDisputeDashboard() {
   return (
     <div>
       {renderTabUI()}
-      <CustomTable<IDispute>
-        searchPlaceholder='Search by Dispute Name'
-        data={disputes}
+      <DynamicTable<IDispute>
+        title=""
+        data={disputes.map((dispute) => ({ ...dispute, id: Number(dispute.id) }))}
         columns={tableHeaders}
+        searchPlaceholder='Search...'
+        loading={loading}
+        totalPages={totalPages}
+        currentPage={queryParams.page}
+        pageSize={queryParams.pageSize}
+        onSearchSort={handleSearchSort}
+        handlePageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
         actions={(row) => (
-          <div className="whitespace-nowrap text-sm font-medium">
+          <div className="whitespace-nowrap text-sm font-medium text-center">
             <button
               title="View Details"
               onClick={() => setSelectedDispute(row)}

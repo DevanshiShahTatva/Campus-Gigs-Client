@@ -7,6 +7,7 @@ import moment from "moment";
 import Slider from "react-slick";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux";
+import { toast } from "react-toastify";
 
 import { apiCall } from "@/utils/apiCall";
 import { Button } from "@/components/ui/button";
@@ -175,6 +176,8 @@ const GigDetail = () => {
           setBids([response.data, ...bids]);
           setGitDetails((prev: any) => ({ ...prev, hasBid: true }));
         }
+      } else if (!response?.success) {
+        toast.error(response.message);
       }
       setSubmitLoading(false);
     } catch (error) {
