@@ -854,7 +854,7 @@ const Profile = () => {
                       <h3 className="text-lg font-semibold text-[var(--base)] mb-4">
                         Stripe verification (KYC)
                       </h3>
-                      <KycStatusPage status="pending" />
+                      <KycStatusPage status="pending" providerId={userProfile.id} />
                     </div>
                   )}
                 </>,

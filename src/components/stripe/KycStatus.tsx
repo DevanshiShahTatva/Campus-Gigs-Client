@@ -2,32 +2,32 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   CheckCircle2,
   AlertCircle,
-  ArrowRight,
   BadgeCheck,
 } from "lucide-react";
+import { OnboardStripeButton } from "./OnboardStripeButton";
 
 interface Props {
   status: "pending" | "completed";
+  providerId?: any;
 }
 export default function KycStatusPage(props: Props) {
-  const { status } = props;
+  const { status, providerId } = props;
 
   return (
     <div className="py-12 px-4 sm:px-6">
       <div className="max-w-md mx-auto">
         <div className="space-y-6">
-          {status === "pending" ? <PendingKycCard /> : <CompletedKycCard />}
+          {status === "pending" ? <PendingKycCard providerId={providerId} /> : <CompletedKycCard />}
         </div>
       </div>
     </div>
   );
 }
 
-function PendingKycCard() {
+function PendingKycCard(props: any) {
   return (
     <Card className="border border-yellow-100 bg-gradient-to-br from-yellow-50 to-amber-50">
       <CardHeader>
@@ -50,10 +50,7 @@ function PendingKycCard() {
           </p>
         </div>
 
-        <Button className="bg-yellow-600 hover:bg-yellow-700 text-white py-6 px-8 rounded-xl text-base font-semibold shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-          Complete Verification
-          <ArrowRight className="ml-2 h-5 w-5" />
-        </Button>
+        <OnboardStripeButton providerId={props.providerId} />
 
         <div className="mt-6 text-sm text-gray-500 flex items-center">
           <div className="w-3 h-3 rounded-full bg-amber-500 mr-2 animate-pulse"></div>
