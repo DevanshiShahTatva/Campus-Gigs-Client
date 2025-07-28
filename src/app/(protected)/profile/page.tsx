@@ -30,11 +30,20 @@ import { API_ROUTES } from "@/utils/constant";
 import { Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 import { OnboardStripeButton } from "@/components/stripe/OnboardStripeButton";
+import { Card, CardContent } from "@/components/ui/card";
+import KycStatusPage from "@/components/stripe/KycStatus";
+import { renderBaseOnCondition } from "@/utils/helper";
 
 const Profile = () => {
   const [success, setSuccess] = React.useState(false);
   const [activeTab, setActiveTab] = useState<
-    "profile" | "gigs" | "history" | "support" | "subscription" | "settings"
+    | "profile"
+    | "gigs"
+    | "history"
+    | "support"
+    | "subscription"
+    | "settings"
+    | "stripe_kyc"
   >("profile");
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [profileImage, setProfileImage] = useState<File | null>(null);
@@ -529,6 +538,18 @@ const Profile = () => {
               >
                 Settings
               </button>
+              {userProfile.profile_type == "provider" && (
+                <button
+                  className={`px-4 py-2 min-w-fit font-medium focus:outline-none transition border-b-2 ${
+                    activeTab === "stripe_kyc"
+                      ? "border-[var(--base)] text-[var(--base)]"
+                      : "border-transparent text-gray-500 hover:text-[var(--base)]"
+                  }`}
+                  onClick={() => setActiveTab("stripe_kyc")}
+                >
+                  Stripe KYC
+                </button>
+              )}
             </div>
           </div>
           {/* Tab Content */}
@@ -815,6 +836,29 @@ const Profile = () => {
                     )}
                   </div>
                 </div>
+              )}
+              {renderBaseOnCondition(
+                activeTab === "stripe_kyc" &&
+                  userProfile.profile_type == "provider",
+                <>
+                  {renderBaseOnCondition(
+                    userProfile.stripe_account_id &&
+                      userProfile.completed_stripe_kyc,
+                    <div>
+                      <h3 className="text-lg font-semibold text-[var(--base)] mb-4">
+                        Stripe verification (KYC)
+                      </h3>
+                      <KycStatusPage status="completed" />
+                    </div>,
+                    <div>
+                      <h3 className="text-lg font-semibold text-[var(--base)] mb-4">
+                        Stripe verification (KYC)
+                      </h3>
+                      <KycStatusPage status="pending" />
+                    </div>
+                  )}
+                </>,
+                <></>
               )}
             </div>
           </div>

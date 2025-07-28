@@ -204,13 +204,14 @@ const MyGigs = () => {
     gig: Gigs
   ) => {
     event.stopPropagation();
+    const bid = gig.bids.find((bid) => bid.status === "accepted");
     try {
       setIsPaymentLoading(true);
       const resp = await apiCall({
         endPoint: `${API_ROUTES.GIG_PAYMENT_SESSION}`,
         method: "POST",
         body: {
-          amount: gig.price,
+          amount: Number(bid?.bid_amount),
           gigId: gig.id,
           userId: gig.user_id,
           gigTitle: gig.title,
