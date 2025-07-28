@@ -1,9 +1,41 @@
 "use client";
-import { useState } from "react";
-import { SERVICE_TIERS, SERVICE_TIER_CONTENT } from "@/utils/constant";
+import { useEffect, useState } from "react";
+import { API_ROUTES, SERVICE_TIERS, SERVICE_TIER_CONTENT } from "@/utils/constant";
+import { apiCall } from "@/utils/apiCall";
+import { toast } from "react-toastify";
+import { Badge } from "@/components/ui/badge";
 
 const ServiceTier = () => {
-  const [activeTier, setActiveTier] = useState("tier1");
+  const [activeTier, setActiveTier] = useState("");
+  const [tireState, setTireState] = useState<any>([]);
+
+
+
+const fetchTires = async (search = "") => {
+  try {
+    let url = API_ROUTES.TIRE;
+
+    const resp = await apiCall({
+      endPoint: url,
+      method: "GET",
+    });
+
+    if (resp?.success) {
+      console.log(resp, "RESPPPPPP");
+      setActiveTier(resp?.data[0]?.id)
+      setTireState(resp?.data)
+    }
+  } catch (error) {
+    toast.error("Failed to fetch Tires");
+  } finally {
+  }
+};
+
+useEffect(() => {
+  fetchTires();
+}, []);
+
+
 
   const handleServiceClick = (service: string, tierId: string) => {
     console.log(`Selected service: ${service} from ${tierId}`);
@@ -13,26 +45,29 @@ const ServiceTier = () => {
     <div>
       <section id="service-tiers" className="py-20 bg-[var(--bg-light)]">
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-4 text-[var(--text-dark)]">Service Tiers Explained</h2>
+          <h2 className="text-3xl font-bold text-center mb-4 text-[var(--text-dark)]">
+            Service Tiers Explained
+          </h2>
           <p className="text-[var(--text-semi-dark)] text-center max-w-3xl mx-auto mb-12">
-            Our tiered system ensures quality and appropriate pricing for different types of services. Each tier represents a different level of
-            expertise and complexity.
+            Our tiered system ensures quality and appropriate pricing for
+            different types of services. Each tier represents a different level
+            of expertise and complexity.
           </p>
 
           {/* Tier Selection Tabs with Animated Underline */}
           <div className="flex justify-center mb-8 relative">
             <div className="flex space-x-4 relative">
-              {SERVICE_TIERS.map((tab) => (
+              {tireState?.map((tab: any) => (
                 <button
-                  key={tab.id}
+                  key={tab?.id}
                   className={`relative cursor-pointer px-6 py-3 rounded-lg font-semibold transition-all duration-300 ease-in-out ${
-                    activeTier === tab.id
+                    activeTier === tab?.id
                       ? "text-[var(--base)] bg-white shadow-sm"
                       : "text-[var(--text-semi-dark)] hover:text-[var(--base)] hover:bg-white/50"
                   }`}
-                  onClick={() => setActiveTier(tab.id)}
+                  onClick={() => setActiveTier(tab?.id)}
                 >
-                  {tab.label}
+                  {tab?.name}
                 </button>
               ))}
 
@@ -42,37 +77,14 @@ const ServiceTier = () => {
           </div>
 
           {/* Service Buttons with Animation */}
-          <div className="flex flex-wrap gap-3 justify-center mb-8">
-            {SERVICE_TIERS.map((tab) => (
-              <div
-                key={tab.id}
-                className={`cursor-pointer flex flex-wrap gap-2 transition-all duration-500 ease-in-out ${
-                  activeTier === tab.id ? "opacity-100 transform translate-y-0" : "opacity-0 transform -translate-y-4 pointer-events-none absolute"
-                }`}
-              >
-                {tab.services.map((service, index) => (
-                  <button
-                    key={index}
-                    className="px-4 py-2 cursor-pointer rounded-full bg-[var(--base)]/10 text-[color:var(--base)] hover:bg-[var(--base-hover)] hover:text-[var(--text-light)] transition-all duration-300 transform hover:scale-105"
-                    onClick={() => handleServiceClick(service, tab.id)}
-                    style={{
-                      animationDelay: `${index * 100}ms`,
-                    }}
-                  >
-                    {service}
-                  </button>
-                ))}
-              </div>
-            ))}
-          </div>
 
           {/* Tier Content with Smooth Animations */}
           <div className="bg-white rounded-xl p-8 hover:shadow-md transition-all duration-300 relative overflow-hidden">
-            {SERVICE_TIER_CONTENT.map((tier) => (
+            {tireState?.map((tier: any) => (
               <div
-                key={tier.id}
+                key={tier?.id}
                 className={`transition-all duration-500 ease-in-out ${
-                  activeTier === tier.id
+                  activeTier === tier?.id
                     ? "opacity-100 transform translate-x-0"
                     : "opacity-0 transform translate-x-full absolute top-0 left-0 w-full h-full"
                 }`}
@@ -80,32 +92,85 @@ const ServiceTier = () => {
                 <div className="flex flex-col md:flex-row gap-8">
                   <div className="w-full md:w-1/2">
                     <img
-                      src={tier.image}
+                      src={
+                        tier?.name?.includes("1")
+                          ? "/tier1.jpg"
+                          : tier?.name?.includes("2")
+                          ? "/tier2.jpg"
+                          : tier?.name?.includes("3")
+                          ? "/tier3.jpg"
+                          : "/tier1.jpg"
+                      }
                       alt={`${tier.tier} illustration`}
                       className="w-full h-40 xs:h-60 sm:h-70 md:h-80 rounded-xl object-cover transition-all duration-500 transform hover:scale-105"
                     />
                   </div>
                   <div className="w-full md:w-1/2">
-                    <h3 className="text-2xl font-bold text-[color:var(--base)] mb-2 transition-all duration-300">{tier.tier}</h3>
-                    <h4 className="text-xl font-semibold mb-4 text-[var(--text-dark)] transition-all duration-300">{tier.title}</h4>
-                    <p className="text-[var(--text-semi-dark)] mb-4 transition-all duration-300">{tier.description}</p>
+                    <h3 className="text-2xl font-bold text-[color:var(--base)] mb-2 transition-all duration-300">
+                      {tier?.name}
+                    </h3>
+
+                    <p className="text-[var(--text-semi-dark)] mb-4 transition-all duration-300">
+                      {tier?.description}
+                    </p>
                     <div className="mb-4">
-                      <h5 className="font-semibold text-[var(--text-dark)] mb-2 transition-all duration-300">Examples:</h5>
-                      <ul className="list-disc list-inside text-[var(--text-semi-dark)] space-y-1">
-                        {tier.examples.map((example, i) => (
-                          <li
-                            key={i}
-                            className="transition-all duration-300 transform hover:translate-x-2"
-                            style={{
-                              animationDelay: `${i * 100}ms`,
-                            }}
-                          >
-                            {example}
-                          </li>
-                        ))}
-                      </ul>
+                      <div className="font-semibold text-[var(--text-dark)] mb-2 transition-all duration-300">
+                        <div className="text-lg">Categories </div>
+                        <div className="flex gap-2 mt-2 flex-wrap">
+                          {tier?.gigsCategories?.map((item: any) => (
+                            <div>
+                              <Badge
+                                variant={"secondary"}
+                                className="text-xs bg-[var(--base)] text-white border "
+                              >
+                                {item?.name}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="text-lg mt-4">Skills </div>
+                        <div className="flex gap-2 mt-2 flex-wrap">
+                          {(() => {
+                            const allSkills =
+                              tier?.gigsCategories?.flatMap(
+                                (item: any) => item?.skills || []
+                              ) || [];
+
+                            const firstTen = allSkills.slice(0, 10);
+                            const remaining =
+                              allSkills.length - firstTen.length;
+
+                            return (
+                              <>
+                                {firstTen.map((skill: any, index: number) => (
+                                  <Badge
+                                    key={index}
+                                    variant="secondary"
+                                    className="bg-teal-50 text-teal-700 border border-teal-200  text-xs"
+                                  >
+                                    {skill?.name}
+                                  </Badge>
+                                ))}
+                                {remaining > 0 && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="bg-teal-50 text-teal-700 border border-teal-200 text-xs"
+                                  >
+                                    +{remaining}
+                                  </Badge>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+
+                      
                     </div>
-                    <p className="text-[color:var(--base)] font-semibold transition-all duration-300">{tier.price}</p>
+                    <p className="text-[color:var(--base)] font-semibold transition-all duration-300">
+                      {tier.price}
+                    </p>
                   </div>
                 </div>
               </div>

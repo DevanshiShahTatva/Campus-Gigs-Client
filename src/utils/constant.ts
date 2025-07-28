@@ -75,6 +75,9 @@ export const API_ROUTES = {
   CHANGE_PASSWORD:"/auth/change-password",
   CREATE_AUTO_DEBIT_SUBSCRIPTION: "/subscription-plan/create-subscription-session",
   PAYMENT_HISTORY: "/payment-history",
+  PUBLIC_GIGS_SEARCH:"/gigsdata/public",
+  PUBLIC_TOP_PROVIDERS: "/portfolios/top",
+  TIRE:'/tire',
   ADMIN: {
     TERMS_CONDITIONS: "/terms-conditions",
     AI_GENERATE_TERMS_CONDITIONS: "/terms-conditions/generate",
