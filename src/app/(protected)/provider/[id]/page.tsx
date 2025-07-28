@@ -84,7 +84,7 @@ const ProviderPortfolioPage = () => {
                   {provider?.headline || provider?.title || "CampusGig user"}
                 </div>
                 <div className="text-base text-gray-700  max-w-2xl">{provider?.bio}</div>
-                  <div>
+                  <div className="flex gap-2 flex-wrap">
                     {
                       provider?.skills?.map((skill: any, id: number) => <span key={id} className="bg-gray-100 rounded px-2 py-1 font-medium">{skill?.name}</span>)
                     }

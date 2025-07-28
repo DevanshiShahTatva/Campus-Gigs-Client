@@ -8,11 +8,12 @@ import { RoleContext } from "@/context/role-context";
 import { useGetUserProfileQuery, useUpdateUserProfileMutation, useGetUserNotificationsQuery, useMarkNotificationReadMutation, useMarkAllNotificationsReadMutation } from "@/redux/api";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, setProfileType } from "@/redux/slices/userSlice";
-import { getRoleLabel, getAvatarName } from "@/utils/helper";
+import { getRoleLabel, getAvatarName, groupNotificationsByTime } from "@/utils/helper";
 import { showPushNotification } from "@/utils/helper";
 import { useSocket } from "@/hooks/useSocket";
 import Toast from "./Toast";
 import { CentralLoader } from "./Loader";
+import moment from "moment";
 
 // Types
 interface UserProviderHeaderProps {
@@ -88,6 +89,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
     message: notif.description || notif.message || notif.title || "",
     read: notif.is_read ?? notif.read ?? false,
     link: notif.link,
+    created_at: notif.created_at,
   }));
 
   const socket = useSocket(userId);
@@ -250,7 +252,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
             {/* Notifications Dropdown */}
             <div
               className={`notif-dropdown absolute -right-5 sm:right-0 mt-2 w-64 sm:w-80 bg-white border border-[var(--base)]/20 rounded-xl shadow-2xl transition-all duration-200 z-40 overflow-hidden ${notifOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
-                }`}
+              }`}
               onMouseLeave={() => setNotifOpen(false)}
             >
               <div className="px-5 py-4 border-b border-gray-100 bg-[var(--base)]/5 font-semibold text-gray-900 text-base flex items-center justify-between">
@@ -265,48 +267,76 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
                   </button>
                 )}
               </div>
-              <div className="max-h-64 overflow-y-auto divide-y divide-gray-100">
+
+              <div className="max-h-64 overflow-y-auto ">
                 {notifications.length === 0 ? (
-                  <div className="px-5 py-6 text-center text-gray-400">No notifications</div>
+                  <div className="px-5 py-6 text-center text-gray-400">
+                    No notifications
+                  </div>
                 ) : (
-                  notifications.map((notif: any) => (
-                    <div
-                      key={notif.id}
-                      className={`flex flex-col gap-2 px-5 py-4 ${notif.read ? "bg-gray-50" : "bg-white"} ${notif.link ? "cursor-pointer hover:bg-[var(--base)]/10 transition" : ""}`}
-                      onClick={async () => {
-                        if (notif.link) {
-                          if (!notif.read) {
-                            await handleMarkAsRead(notif.id);
-                          }
-                          router.push(notif.link);
-                        }
-                      }}
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="mt-1">
-                          {notif.type === "success" ? (
-                            <FaCheckCircle className="text-green-500 text-lg" />
-                          ) : (
-                            <FaInfoCircle className="text-[var(--base)] text-lg" />
-                          )}
-                        </span>
-                        <div className="flex-1">
-                          <div className="text-sm text-gray-800">{notif.message}</div>
+                  Object.entries(groupNotificationsByTime(notifications)).map(
+                    ([label, group]) => (
+                      <div key={label}>
+                        <div className="flex items-center px-5">
+                          <div className="border border-b-[0.5px] w-full"></div>
+                          <div className="bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-500 px-5 py-2 text-center text-nowrap">
+                            {label}
+                          </div>
+                          <div className="border border-b w-full"></div>
                         </div>
+
+                        {group.map((notif: any) => (
+                          <div
+                            key={notif.id}
+                            className={`flex flex-col gap-2 px-5 py-4 bg-white 
+                              
+                            ${
+                              notif.link
+                                ? "cursor-pointer hover:bg-[var(--base)]/10 transition"
+                                : ""
+                            }`}
+                            onClick={async () => {
+                              if (notif.link) {
+                                if (!notif.read) {
+                                  await handleMarkAsRead(notif.id);
+                                }
+                                router.push(notif.link);
+                              }
+                            }}
+                          >
+                            <div className="flex items-start gap-3">
+                              <span className="mt-1">
+                                {notif.type === "success" ? (
+                                  <FaCheckCircle className="text-green-500 text-lg" />
+                                ) : (
+                                  <FaInfoCircle className="text-[var(--base)] text-lg" />
+                                )}
+                              </span>
+                              <div className="flex-1">
+                                <div className="text-sm text-gray-800 ">
+                                  {notif.message}
+                                </div>
+                                <div className="text-xs text-gray-400">
+                                  {moment(notif.created_at).fromNow()}
+                                </div>
+                              </div>
+                            </div>
+                            {!notif.read && (
+                              <button
+                                className="text-xs text-[var(--base)] hover:underline self-end"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMarkAsRead(notif.id);
+                                }}
+                              >
+                                Mark as read
+                              </button>
+                            )}
+                          </div>
+                        ))}
                       </div>
-                      {!notif.read && (
-                        <button
-                          className="text-xs text-[var(--base)] hover:underline self-start"
-                          onClick={e => {
-                            e.stopPropagation();
-                            handleMarkAsRead(notif.id);
-                          }}
-                        >
-                          Mark as read
-                        </button>
-                      )}
-                    </div>
-                  ))
+                    )
+                  )
                 )}
               </div>
             </div>
@@ -323,9 +353,25 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
                   aria-label="Toggle user/provider role"
                 />
                 <div className="w-24 h-8 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[var(--base)] rounded-full peer peer-checked:bg-[var(--base)] transition-all duration-200 flex items-center justify-between relative px-2">
-                  <span className={`text-sm text-white font-semibold transition-all duration-200 ${role === "provider" ? "opacity-100" : "opacity-0"}`}>Provider</span>
-                  <span className={`text-sm font-semibold transition-all duration-200 ${role === "provider" ? "opacity-0" : "opacity-100"} -translate-x-4`}>User</span>
-                  <div className={`absolute top-1 left-1 w-6 h-6 rounded-full shadow-md bg-white transition-all duration-200 ${role === "provider" ? "translate-x-16" : "translate-x-0"}`}></div>
+                  <span
+                    className={`text-sm text-white font-semibold transition-all duration-200 ${
+                      role === "provider" ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
+                    Provider
+                  </span>
+                  <span
+                    className={`text-sm font-semibold transition-all duration-200 ${
+                      role === "provider" ? "opacity-0" : "opacity-100"
+                    } -translate-x-4`}
+                  >
+                    User
+                  </span>
+                  <div
+                    className={`absolute top-1 left-1 w-6 h-6 rounded-full shadow-md bg-white transition-all duration-200 ${
+                      role === "provider" ? "translate-x-16" : "translate-x-0"
+                    }`}
+                  ></div>
                 </div>
               </label>
             </div>
@@ -340,34 +386,59 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
               {isLoading ? (
                 <span className="w-9 h-9 rounded-full bg-gray-200 animate-pulse" />
               ) : user?.profile ? (
-                <img src={user.profile} alt={user.name} className="w-9 h-9 rounded-full object-cover border-2 border-[var(--base)] shadow-sm" />
+                <img
+                  src={user.profile}
+                  alt={user.name}
+                  className="w-9 h-9 rounded-full object-cover border-2 border-[var(--base)] shadow-sm"
+                />
               ) : (
                 <span className="w-9 h-9 rounded-full bg-[var(--base)] text-white flex items-center justify-center font-bold text-md border-2 border-[var(--base)] shadow-sm">
                   {initials}
                 </span>
               )}
-              <FaChevronDown className={`text-xs text-gray-700 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
+              <FaChevronDown
+                className={`text-xs text-gray-700 transition-transform duration-200 ${
+                  dropdownOpen ? "rotate-180" : ""
+                }`}
+              />
             </button>
             {/* Profile Dropdown */}
             <div
-              className={`profile-dropdown absolute right-0 mt-2 w-56 bg-white border border-[var(--base)]/20 rounded-xl shadow-2xl transition-all duration-200 z-40 overflow-hidden ${dropdownOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
-                }`}
+              className={`profile-dropdown absolute right-0 mt-2 w-56 bg-white border border-[var(--base)]/20 rounded-xl shadow-2xl transition-all duration-200 z-40 overflow-hidden ${
+                dropdownOpen
+                  ? "opacity-100 translate-y-0 pointer-events-auto"
+                  : "opacity-0 -translate-y-2 pointer-events-none"
+              }`}
               onMouseLeave={() => setDropdownOpen(false)}
             >
               <div className="px-5 py-4 flex items-center gap-3 border-b border-gray-100 bg-[var(--base)]/5">
                 {isLoading ? (
                   <span className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
                 ) : user?.profile ? (
-                  <img src={user.profile} alt={user.name} className="w-10 h-10 rounded-full object-cover border-2 border-[var(--base)]" />
+                  <img
+                    src={user.profile}
+                    alt={user.name}
+                    className="w-10 h-10 rounded-full object-cover border-2 border-[var(--base)]"
+                  />
                 ) : (
                   <span className="w-10 min-w-10 h-10 rounded-full bg-[var(--base)] text-white flex items-center justify-center font-bold text-xl border-2 border-[var(--base)]">
                     {initials}
                   </span>
                 )}
                 <div>
-                  {user?.name && <div className="font-semibold text-gray-900 text-base">{user.name}</div>}
-                  {user?.email && <div className="text-xs text-gray-500 truncate max-w-xs">{user.email}</div>}
-                  <div className="text-xs text-gray-500">{getRoleLabel(currentRole)} Mode</div>
+                  {user?.name && (
+                    <div className="font-semibold text-gray-900 text-base">
+                      {user.name}
+                    </div>
+                  )}
+                  {user?.email && (
+                    <div className="text-xs text-gray-500 truncate max-w-xs">
+                      {user.email}
+                    </div>
+                  )}
+                  <div className="text-xs text-gray-500">
+                    {getRoleLabel(currentRole)} Mode
+                  </div>
                 </div>
               </div>
               <Link
@@ -376,7 +447,10 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
               >
                 <FaUser className="text-[var(--base)]" /> Profile
               </Link>
-              <Link href="#" className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-[var(--base)]/10 transition text-sm font-medium">
+              <Link
+                href="#"
+                className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-[var(--base)]/10 transition text-sm font-medium"
+              >
                 <FaCog className="text-[var(--base)]" /> Settings
               </Link>
               {/* User/Provider toggle for mobile (only visible on small screens) */}
@@ -384,7 +458,11 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
                 <div className="flex md:hidden items-center gap-2 px-5 py-3 border-t border-gray-100">
                   <span
                     className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold select-none w-20
-                    ${currentRole === "user" ? "bg-gray-100 text-gray-700" : "bg-[var(--base)]/10 text-[var(--base)]"}`}
+                    ${
+                      currentRole === "user"
+                        ? "bg-gray-100 text-gray-700"
+                        : "bg-[var(--base)]/10 text-[var(--base)]"
+                    }`}
                   >
                     {getRoleIcon(currentRole)}
                     {getRoleLabel(currentRole)}
@@ -392,8 +470,12 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
                   <button
                     className="p-2 rounded-full hover:bg-[var(--base)]/10 transition-colors text-[var(--base)]"
                     onClick={handleRoleSwitch}
-                    title={`Switch to ${currentRole === "user" ? "Provider" : "User"}`}
-                    aria-label={`Switch to ${currentRole === "user" ? "Provider" : "User"}`}
+                    title={`Switch to ${
+                      currentRole === "user" ? "Provider" : "User"
+                    }`}
+                    aria-label={`Switch to ${
+                      currentRole === "user" ? "Provider" : "User"
+                    }`}
                   >
                     <FaExchangeAlt className="w-4 h-4" />
                   </button>

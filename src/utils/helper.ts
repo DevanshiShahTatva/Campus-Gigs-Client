@@ -1,4 +1,6 @@
 import { ReactNode } from "react";
+import moment from "moment";
+
 
 export const getAuthToken = () => {
   if (typeof window === "undefined") return "";
@@ -106,4 +108,31 @@ export function getProviderBadge(isMostRated: boolean, isTopRated: boolean, plan
     return false
   }
   return isTopRated ? "Top Rated" : isMostRated ? "Most Rated" : false
+}
+
+
+export function groupNotificationsByTime(notifications: any[]) {
+  const groups: Record<string, any[]> = {};
+
+  notifications.forEach((notif) => {
+    const date = moment(notif.created_at);
+    let label = "";
+
+    if (date.isSame(moment(), "day")) {
+      label = "Today";
+    } else if (date.isSame(moment().subtract(1, "day"), "day")) {
+      label = "Yesterday";
+    } else if (date.isAfter(moment().startOf("week"))) {
+      label = "This Week";
+    } else {
+      label = date.format("MMM D, YYYY");
+    }
+
+    if (!groups[label]) {
+      groups[label] = [];
+    }
+    groups[label].push(notif);
+  });
+
+  return groups;
 }
