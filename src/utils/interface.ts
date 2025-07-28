@@ -209,6 +209,12 @@ export interface Gigs {
     bids: number;
   };
   gig_payment: GigPayment | null;
+  provider: {
+    id: number,
+    name: string,
+    completed_stripe_kyc: boolean,
+    stripe_account_id: string
+  }
 }
 
 export interface Attachment {
