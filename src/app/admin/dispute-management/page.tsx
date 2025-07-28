@@ -65,7 +65,7 @@ export default function AdminDisputeDashboard() {
     page: 1,
     pageSize: 10,
     search: "",
-    sortKey: "created_at",
+    sortBy: "created_at",
     sortOrder: "desc",
   });
 
@@ -75,11 +75,11 @@ export default function AdminDisputeDashboard() {
   const fetchDisputes = async (tab: string) => {
     setLoading(true);
 
-    const { page, pageSize, search, sortKey, sortOrder } = queryParamsRef.current;
+    const { page, pageSize, search, sortBy, sortOrder } = queryParamsRef.current;
     try {
       const response = await apiCall({
         method: "GET",
-        endPoint: `/rating/get-depute-gigs?status=${tab.toLowerCase().replace(/\s+/g, '_')}&page=${page}&pageSize=${pageSize}&search=${search}&sortKey=${sortKey}&sortOrder=${sortOrder}`,
+        endPoint: `/rating/get-depute-gigs?status=${tab.toLowerCase().replace(/\s+/g, '_')}&page=${page}&pageSize=${pageSize}&search=${search}&sortBy=${sortBy}&sortOrder=${sortOrder}`,
       });
       if (response?.data) {
         setDisputes(response.data);
@@ -164,7 +164,7 @@ export default function AdminDisputeDashboard() {
       page: 1,
       sortOrder: order,
       search: searchTerm,
-      sortKey: key ? key : "created_at",
+      sortBy: key ? key : "created_at",
     }));
   };
 
@@ -439,7 +439,7 @@ export default function AdminDisputeDashboard() {
             <button
               onClick={() => handleDecision('user_won')}
               className={`justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-gray-100 hover:bg-gray-200 hover:text-gray-900 h-10 px-4 py-2 flex items-center gap-2
-                ${selectedDispute.decision === "user_won" && "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"}
+                ${selectedDispute.decision === "user_won" && "text-white hover:text-white bg-teal-600 hover:bg-teal-700"}
               `}
             >
               <CheckCircle className="w-5 h-5" />
@@ -448,7 +448,7 @@ export default function AdminDisputeDashboard() {
             <button
               onClick={() => handleDecision('provider_won')}
               className={`justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-gray-100 hover:bg-gray-200 hover:text-gray-900 h-10 px-4 py-2 flex items-center gap-2
-                ${selectedDispute.decision === "provider_won" && "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"}
+                ${selectedDispute.decision === "provider_won" && "text-white hover:text-white bg-teal-600 hover:bg-teal-700"}
               `}
             >
               <CheckCircle className="w-5 h-5" />
@@ -468,7 +468,7 @@ export default function AdminDisputeDashboard() {
           </div>
           <div className='flex gap-2 mt-4'>
             <button
-              disabled={!(!!selectedDispute.decision && selectedDispute.adminNotes?.trim())}
+              disabled={!(selectedDispute.decision === "user_won" || selectedDispute.decision === "provider_won") || !selectedDispute.adminNotes?.trim()}
               onClick={() => markResolvedDispute(selectedDispute.id)}
               className="justify-center whitespace-nowrap rounded-md text-white text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input h-10 px-4 py-2 flex items-center gap-2 bg-green-500 hover:bg-green-600"
             >
