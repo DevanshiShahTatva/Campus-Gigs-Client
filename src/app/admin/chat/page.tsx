@@ -5,7 +5,7 @@ import ChatPage from '@/app/(protected)/chat/page';
 
 function AdminChat() {
   return (
-    <div className='h-full'>
+    <div className='h-[calc(100vh-210px)]'>
       <ChatPage />
     </div>
   )
