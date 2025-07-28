@@ -1,23 +1,17 @@
 "use client";
 import React, { ReactNode, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
-// custom componetns
-// import Header from '@/components/common/Header';
-// import Sidebar from '@/components/common/Sidebar';
-
-// Constant
-import { ROLE } from "@/utils/constant";
 import AdminSidebar from "./AdminSidebar";
 import AdminHeader from "./AdminHeader";
-import Link from "next/link";
+import { ROLE } from "@/utils/constant";
 
 interface CommonUserLayoutProps {
   children: ReactNode;
   role: ROLE.Admin | ROLE.User;
 }
 
-// Define BreadcrumbItem type locally
 interface BreadcrumbItem {
   label: string;
   href?: string;
@@ -45,23 +39,19 @@ const CommonUserLayout: React.FC<CommonUserLayoutProps> = ({
     setIsSidebarOpen(false);
   };
 
-  const adminRoleType = role === ROLE.Admin ? true : false;
-  // const organizerRoleType = role === ROLE.Organizer ? true : false;
-
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 679px)") ;
+    const mediaQuery = window.matchMedia("(max-width: 679px)");
     const handleResize = () => {
       setIsMobile(mediaQuery.matches);
       if (mediaQuery.matches) {
         setSidebarCollapsed(false); // force collapse off on small screens
       }
     };
-    handleResize(); // initial check
+    handleResize();
     mediaQuery.addEventListener("change", handleResize);
     return () => mediaQuery.removeEventListener("change", handleResize);
   }, []);
 
-  // Generate breadcrumb for admin pages
   let breadcrumb: BreadcrumbItem[] = [];
   const isDashboard = pathname === "/admin" || pathname === "/admin/dashboard";
   if (pathname && pathname.startsWith("/admin") && !isDashboard) {
@@ -85,17 +75,14 @@ const CommonUserLayout: React.FC<CommonUserLayoutProps> = ({
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 h-full">
-      {/* Header at the top */}
-      <AdminHeader 
-        pageTitle="Admin Panel" 
-        adminName="Admin" 
+      <AdminHeader
+        pageTitle="Admin Panel"
+        adminName="Admin"
         onSidebarToggle={toggleSidebar}
       />
-      {/* Sidebar and main content */}
       <div className="flex flex-1 min-h-0 h-full">
-        {/* Sidebar: static/collapsed on desktop, overlay on mobile */}
-        <AdminSidebar 
-          activeRoute={pathname} 
+        <AdminSidebar
+          activeRoute={pathname}
           isOpen={isMobile ? isSidebarOpen : false}
           onClose={isMobile ? closeSidebar : undefined}
           collapsed={!isMobile && sidebarCollapsed}

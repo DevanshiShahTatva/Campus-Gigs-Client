@@ -157,13 +157,13 @@ export const USER_SIDEBAR_ITEMS = [
     id: 9,
     title: "Dispute Management",
     route: ROUTES.ADMIN.DISPUTE_MANAGEMENT,
-    icon: "/assets/gigcategory.svg",
+    icon: "/assets/dispute.svg",
   },
   {
     id: 9,
     title: "Chat",
     route: ROUTES.ADMIN.CHAT,
-    icon: "/assets/gigcategory.svg",
+    icon: "/assets/chat.svg",
   },
   {
     id: 4,

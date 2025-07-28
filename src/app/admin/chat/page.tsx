@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import ChatWindow from '@/app/(protected)/chat/components/ChatWindow';
+import ChatPage from '@/app/(protected)/chat/page';
 
 function AdminChat() {
   return (
-    <div>
-      <ChatWindow />
+    <div className='h-full'>
+      <ChatPage />
     </div>
   )
 }
