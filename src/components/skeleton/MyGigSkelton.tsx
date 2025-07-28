@@ -6,36 +6,56 @@ interface Props {
   cardNum: number;
 }
 
-const MyGigSkelton = (props: Props) => {
-  const { cardNum } = props;
+const MyGigSkelton = ({ cardNum }: Props) => {
   const cards = Array(cardNum).fill(1);
+
   return (
-    <div className="space-y-6">
-      {cards.map((_card, index: number) => {
-        return (
-          <Card key={index} className="w-full flex flex-col items-start gap-4 px-8 hover:shadow-lg transition-shadow border-l-4 border-l-[var(--base)]">
-            <div className="flex w-full items-center justify-between">
-              <Skeleton className="w-[300px] h-[40px]" />
-              <div className="flex items-center gap-2">
-                <Skeleton className="w-[50px] h-[50px]" />
-                <Skeleton className="w-[50px] h-[50px]" />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {cards.map((_card, index) => (
+        <Card
+          key={index}
+          className="p-0 flex flex-col h-full border border-gray-200 rounded-lg overflow-hidden"
+        >
+          {/* Image */}
+          <div className="relative h-[250px] w-full">
+            <Skeleton className="absolute inset-0 w-full h-full" />
+          </div>
+
+          {/* Content */}
+          <div className="p-4 flex flex-col justify-between flex-1 gap-3">
+            {/* Title + Icons */}
+            <div className="flex justify-between items-center">
+              <Skeleton className="w-3/4 h-6" />
+              <div className="flex gap-2">
+                <Skeleton className="w-5 h-5 rounded-full" />
+                <Skeleton className="w-5 h-5 rounded-full" />
               </div>
             </div>
-            <Skeleton className="w-full h-[40px]" />
-            <div className="flex w-full items-center gap-8">
-              <Skeleton className="w-[100px] h-[25px]" />
-              <Skeleton className="w-[100px] h-[25px]" />
-              <Skeleton className="w-[100px] h-[25px]" />
+
+            {/* Description */}
+            <Skeleton className="w-full h-4" />
+            <Skeleton className="w-full h-4" />
+            <Skeleton className="w-2/3 h-4" />
+
+            {/* Skills */}
+            <div className="flex gap-2 flex-wrap">
+              <Skeleton className="w-16 h-5 rounded" />
+              <Skeleton className="w-14 h-5 rounded" />
+              <Skeleton className="w-12 h-5 rounded" />
             </div>
-            <div className="flex w-full items-center justify-between">
-              <Skeleton className="w-[100px] h-[25px]" />
-              <Skeleton className="w-[100px] h-[25px]" />
-              <Skeleton className="w-[100px] h-[25px]" />
-              <Skeleton className="w-[100px] h-[25px]" />
+
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <Skeleton className="w-full h-6 rounded" />
+              <Skeleton className="w-full h-6 rounded" />
+              <Skeleton className="w-full h-6 rounded" />
             </div>
-          </Card>
-        );
-      })}
+
+            {/* Rating or Review button */}
+            <Skeleton className="w-full h-8 rounded mt-2" />
+          </div>
+        </Card>
+      ))}
     </div>
   );
 };

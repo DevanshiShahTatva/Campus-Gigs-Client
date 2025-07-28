@@ -194,7 +194,7 @@ export interface Gigs {
   gig_category: GigCategory;
   bids: Array<Bid>;
   priority: PRIORITY;
-  rating?: number;
+  rating?: {id?:number, rating?:number, rating_feedback?: string};
   review?: string;
   _count?: {
     bids: number;
