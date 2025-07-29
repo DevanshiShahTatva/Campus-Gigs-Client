@@ -92,7 +92,8 @@ export const API_ROUTES = {
     GIG_CATEGORY: "/gig-category",
     USERS: "/admin/users",
     USER_DETAILS: "/admin/user/",
-    DASHBOARD:"/admin/dashboard/summary"
+    DASHBOARD:"/admin/dashboard/summary",
+    REVENUE_OVERVIEW:"/admin/dashboard/revenue-overview?range="
   },
 };
 

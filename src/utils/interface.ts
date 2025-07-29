@@ -195,7 +195,7 @@ export interface Gigs {
   gig_category: GigCategory;
   bids: Array<Bid>;
   priority: PRIORITY;
-  rating?: {id?:number, rating?:number, rating_feedback?: string};
+  rating?: { id?: number, rating?: number, rating_feedback?: string };
   review?: string;
   _count?: {
     bids: number;
@@ -290,8 +290,8 @@ export interface StatCardProps {
 }
 
 export interface LastSevenDaysRevenue {
-  data: string;
-  day: string;
+  key: string;
+  label: string;
   amount: number;
 }
 
@@ -314,5 +314,31 @@ export interface DashboardData {
   gigsByCategories: GigCategories[];
   totalRevenue: number;
   percentageIncreaseRevenue: number;
-  lastSevenDaysRevenue: LastSevenDaysRevenue[];
+  topRatedUsers: TopUsers[];
+  usersByPlan: UserPlanData[];
+  complaintsByOutcome: ComplaintsByOutcome
+}
+
+export interface UserPlanData {
+  planId: number;
+  planName: string;
+  userCount: number;
+}
+
+export interface DoughnutChartProps {
+  data: UserPlanData[];
+  size?: number;
+}
+
+export interface TopUsers {
+  name: string,
+  email: string,
+  average_rating: number,
+  total_ratings: number
+}
+
+export interface ComplaintsByOutcome extends Record<string, number> {
+  pending: number;
+  provider_won: number;
+  user_won: number;
 }
