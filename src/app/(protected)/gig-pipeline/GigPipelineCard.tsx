@@ -15,6 +15,7 @@ import { useMemo, useState } from "react";
 import { BID_STATUS, GIG_STATUS, PRIORITY } from "@/utils/constant";
 import Slider from "react-slick";
 import { PlaceholderImage } from "@/components/ui/placeholderImage";
+import { toast } from "react-toastify";
 
 interface GigCardProps {
   gig: Gigs;
@@ -89,6 +90,16 @@ const GigCard = ({
     [gig]
   );
 
+  const handleStartGig = (gig: Gigs, status: string) => {
+    if (gig.provider.completed_stripe_kyc && gig.provider.stripe_account_id) {
+      onStartGig?.(gig.id, status);
+    } else {
+      toast.error(
+        "To continue, please complete your KYC verification on Stripe. Just head over to your profile settings to get started."
+      );
+    }
+  };
+
   const pipelineStage = useMemo(() => {
     if (!bid) return null;
 
@@ -117,78 +128,81 @@ const GigCard = ({
     return null;
   }, [bid, gig.status]);
 
-    const ImageWithFallback = ({ src, alt, className }: { src: string; alt: string, className?: string }) => {
-      const [hasError, setHasError] = useState(false);
-      const [isLoading, setIsLoading] = useState(true);
-  
-      const handleError = () => {
-        setHasError(true);
-        setIsLoading(false);
-      };
-  
-      const handleLoad = () => {
-        setIsLoading(false);
-      };
-  
-      if (hasError || !src) {
-        return <PlaceholderImage />;
-      }
-  
-      return (
-        <div className={`relative w-full bg-gray-300 h-auto ${className}`}>
-          {isLoading && (
-            <div className="h-full w-full object-contain">
-              <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-gray-300 border-t-gray-500 rounded-full animate-spin"></div>
-              </div>
-            </div>
-          )}
-          <img
-            src={src}
-            alt={alt}
-            onError={handleError}
-            onLoad={handleLoad}
-            style={{ display: isLoading ? 'none' : 'block' }}
-            className="min-h-[250px] h-[250px] w-full object-contain"
-          />
-        </div>
-      );
-    };
-  
+  const ImageWithFallback = ({
+    src,
+    alt,
+    className,
+  }: {
+    src: string;
+    alt: string;
+    className?: string;
+  }) => {
+    const [hasError, setHasError] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-   const renderImageSlider = (images:string[]) => (
-      <div className="lg:col-span-2 order-1">
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <div className="h-auto ">
-            <div className="slider h-[250px]">
-              <Slider
-                speed={3000}
-                autoplay={true}
-                dots={images && images.length > 1}
-                infinite={images.length > 1}
-                customPaging={() => (
-                  <div className="w-[7px] h-[7px] bg-gray-400 rounded-full transition" />
-                )}
-              >
-                {images && images.length > 0 ? (
-                  images.map((image: string, i: number) => (
-                    <ImageWithFallback
-                      key={`${i + 1}`}
-                      src={image}
-                      alt={'img'}
-                    />
-                  ))
-                ) : (
-                  <div className="h-[250px]">
-                    <PlaceholderImage />
-                  </div>
-                )}
-              </Slider>
+    const handleError = () => {
+      setHasError(true);
+      setIsLoading(false);
+    };
+
+    const handleLoad = () => {
+      setIsLoading(false);
+    };
+
+    if (hasError || !src) {
+      return <PlaceholderImage />;
+    }
+
+    return (
+      <div className={`relative w-full bg-gray-300 h-auto ${className}`}>
+        {isLoading && (
+          <div className="h-full w-full object-contain">
+            <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+              <div className="w-8 h-8 border-4 border-gray-300 border-t-gray-500 rounded-full animate-spin"></div>
             </div>
+          </div>
+        )}
+        <img
+          src={src}
+          alt={alt}
+          onError={handleError}
+          onLoad={handleLoad}
+          style={{ display: isLoading ? "none" : "block" }}
+          className="min-h-[250px] h-[250px] w-full object-contain"
+        />
+      </div>
+    );
+  };
+
+  const renderImageSlider = (images: string[]) => (
+    <div className="lg:col-span-2 order-1">
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="h-auto ">
+          <div className="slider h-[250px]">
+            <Slider
+              speed={3000}
+              autoplay={true}
+              dots={images && images.length > 1}
+              infinite={images.length > 1}
+              customPaging={() => (
+                <div className="w-[7px] h-[7px] bg-gray-400 rounded-full transition" />
+              )}
+            >
+              {images && images.length > 0 ? (
+                images.map((image: string, i: number) => (
+                  <ImageWithFallback key={`${i + 1}`} src={image} alt={"img"} />
+                ))
+              ) : (
+                <div className="h-[250px]">
+                  <PlaceholderImage />
+                </div>
+              )}
+            </Slider>
           </div>
         </div>
       </div>
-    );
+    </div>
+  );
 
   return (
     <Card className="pt-0 mb-4 hover:shadow-lg transition-all duration-200 border border-gray-200 rounded-lg overflow-hidden flex flex-col">
@@ -237,7 +251,7 @@ const GigCard = ({
             </Badge>
 
             {bid?.bid_amount && (
-              <div className="flex items-center gap-1 text-sm text-teal-600 bg-teal-50 px-2 py-1 rounded-md text-xs">
+              <div className="flex items-center gap-1 text-teal-600 bg-teal-50 px-2 py-1 rounded-md text-xs">
                 <TrendingUp className="h-3 w-3" />
                 <span className="font-medium">
                   Your bid: ${Number(bid?.bid_amount).toFixed(2)}
@@ -284,15 +298,25 @@ const GigCard = ({
         </div>
 
         {/* CTA / Status Sections */}
-        {pipelineStage === BID_STATUS.ACCEPTED && (
+        {pipelineStage === BID_STATUS.ACCEPTED && gig.gig_payment !== null && (
           <div className="pt-4">
             <Button
-              onClick={() => onStartGig?.(gig.id, "in_progress")}
+              onClick={() => handleStartGig(gig, "in_progress")}
               className="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-3"
               size="lg"
             >
               🚀 Start Working on This Gig
             </Button>
+          </div>
+        )}
+
+        {pipelineStage === BID_STATUS.ACCEPTED && gig.gig_payment === null && (
+          <div className="border-t pt-4 bg-green-50 rounded-lg p-4 mt-4">
+            <p className="text-sm text-green-700">
+              <strong>Payment Pending:</strong> Congratulaton 🚀, Your bid has
+              been accepted. Once Owner will pay for this gig you can able to
+              work on this gig.
+            </p>
           </div>
         )}
 
