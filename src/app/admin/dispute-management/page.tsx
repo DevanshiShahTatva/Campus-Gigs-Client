@@ -72,7 +72,7 @@ export default function AdminDisputeDashboard() {
   const queryParamsRef = useRef(queryParams);
   queryParamsRef.current = queryParams;
 
-  const fetchDisputes = async (tab: string) => {
+  const fetchDisputes = async () => {
     setLoading(true);
 
     const { page, pageSize, search, sortBy, sortOrder } = queryParamsRef.current;
@@ -94,8 +94,8 @@ export default function AdminDisputeDashboard() {
   };
 
   useEffect(() => {
-    fetchDisputes('all');
-  }, [queryParams]);
+    fetchDisputes();
+  }, [queryParams, tab]);
 
   const handleStartChat = async (otherUserId: string) => {
     try {
@@ -178,7 +178,6 @@ export default function AdminDisputeDashboard() {
 
   const handleTabChange = (tab: string) => {
     setTab(tab);
-    fetchDisputes(tab);
   };
 
   const handleDecision = (decision: DisputeDecision) => {
