@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { Column, IUsers, TopUsers } from "./interface";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -95,7 +96,9 @@ export const API_ROUTES = {
     TIRE: "/tire",
     GIG_CATEGORY: "/gig-category",
     USERS: "/admin/users",
-    USER_DETAILS: "/admin/user/"
+    USER_DETAILS: "/admin/user/",
+    DASHBOARD:"/admin/dashboard/summary",
+    REVENUE_OVERVIEW:"/admin/dashboard/revenue-overview?range="
   },
 };
 
@@ -633,3 +636,33 @@ export const USER_PROFILE = {
     },
   ],
 };
+
+export const fallbackColors = [
+  "#3B82F6",
+  "#EF4444",
+  "#10B981",
+  "#F59E0B",
+  "#8B5CF6",
+  "#EC4899",
+  "#06B6D4",
+  "#F97316",
+];
+
+export const tableHeaders = [
+  { label: "Name", key: "name", sortable: true },
+  { label: "Email", key: "email", sortable: true },
+  { label: "Average Rating", key: "average_rating", sortable: true },
+  { label: "Total Rating", key: "total_ratings", sortable: true },
+] satisfies Column<TopUsers>[];
+
+export const popUpHeaders = [
+  { label: "Name", key: "name", sortable: true },
+  { label: "Email", key: "email", sortable: true },
+  { label: "Plan", key: "plan", sortable: false },
+] satisfies Column<IUsers>[];
+
+export const generateColor = (index: number): string =>
+  `hsl(${(index * 137.508) % 360}, 85%, 60%)`;
+
+export const formatLabel = (key: string) =>
+  key.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());

@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { BID_STATUS, PAYMENT_HISTORY_TYPE, PRIORITY } from "./constant";
 
 export type SortOrder = "asc" | "desc";
@@ -203,7 +204,7 @@ export interface Gigs {
   gig_category: GigCategory;
   bids: Array<Bid>;
   priority: PRIORITY;
-  rating?: {id?:number, rating?:number, rating_feedback?: string};
+  rating?: { id?: number, rating?: number, rating_feedback?: string };
   review?: string;
   _count?: {
     bids: number;
@@ -268,4 +269,119 @@ export interface PaymentTransaction {
   description: string;
   created_at: string;
   is_deleted: boolean;
+}
+
+export interface BarChartProps {
+  data: LastSevenDaysRevenue[];
+  color?: string;
+  height?: number;
+}
+
+export interface CategoryGigData {
+  categoryId: number;
+  categoryName: string;
+  count: number;
+  color?: string;
+}
+
+export interface PieChartProps {
+  data: CategoryGigData[];
+  size?: number;
+}
+
+export interface StatCardProps {
+  title: string;
+  icon: ReactNode;
+  bgColor: string;
+  textColor: string;
+  value: string | number;
+  percentage?: string;
+  percentageTextColor?: string;
+  subtext?: string;
+  isCurrency?: boolean;
+  isDualStat?: boolean;
+  secondValue?: string | number;
+  secondLabel?: string;
+  secondTextColor?: string;
+}
+
+export interface LastSevenDaysRevenue {
+  key: string;
+  label: string;
+  amount: number;
+}
+
+export interface GigCategories {
+  categoryId: number;
+  categoryName: string;
+  count: number;
+}
+
+export interface DashboardData {
+  totalUsers: number;
+  percentageIncrease: number;
+  bannedUsers: number;
+  bannedUserPercentage: number;
+  totalGigs: number;
+  percentageIncreaseGigs: number;
+  totalComplaints: number;
+  pendingComplaintsCount: number;
+  respondedComplaintsCount: number;
+  gigsByCategories: GigCategories[];
+  totalRevenue: number;
+  percentageIncreaseRevenue: number;
+  topRatedUsers: TopUsers[];
+  usersByPlan: UserPlanData[];
+  complaintsByOutcome: ComplaintsByOutcome
+}
+
+export interface UserPlanData {
+  planId: number;
+  planName: string;
+  userCount: number;
+  users: IUsers[]
+}
+
+export interface IUsers {
+  id: number,
+  name: string,
+  email: string
+  plan?: string
+}
+
+export interface DoughnutChartProps {
+  data: UserPlanData[];
+  size?: number;
+}
+
+export interface TopUsers {
+  name: string,
+  email: string,
+  average_rating: number,
+  total_ratings: number
+}
+
+export interface ComplaintsByOutcome extends Record<string, number> {
+  pending: number;
+  provider_won: number;
+  user_won: number;
+}
+
+export type Column<T> = {
+  key: keyof T;
+  label: string;
+  sortable?: boolean;
+  textAlign?: "left" | "center" | "right";
+  render?: (value: any, row: T, index: number) => React.ReactNode;
+};
+
+export type TimeRange = "7_days" | "12_months" | "7_years";
+
+export interface OutcomeData {
+  [key: string]: number;
+}
+
+export interface Props {
+  data: OutcomeData;
+  fallbackColors: string[];
 }
