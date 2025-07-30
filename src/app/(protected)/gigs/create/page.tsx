@@ -178,7 +178,7 @@ const CreateGig = () => {
 
       if (values.certifications.length > 0) {
         values.certifications.forEach((certification: string) => {
-          formData.append("certifications[]", certification);
+          certification?.trim()?.length > 0 && formData.append("certifications[]", certification);
         });
       }
 
