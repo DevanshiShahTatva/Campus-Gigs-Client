@@ -323,6 +323,14 @@ export interface UserPlanData {
   planId: number;
   planName: string;
   userCount: number;
+  users: IUsers[]
+}
+
+export interface IUsers {
+  id: number,
+  name: string,
+  email: string
+  plan?: string
 }
 
 export interface DoughnutChartProps {
@@ -341,4 +349,23 @@ export interface ComplaintsByOutcome extends Record<string, number> {
   pending: number;
   provider_won: number;
   user_won: number;
+}
+
+export type Column<T> = {
+  key: keyof T;
+  label: string;
+  sortable?: boolean;
+  textAlign?: "left" | "center" | "right";
+  render?: (value: any, row: T, index: number) => React.ReactNode;
+};
+
+export type TimeRange = "7_days" | "12_months" | "7_years";
+
+export interface OutcomeData {
+  [key: string]: number;
+}
+
+export interface Props {
+  data: OutcomeData;
+  fallbackColors: string[];
 }
