@@ -16,6 +16,7 @@ import ProfileSkeleton from "@/components/skeleton/ProfileSkeleton";
 import { toast } from "react-toastify";
 import {
   useGetUserProfileQuery,
+  useUpdateNotificationPreferencesMutation,
   useUpdateUserProfileMutation,
 } from "@/redux/api";
 import { CurrentSubscriptionPlan, IDropdownOption } from "@/utils/interface";
@@ -32,7 +33,8 @@ import { ConfirmationDialog } from "@/components/common/ConfirmationDialog";
 import { OnboardStripeButton } from "@/components/stripe/OnboardStripeButton";
 import { Card, CardContent } from "@/components/ui/card";
 import KycStatusPage from "@/components/stripe/KycStatus";
-import { renderBaseOnCondition } from "@/utils/helper";
+import { getAllNotificationStatus, renderBaseOnCondition } from "@/utils/helper";
+import { CustomModal } from "@/components/common/CustomModal";
 
 const Profile = () => {
   const [success, setSuccess] = React.useState(false);
@@ -57,6 +59,7 @@ const Profile = () => {
   const userProfile = data?.data;
   const [updateUserProfile, { isLoading: isUpdating }] =
     useUpdateUserProfileMutation();
+    const [updateNotificationPref] = useUpdateNotificationPreferencesMutation();
   const [subscriptionHistory, setSubscriptionHistory] = useState<any[]>([]);
   const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(false);
   const [subscriptionError, setSubscriptionError] = useState<string | null>(
@@ -67,15 +70,23 @@ const Profile = () => {
   const [isSupportLoading, setIsSupportLoading] = useState(false);
   const [supportError, setSupportError] = useState<string | null>(null);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
-  const userId = useSelector(
-    (state: RootState) => state.user?.user_id || state.user?.user?.id
-  );
+  const [changeNotificationOpen, setChangeNotificationOpen] = useState(false);
+  const userId = useSelector((state: RootState) => state.user?.user_id || state.user?.user?.id);
   const socket = useSocket(userId ? String(userId) : null);
   const [selectedPlan, setSelectedPlan] =
     useState<null | CurrentSubscriptionPlan>(null);
   const [deleteModelOpen, setDeleteModelOpen] = useState<boolean>(false);
-  const [isCancellingAutoDebit, setIsCancellingAutoDebit] =
-    useState<boolean>(false);
+  const [isCancellingAutoDebit, setIsCancellingAutoDebit] = useState<boolean>(false);
+  const [
+    { show_bid, show_chat, show_payment, show_rating, show_all },
+    setNotificationPreference,
+  ] = useState({
+    show_chat: userProfile?.preferences?.show_chat,
+    show_bid: userProfile?.preferences?.show_bid,
+    show_payment: userProfile?.preferences?.show_payment,
+    show_rating: userProfile?.preferences?.show_rating,
+    show_all: getAllNotificationStatus(userProfile?.preferences),
+  });
 
   useEffect(() => {
     if (activeTab === "subscription") {
@@ -100,7 +111,16 @@ const Profile = () => {
         }
       })();
     }
-  }, [activeTab]);
+    if(activeTab === "settings"){
+      setNotificationPreference({
+        show_chat: userProfile?.preferences?.show_chat,
+        show_bid: userProfile?.preferences?.show_bid,
+        show_payment: userProfile?.preferences?.show_payment,
+        show_rating: userProfile?.preferences?.show_rating,
+        show_all: getAllNotificationStatus(userProfile?.preferences),
+      });
+    }
+  }, [activeTab, changeNotificationOpen]);
 
   useEffect(() => {
     if (!socket) return;
@@ -175,6 +195,7 @@ const Profile = () => {
       bio: userProfile.bio || "",
     };
   }, [userProfile]);
+console.log("USER PROFILE", userProfile);
 
   // When user selects a new profile image, store the File object and upload immediately
   const handleProfileImageChange = async (
@@ -214,6 +235,60 @@ const Profile = () => {
       toast.error("Failed to update profile");
     }
   };
+
+  const handleChangeNotificationSubmit = async () => {
+    try {
+      await updateNotificationPref({
+        userId: userId,
+        preferences: { show_bid, show_chat, show_payment, show_rating },
+      }).unwrap();
+      toast.success("Notification preferences updated successfully");
+      setChangeNotificationOpen(false);
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to update notification preferences."
+      );
+    }
+  };
+
+ const handleChangeToggleStatus = (
+  flag: boolean,
+  name: "CHAT" | "RATING" | "PAYMENT" | "BID" | "ALL"
+) => {
+  if (name === "ALL") {
+    setNotificationPreference({
+      show_chat: !flag,
+      show_bid: !flag,
+      show_payment: !flag,
+      show_rating: !flag,
+      show_all: flag,
+    });
+    return;
+  }
+
+  setNotificationPreference((prev) => {
+    const updated = {
+      ...prev,
+      show_chat: name === "CHAT" ? flag : prev.show_chat,
+      show_bid: name === "BID" ? flag : prev.show_bid,
+      show_payment: name === "PAYMENT" ? flag : prev.show_payment,
+      show_rating: name === "RATING" ? flag : prev.show_rating,
+    };
+
+    const allOff =
+      !updated.show_chat &&
+      !updated.show_bid &&
+      !updated.show_payment &&
+      !updated.show_rating;
+
+    return {
+      ...updated,
+      show_all: allOff,
+    };
+  });
+};
 
   const handleChangePasswordSubmit = async (values: any) => {
     if (values.newPassword !== values.confirmNewPassword) {
@@ -815,7 +890,10 @@ const Profile = () => {
                       <div className="font-medium text-gray-900 mb-1">
                         Notification Preferences
                       </div>
-                      <button className="text-[var(--base)] font-medium hover:underline">
+                      <button
+                        className="text-[var(--base)] font-medium hover:underline"
+                        onClick={() => setChangeNotificationOpen(true)}
+                      >
                         Edit
                       </button>
                     </div>
@@ -839,7 +917,10 @@ const Profile = () => {
                       <h3 className="text-lg font-semibold text-[var(--base)] mb-4">
                         Stripe verification (KYC)
                       </h3>
-                      <KycStatusPage status="pending" providerId={userProfile.id} />
+                      <KycStatusPage
+                        status="pending"
+                        providerId={userProfile.id}
+                      />
                     </div>
                   )}
                 </>,
@@ -849,6 +930,55 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {changeNotificationOpen && (
+        <CustomModal
+          onClose={() => setChangeNotificationOpen(false)}
+          title="Notification Preferences"
+        >
+          <div className="flex flex-col gap-6">
+            <Toggle
+              label="Show Chat Notifications"
+              checked={show_chat}
+              onChange={(flag) => handleChangeToggleStatus(flag, "CHAT")}
+            />
+            <Toggle
+              label="Show Bid Notifications"
+              checked={show_bid}
+              onChange={(flag) => handleChangeToggleStatus(flag, "BID")}
+            />
+            <Toggle
+              label="Show Payment Notifications"
+              checked={show_payment}
+              onChange={(flag) => handleChangeToggleStatus(flag, "PAYMENT")}
+            />
+            <Toggle
+              label="Show Rating & Review Notifications"
+              checked={show_rating}
+              onChange={(flag) => handleChangeToggleStatus(flag, "RATING")}
+            />
+            <Toggle
+              label={`Turn off all Notifications`}
+              checked={show_all}
+              onChange={(flag) => handleChangeToggleStatus(flag, "ALL")}
+            />
+            <div className="  w-full flex justify-end gap-3">
+              <button
+                className="border py-2 px-4 rounded-md"
+                onClick={() => setChangeNotificationOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-[var(--base)] text-[var(--text-light)] py-2 px-4 rounded-md"
+                onClick={handleChangeNotificationSubmit}
+              >
+                Save Preferences
+              </button>
+            </div>
+          </div>
+        </CustomModal>
+      )}
 
       <ConfirmationDialog
         isOpen={deleteModelOpen}
@@ -862,5 +992,35 @@ const Profile = () => {
     </div>
   );
 };
+
+const Toggle = ({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (val: boolean) => void;
+}) => {
+  return (
+    <div className="flex items-center justify-between px-2">
+      <span className="text-sm font-medium text-gray-800">{label}</span>
+      <button
+        type="button"
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
+          checked ? "bg-[var(--base)]" : "bg-gray-300"
+        }`}
+        onClick={() => onChange(!checked)}
+      >
+        <span
+          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
+            checked ? "translate-x-6" : "translate-x-1"
+          }`}
+        />
+      </button>
+    </div>
+  );
+};
+
 
 export default Profile;

@@ -136,3 +136,17 @@ export function groupNotificationsByTime(notifications: any[]) {
 
   return groups;
 }
+
+export const getAllNotificationStatus = ({
+  show_chat,
+  show_bid,
+  show_payment,
+  show_rating,
+}: {
+  show_chat: boolean;
+  show_bid: boolean;
+  show_payment: boolean;
+  show_rating: boolean;
+}) => {
+   return !show_chat && !show_bid && !show_payment && !show_rating;
+};
