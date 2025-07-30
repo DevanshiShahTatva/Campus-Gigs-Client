@@ -163,7 +163,13 @@ const PaymentSuccess = () => {
           )}
           <div className="space-y-3">
             <Button
-              onClick={() => router.push(ROUTES.GIGS)}
+              onClick={() => {
+                if(isGigPayment) {
+                  router.push(ROUTES.MY_GIGS)
+                } else {
+                  router.push(ROUTES.GIGS)
+                }
+              }}
               className="w-full bg-primary hover:bg-primary/90"
             >
               <Home className="mr-2 h-4 w-4" />
