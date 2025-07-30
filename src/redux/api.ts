@@ -47,6 +47,17 @@ export const api = createApi({
         method: "POST",
       }),
     }),
+    updateNotificationPreferences: builder.mutation<
+      any,
+      { userId: any; preferences: any }
+    >({
+      query: ({ userId, preferences }) => ({
+        url: `/user/${userId}/notification-preferences`,
+        method: "PUT",
+        body: preferences,
+      }),
+      invalidatesTags: ["UserProfile"],
+    }),
     // Add more endpoints here
   }),
 });
@@ -58,4 +69,5 @@ export const {
   useGetUserNotificationsQuery,
   useMarkNotificationReadMutation,
   useMarkAllNotificationsReadMutation,
+  useUpdateNotificationPreferencesMutation,
 } = api;

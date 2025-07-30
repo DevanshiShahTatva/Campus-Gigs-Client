@@ -156,12 +156,6 @@ const ReviewComplaintModal = ({
                 >
                   Challenge This Complaint
                 </button>
-                <button
-                  onClick={handleClose}
-                  className="flex-1 py-3 px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-                >
-                  Accept & Close
-                </button>
               </div>
             </div>
           )}
