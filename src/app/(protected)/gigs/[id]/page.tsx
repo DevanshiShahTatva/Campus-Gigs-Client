@@ -136,6 +136,8 @@ const GigDetail = () => {
       });
       if (response?.success) {
         setGitDetails(response.data);
+      } else if (response.message) {
+        toast.error(response.message);
       }
     };
     getGitDetails();
@@ -149,6 +151,8 @@ const GigDetail = () => {
     });
     if (response?.success) {
       setBids(response.data);
+    } else if (response.message) {
+      toast.error(response.message);
     }
     setBidLoading(false);
   };
@@ -193,6 +197,9 @@ const GigDetail = () => {
       });
       if (response?.success) {
         setBids(bids.map((bid) => bid.id === bidId ? { ...bid, updated_at: response.data.updated_at, status: "accepted" } : bid));
+        setGitDetails((prev: any) => ({ ...prev, gig_bid_accepted: true }));
+      } else if (response.message) {
+        toast.error(response.message);
       }
     } catch (error) {
       console.log(error);
@@ -207,6 +214,8 @@ const GigDetail = () => {
       });
       if (response?.success) {
         setBids(bids.map((bid) => bid.id === bidId ? { ...bid, updated_at: response.data.updated_at, status: "rejected" } : bid));
+      } else if (response.message) {
+        toast.error(response.message);
       }
     } catch (error) {
       console.log(error);
@@ -338,7 +347,7 @@ const GigDetail = () => {
           <div className="text-xs sm:text-sm text-gray-500">in {gigDetails.payment_type === "fixed" ? "Fixed Price" : "Range"}</div>
         </div>
       </div>
-      {(gigDetails?.user_id !== user_id && !gigDetails.hasBid && userProfile?.data?.profile_type === "provider") && (
+      {(gigDetails?.user_id !== user_id && !gigDetails.gig_bid_accepted && !gigDetails.hasBid && userProfile?.data?.profile_type === "provider") && (
         <Button
           onClick={() => setIsModalOpen(true)}
           className="px-3 py-2 sm:px-4 sm:py-6 text-sm sm:text-md rounded-lg font-semibold"
@@ -477,13 +486,41 @@ const GigDetail = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
           <span className="text-xs sm:text-sm text-gray-500">Bid placed {formatDate(bid.created_at)}</span>
           {bid.status === "accepted" && (
-            <div className="w-fit bg-green-600 hover:bg-green-600 pt-[2px] text-white h-8 rounded-md gap-1.5 px-3">
-              Accepted
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => {
+                  const otherUserId = user_id === bid.provider.id ? gigDetails.user_id : bid.provider.id;
+                  handleStartChat(otherUserId);
+                }}
+              >
+                <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                Message
+              </Button>
+              <div className="w-fit bg-green-600 hover:bg-green-600 pt-[2px] text-white h-8 rounded-md gap-1.5 px-3">
+                Accepted
+              </div>
             </div>
           )}
           {bid.status === "rejected" && (
-            <div className="w-fit bg-red-600 hover:bg-red-600 pt-[2px] text-white h-8 rounded-md gap-1.5 px-3">
-              Rejected
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => {
+                  const otherUserId = user_id === bid.provider.id ? gigDetails.user_id : bid.provider.id;
+                  handleStartChat(otherUserId);
+                }}
+              >
+                <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                Message
+              </Button>
+              <div className="w-fit bg-red-600 hover:bg-red-600 pt-[2px] text-white h-8 rounded-md gap-1.5 px-3">
+                Rejected
+              </div>
             </div>
           )}
           {user_id === bid.provider.id && bid.status === "pending" && (
@@ -506,9 +543,8 @@ const GigDetail = () => {
               </Button>
             </div>
           )}
-          {user_id === gigDetails.user_id && bid.status !== "accepted" && bid.status !== "rejected" && (
+          {user_id === gigDetails.user_id && !gigDetails.gig_bid_accepted && (
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              {/* Message button for both gig owner and provider */}
               <Button
                 size="sm"
                 variant="outline"

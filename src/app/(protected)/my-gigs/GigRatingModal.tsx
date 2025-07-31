@@ -31,7 +31,7 @@ interface GigRatingModalProps {
   gigId: number;
   isReadonly?: boolean;
   existingRating?: ExistingRatingData | null;
-  onClose: () => void;
+  onClose: (step: string) => void;
 }
 
 const GigRatingModal = ({ gigId, existingRating, isReadonly = false, onClose }: GigRatingModalProps) => {
@@ -132,7 +132,7 @@ const GigRatingModal = ({ gigId, existingRating, isReadonly = false, onClose }: 
   if (!gigId) return null;
 
   return (
-    <Dialog open={!!gigId} onOpenChange={onClose}>
+    <Dialog open={!!gigId} onOpenChange={() => onClose(step)}>
       {loading && <CentralLoader loading={loading} />}
       <DialogContent
         style={{
@@ -339,7 +339,7 @@ const GigRatingModal = ({ gigId, existingRating, isReadonly = false, onClose }: 
                   }
                 </p>
                 <button
-                  onClick={onClose}
+                  onClick={() => onClose(step)}
                   className="w-full py-3 px-4 bg-[var(--base)] text-white rounded-lg hover:bg-[var(--base-hover)] transition-colors font-medium"
                 >
                   Close
@@ -378,7 +378,7 @@ const GigRatingModal = ({ gigId, existingRating, isReadonly = false, onClose }: 
             <DialogFooter>
               <Button
                 type="button"
-                onClick={onClose}
+                onClick={() => onClose(step)}
                 className="w-full sm:w-auto text-sm sm:text-base h-9 sm:h-10"
               >
                 Close
