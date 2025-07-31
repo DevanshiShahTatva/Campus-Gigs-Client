@@ -16,6 +16,7 @@ import { BID_STATUS, GIG_STATUS, PRIORITY } from "@/utils/constant";
 import Slider from "react-slick";
 import { PlaceholderImage } from "@/components/ui/placeholderImage";
 import { toast } from "react-toastify";
+import { renderBaseOnCondition } from "@/utils/helper";
 
 interface GigCardProps {
   gig: Gigs;
@@ -67,8 +68,13 @@ const GigCard = ({
     }
   };
 
-  const getStatusText = (status: string | null) => {
+  const getStatusText = (status: string | null, gig: Gigs) => {
     if (!status) return "";
+
+    if (gig.status === "rejected" && gig.provider_id === userId) {
+      return "Gig Rejected"
+    };
+    
     switch (status) {
       case "pending":
         return "Pending Approval";
@@ -214,7 +220,7 @@ const GigCard = ({
             <h3 className="font-semibold text-xl text-gray-900 line-clamp-1">
               {gig.title}
             </h3>
-            {activeTab === "rejected" && (
+            {activeTab === "completed" && (
               <button
                 onClick={() => onChallengeReview(gig.id)}
                 className="bg-[var(--base)] text-white px-3 py-1 rounded text-sm"
@@ -230,7 +236,7 @@ const GigCard = ({
                 pipelineStage
               )} border font-medium text-xs`}
             >
-              {getStatusText(pipelineStage)}
+              {getStatusText(pipelineStage, gig)}
             </Badge>
 
             {gig.priority && pipelineStage === "in_progress" && (
@@ -355,7 +361,7 @@ const GigCard = ({
           </div>
         )}
 
-        {gig.status === "completed" && (
+        {gig.status === "completed" && activeTab === "completed" && (
           <div className="pt-4 bg-green-50 rounded-lg p-4 mt-4">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-semibold text-green-800">
@@ -387,20 +393,32 @@ const GigCard = ({
           </div>
         )}
 
-        {pipelineStage === "rejected" && (
-          <div className="pt-4 bg-red-50 rounded-lg p-4 mt-4">
-            <p className="text-sm text-red-700">
-              <strong>Not selected:</strong> The client chose another provider.
-            </p>
-            {bid?.created_at && (
-              <div className="flex items-center gap-2 text-sm text-red-600 mt-2">
-                <Clock className="h-4 w-4" />
-                <span>
-                  Bid placed on {moment(bid?.created_at).format("DD/MM/YYYY")}
-                </span>
+        {renderBaseOnCondition(
+          pipelineStage === "rejected",
+          <>
+            {renderBaseOnCondition(
+              gig.status === "rejected" && gig.provider_id === userId,
+              <div className="pt-4 bg-red-50 rounded-lg p-4 mt-4">
+                <p className="text-sm text-red-700">
+                  <strong>Gig Rejected:</strong> Due to poor work experience with user and not proper completed job.
+                </p>
+              </div>,
+              <div className="pt-4 bg-red-50 rounded-lg p-4 mt-4">
+                <p className="text-sm text-red-700">
+                  <strong>Not selected:</strong> The client chose another provider.
+                </p>
+                {bid?.created_at && (
+                  <div className="flex items-center gap-2 text-sm text-red-600 mt-2">
+                    <Clock className="h-4 w-4" />
+                    <span>
+                      Bid placed on {moment(bid?.created_at).format("DD/MM/YYYY")}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
-          </div>
+          </>,
+          <></>
         )}
 
         {pipelineStage === "pending" && (

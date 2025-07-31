@@ -101,9 +101,9 @@ const ProviderPortfolioPage = () => {
               ></div>
             )}
             <div className="absolute left-8 -bottom-16 w-32 h-32 rounded-full border-4 border-white overflow-hidden shadow-lg bg-gray-100 transition-transform duration-300 ease-in-out hover:scale-110 hover:shadow-2xl flex items-center justify-center bg-gray-100">
-              {provider?.profileImage ? (
+              {provider?.profile ? (
                 <img
-                  src={provider.profileImage}
+                  src={provider?.profile}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
@@ -183,7 +183,7 @@ const ProviderPortfolioPage = () => {
         </div>
 
         {/* Tier based rating */}
-        <div className="max-w-8xl mx-auto mt-12 mb-10">
+        {result?.length > 0 && <div className="max-w-8xl mx-auto mt-12 mb-10">
           <h3 className="text-xl font-bold mb-4 text-gray-900">
             Tier based Ratings
           </h3>
@@ -208,7 +208,7 @@ const ProviderPortfolioPage = () => {
               </div>
             ))}
           </div>
-        </div>
+        </div>}
 
         {/* Reviews Section */}
         {provider?.gigs_provider?.length > 0 && (
@@ -276,7 +276,7 @@ const ProviderPortfolioPage = () => {
         )}
 
         {/* Completed Gigs Section */}
-        {provider?.gigs_provider && (
+        {provider?.gigs_provider?.length > 0 && (
           <div className="max-w-8xl mx-auto mt-12 mb-16">
             <h3 className="text-xl font-bold mb-6 text-gray-900 flex items-center gap-2">
               Completed Gigs
@@ -359,6 +359,12 @@ const ProviderPortfolioPage = () => {
             </div>
           </div>
         )}
+
+        {provider?.gigs_provider?.length == 0 && result?.length == 0 && <div className="w-full flex justify-center ">
+          <span className="mt-20 text-2xl font-semibold">
+             No data found
+            </span>
+          </div>}
       </div>
     </div>
   );
