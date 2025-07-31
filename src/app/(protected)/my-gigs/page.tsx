@@ -2,22 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Edit,
   Trash2,
   Calendar,
   DollarSign,
-  Star,
   ImageIcon,
-  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { apiCall } from "@/utils/apiCall";
@@ -452,23 +444,6 @@ const MyGigs = () => {
 
                         {/* Status */}
                         {gig.status === "completed" &&
-                          (gig.rating ? (
-                            <div
-                              className="bg-green-50 flex  px-2 py-1 rounded gap-3"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setGigIdForRating(gig.id);
-                                getRatingDetail(gig.id);
-                              }}
-                            >
-                              <span className="text-sm">
-                                ⭐ {gig?.rating?.rating}
-                              </span>
-                              <span className="italic text-green-700 line-clamp-1 text-sm">
-                                "{gig.rating?.rating_feedback}"
-                              </span>
-                            </div>
-                          ) : (
                             <div className="mt-4">
                               <button
                                 onClick={(e) => {
@@ -478,10 +453,10 @@ const MyGigs = () => {
                                 }}
                                 className="bg-[var(--base)] text-white px-2 py-1 rounded w-full"
                               >
-                                Review
+                               {gig.rating ? "Show Review" : "Review"}
                               </button>
                             </div>
-                          ))}
+                          }
 
                         {activeTab === "un_started" &&
                           gig.provider_id !== null &&
