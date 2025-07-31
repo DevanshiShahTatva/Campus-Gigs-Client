@@ -35,8 +35,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import KycStatusPage from "@/components/stripe/KycStatus";
 import { getAllNotificationStatus, renderBaseOnCondition } from "@/utils/helper";
 import { CustomModal } from "@/components/common/CustomModal";
+import { useSearchParams } from "next/navigation";
 
 const Profile = () => {
+
+  const searchParams = useSearchParams();
+
   const [success, setSuccess] = React.useState(false);
   const [activeTab, setActiveTab] = useState<
     | "profile"
@@ -46,11 +50,9 @@ const Profile = () => {
     | "subscription"
     | "settings"
     | "stripe_kyc"
-  >("profile");
-  const [coverImage, setCoverImage] = useState<string | null>(null);
+  >(searchParams.get("settings") ? "settings" : "profile");
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [isProfileImageUploading, setIsProfileImageUploading] = useState(false);
-  const coverInputRef = useRef<HTMLInputElement>(null);
   const profileInputRef = useRef<HTMLInputElement>(null);
   const { role: profileMode } = useContext(RoleContext);
   const { data, isLoading } = useGetUserProfileQuery(undefined, {
@@ -177,7 +179,8 @@ const Profile = () => {
       name: userProfile.name || "",
       email: userProfile.email || "",
       phone: userProfile.phone || "",
-      address: userProfile.location || "",
+      location: userProfile.location || "",
+      phone_number: userProfile.phone_number || "",
       educationLevel:
         educationOptions.find(
           (opt) =>
@@ -371,13 +374,6 @@ console.log("USER PROFILE", userProfile);
         {/* Cover Image or Gradient */}
         <div className="relative shadow pb-8 rounded-2xl">
           <div className="w-full h-48 bg-gray-300 relative rounded-t-2xl overflow-hidden group/cover">
-            {coverImage ? (
-              <img
-                src={coverImage}
-                alt="Cover"
-                className="w-full h-full object-cover "
-              />
-            ) : (
               <div
                 className="w-full h-full"
                 style={{
@@ -385,51 +381,7 @@ console.log("USER PROFILE", userProfile);
                     "linear-gradient(90deg, var(--base), var(--base-hover) 100%)",
                 }}
               />
-            )}
-            {/* Animated Hover Overlay for Cover Image */}
-            <div className="absolute top-4 right-4 flex flex-row gap-3 pointer-events-auto opacity-0 group-hover/cover:opacity-100 transition-opacity duration-400 ease-in-out z-10">
-              {/* Camera Icon - always shown */}
-              <button
-                className="flex items-center justify-center w-10 h-10 rounded-full shadow-lg transition-all duration-400 ease-in-out bg-white/90 focus:outline-none"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  coverInputRef.current?.click();
-                }}
-                title={coverImage ? "Change Cover Image" : "Add Cover Image"}
-                type="button"
-              >
-                <FiCamera className="w-6 h-6 text-[var(--base)]" />
-              </button>
-              {/* Trash Icon - only if cover image is set */}
-              {coverImage && (
-                <button
-                  className="flex items-center justify-center w-10 h-10 rounded-full shadow-lg transition-all duration-400 ease-in-out bg-white/90 focus:outline-none"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setCoverImage(null);
-                  }}
-                  title="Remove Cover Image"
-                  type="button"
-                >
-                  <FiTrash2 className="w-6 h-6 text-red-600" />
-                </button>
-              )}
-              <input
-                ref={coverInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const url = URL.createObjectURL(file);
-                    setCoverImage(url);
-                  }
-                }}
-                aria-label="Upload cover image"
-                title="Upload cover image"
-              />
-            </div>
+            
           </div>
           {/* Profile Picture - overlaps bottom left of cover image */}
           <div className="absolute left-[2rem] top-32 z-20">

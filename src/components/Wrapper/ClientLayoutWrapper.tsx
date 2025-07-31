@@ -19,7 +19,7 @@ export function ClientLayoutWrapper({ children }: { children: React.ReactNode })
     }
   }, []);
 
-  const showHeaderFooter = ["/", "/contact-us", "/faqs", "/terms-conditions", "/privacy-policy"].includes(pathname);
+  const showHeaderFooter = ["/", "/contact-us", "/FAQs", "/terms-conditions", "/privacy-policy"].includes(pathname);
 
   return (
     <>
