@@ -302,11 +302,10 @@ const MyGigs = () => {
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                  activeTab === tab.id
+                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
                     ? "border-teal-500 text-teal-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -530,9 +529,12 @@ const MyGigs = () => {
           isReadonly={!!ratingData}
           gigId={gigIdForRating}
           existingRating={ratingData}
-          onClose={() => {
+          onClose={(step: string) => {
             setGigIdForRating(0);
             setRatingData(null);
+            if (step === "submitted") {
+              fetchGigs(1, "completed");
+            }
           }}
         />
       )}
