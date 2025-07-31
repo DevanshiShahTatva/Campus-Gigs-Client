@@ -214,7 +214,7 @@ const GigCard = ({
             <h3 className="font-semibold text-xl text-gray-900 line-clamp-1">
               {gig.title}
             </h3>
-            {activeTab === "rejected" && (
+            {activeTab === "completed" && (
               <button
                 onClick={() => onChallengeReview(gig.id)}
                 className="bg-[var(--base)] text-white px-3 py-1 rounded text-sm"
@@ -355,7 +355,7 @@ const GigCard = ({
           </div>
         )}
 
-        {gig.status === "completed" && (
+        {gig.status === "completed" && activeTab === "completed" && (
           <div className="pt-4 bg-green-50 rounded-lg p-4 mt-4">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-semibold text-green-800">
