@@ -375,7 +375,7 @@ const MyGigs = () => {
                               {gig.title}
                             </h3>
                             {activeTab === "un_started" &&
-                              gig.provider_id == null && (
+                              gig.provider_id == null && gig.bids.length == 0 && (
                                 <div className="flex gap-2 ml-4">
                                   <Edit
                                     onClick={(event) =>
