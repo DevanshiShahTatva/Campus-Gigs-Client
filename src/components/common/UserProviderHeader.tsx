@@ -448,7 +448,7 @@ const UserProviderHeader: React.FC<UserProviderHeaderProps> = ({ sidebarOpen, se
                 <FaUser className="text-[var(--base)]" /> Profile
               </Link>
               <Link
-                href="#"
+                href="/profile?settings=true"
                 className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-[var(--base)]/10 transition text-sm font-medium"
               >
                 <FaCog className="text-[var(--base)]" /> Settings
