@@ -60,8 +60,8 @@ export const profileFormConfig =(skillDropdown:IDropdownOption[]) => [
     section: true,
     subfields: [
       { id: "name", name: "name", label: "Full Name", type: "text" as const, required: true, errorMessage: "Name is required", placeholder: "Enter your full name" },
-      { id: "phone", name: "phone", label: "Phone", type: "text" as const, required: false, errorMessage: "Phone number is required", placeholder: "Enter phone number" },
-      { id: "address", name: "address", label: "Address", type: "text" as const, required: false, errorMessage: "Address is required", placeholder: "Enter address" },
+      { id: "phone", name: "phone_number", label: "Phone", type: "text" as const, required: false, errorMessage: "Phone number is required", placeholder: "Enter phone number" },
+      { id: "address", name: "location", label: "Address", type: "text" as const, required: false, errorMessage: "Address is required", placeholder: "Enter address" },
     ],
   },
   {

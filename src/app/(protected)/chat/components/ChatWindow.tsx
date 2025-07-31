@@ -722,7 +722,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
               </button>
             )}
             <div className="relative mr-3">
-              {selectedChat?.avatar && selectedChat.avatar !== '/default-avatar.png' ? (
+              {selectedChat?.avatar &&
+              selectedChat.avatar !== "/default-avatar.png" ? (
                 <div className="h-10 w-10 rounded-full bg-gray-200 overflow-hidden">
                   <Image
                     src={selectedChat.avatar}
@@ -734,7 +735,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
                 </div>
               ) : (
                 <div className="h-10 w-10 rounded-full flex items-center justify-center bg-[var(--base)] text-white text-lg font-bold border-2 border-[var(--base)]">
-                  {getUserInitials(selectedChat?.name || '')}
+                  {getUserInitials(selectedChat?.name || "")}
                 </div>
               )}
               {selectedChat?.status === "online" && (
@@ -742,7 +743,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
               )}
             </div>
             <div>
-              <h3 className="font-medium text-gray-900">{selectedChat?.name || 'User'}</h3>
+              <h3 className="font-medium text-gray-900">
+                {selectedChat?.name || "User"}
+              </h3>
             </div>
           </div>
         </div>
@@ -757,14 +760,21 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
             dataLength={messages.length}
             next={fetchMoreMessages}
             hasMore={hasMore}
-            style={{ display: 'flex', flexDirection: 'column-reverse' }}
+            style={{ display: "flex", flexDirection: "column-reverse" }}
             inverse={true}
-            loader={<div className="text-center py-2 text-xs text-gray-400">Loading...</div>}
+            loader={
+              <div className="text-center py-2 text-xs text-gray-400">
+                Loading...
+              </div>
+            }
             scrollableTarget="scrollable-chat"
           >
             <div className="flex flex-col gap-3 relative">
               {renderMessagesWithDateSeparators()}
-              <div ref={bottomRef} style={{ visibility: 'hidden', marginTop: "-11px" }} />
+              <div
+                ref={bottomRef}
+                style={{ visibility: "hidden", marginTop: "-11px" }}
+              />
             </div>
           </InfiniteScroll>
         </div>
@@ -777,7 +787,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
                 <div key={index} className="relative group">
                   {preview.type === "image" ? (
                     <div className="relative h-20 w-20 rounded-md overflow-hidden border border-gray-200">
-                      <Image src={preview.url} alt="Preview" fill className="object-cover" />
+                      <Image
+                        src={preview.url}
+                        alt="Preview"
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                   ) : (
                     <div className="h-20 w-40 p-2 bg-white rounded-md border border-gray-200 flex items-center">
@@ -800,7 +815,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
 
         {/* Message Input */}
         <div className="p-4 border-t border-gray-200 bg-white">
-          <form className="flex items-end gap-2" onSubmit={handleSendMessage}>
+          <form className="flex gap-2" onSubmit={handleSendMessage}>
             <button
               type="button"
               className="p-2 text-gray-400 hover:text-[var(--base)]"
@@ -826,11 +841,22 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
                 onChange={(e) => {
                   setMessage(e.target.value);
                   e.target.style.height = "auto";
-                  const maxHeight = e.target.scrollHeight > 3 * 24 ? 3 * 24 : e.target.scrollHeight;
+                  const maxHeight =
+                    e.target.scrollHeight > 3 * 24
+                      ? 3 * 24
+                      : e.target.scrollHeight;
                   e.target.style.height = `${maxHeight}px`;
                 }}
                 onFocus={() => setShowEmojiPicker(false)}
                 disabled={sending}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // prevent newline
+                    if (message.trim()) {
+                      (e.target as HTMLTextAreaElement).form?.requestSubmit();
+                    }
+                  }
+                }}
               />
               <button
                 type="button"
@@ -848,11 +874,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedChat, onBack, socket })
             </div>
             <button
               type="submit"
-              disabled={sending || (message.trim() === "" && attachments.length === 0)}
-              className={`p-2 ${(message.trim() || attachments.length > 0) && !sending
-                ? "text-[var(--base)]"
-                : "text-gray-400"
-                }`}
+              disabled={
+                sending || (message.trim() === "" && attachments.length === 0)
+              }
+              className={`p-2 ${
+                (message.trim() || attachments.length > 0) && !sending
+                  ? "text-[var(--base)]"
+                  : "text-gray-400"
+              }`}
               aria-label="Send message"
             >
               {sending ? <Loader size={20} /> : <FiSend className="h-5 w-5" />}

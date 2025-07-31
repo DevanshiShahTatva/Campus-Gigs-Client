@@ -553,7 +553,7 @@ export const FOOTER_BOTTOM_LINKS = [
 export const FOOTER_COPYRIGHT = "© 2025 CampusGig. All rights reserved.";
 
 export const FOOTER_BRAND = {
-  title: "CampusGig",
+  title: "CampusGigs",
   description:
     "Connecting UMich students for campus services, tutoring, and more. Join our community to find help or earn money on campus.",
 };
