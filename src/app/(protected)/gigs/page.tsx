@@ -109,6 +109,7 @@ const GigListing = () => {
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loader,setLoader] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const filters = useSelector((state: RootState) => state.filter);
   const [appliedFilters, setAppliedFilters] = useState<IFilter>(filters);
@@ -164,18 +165,20 @@ const GigListing = () => {
       toast.error("Failed to fetch gigs");
     } finally {
       setLoading(false);
+      setLoader(false);
     }
   };
   const handleClearFilters = () => {
-    setLoading(true);
+    setLoader(true);
     fetchGigs(1, searchQuery, {});
   };
+
   useEffect(() => {
     setAppliedFilters(filters);
   }, [filters]);
 
   useEffect(() => {
-    setLoading(true);
+    setLoader(true);
     fetchGigs(1, debounceSearch, appliedFilters);
   }, [debounceSearch, appliedFilters]);
 
@@ -351,7 +354,7 @@ const GigListing = () => {
         <FilterChips />
       </div>
       {renderBaseOnCondition(
-        loading,
+        loader,
         <div className="h-20 mt-14 w-full text-center">
           <Loader size={50} />
         </div>,
